@@ -1,0 +1,16 @@
+# Flutter/Dart specific
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+

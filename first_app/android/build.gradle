@@ -1,0 +1,23 @@
+// All projects repositories
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Define build directories for subprojects
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+// Dependency evaluation for subprojects
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+// Clean task configuration
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
