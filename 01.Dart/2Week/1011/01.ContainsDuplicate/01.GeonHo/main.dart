@@ -8,8 +8,6 @@ void main() {
   print(solution.containsDuplicate(input1));
   print(solution.containsDuplicate(input2));
   print(solution.containsDuplicate(input3));
-
-  String a = "Protect Test";
 }
 
 class Solution {
