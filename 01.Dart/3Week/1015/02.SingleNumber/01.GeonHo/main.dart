@@ -26,10 +26,12 @@ class Solution {
       if (map.containsKey(num)) {
         map.remove(num);
       }
-      map[num] = (count + 1);
+      map[num] = count + 1;
+
+      //map[num] = (map[num] ?? 0) + 1;
     }
 
-    for (var entry in map.entries) {
+    for (MapEntry<int, int> entry in map.entries) {
       if (entry.value == 1) {
         result = entry.key;
       }
