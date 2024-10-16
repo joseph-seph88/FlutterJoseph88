@@ -10,14 +10,19 @@ void main() {
 
   Solution solution = Solution();
 
-  print(solution.singleNumber(inputNum1));
-  print(solution.singleNumber(inputNum2));
-  print(solution.singleNumber(inputNum3));
+  print(solution.singleNumber(inputNum1)); //1
+  print(solution.singleNumber(inputNum2)); //4
+  print(solution.singleNumber(inputNum3)); //1
 }
 
 class Solution {
   int singleNumber(List<int> nums) {
     int result = 0;
+
+    // 모든 숫자를 XOR 연산
+    for (int num in nums) {
+      result ^= num;
+    }
 
     return result;
   }
