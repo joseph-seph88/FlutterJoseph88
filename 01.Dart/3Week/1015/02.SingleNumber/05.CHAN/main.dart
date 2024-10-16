@@ -17,8 +17,14 @@ void main() {
 
 class Solution {
   int singleNumber(List<int> nums) {
-    int result = 0;
-
-    return result;
+    List<int> list = [];
+    for (var x in nums) {
+      if (list.contains(x)) {
+        list.remove(x);
+      } else {
+        list.add(x);
+      }
+    }
+    return list.first;
   }
 }
