@@ -32,5 +32,6 @@ class Solution {
 
 void main() {
   Solution solution = Solution();
+  solution.setBillAnswer();
   solution.printAnswer();
 }
