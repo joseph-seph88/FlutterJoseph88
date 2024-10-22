@@ -1,4 +1,4 @@
-// 3. Longest Substring Without Repeating Characters
+// 3. Longest Substring Without Repeating Characters : 적당히 어려운
 // Medium
 // Topics
 // Companies

@@ -1,4 +1,4 @@
-// FurthestNode
+// FurthestNode : 적당히 어려운
 
 
 // 문제 설명

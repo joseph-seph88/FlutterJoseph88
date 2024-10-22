@@ -1,4 +1,4 @@
-// 04.CharacterOautput
+// 04.CharacterOautput : 매우 쉬운문제
 
 // [PCCE 기출문제] 1번 / 문자 출력
 // 문제 설명
