@@ -40,7 +40,7 @@ class PizzaOrder {
 }
 
 void main() {
-  PizzaOrder myPizza = PizzaOrder();
+  // PizzaOrder myPizza = PizzaOrder();
 }
 
 // 비트마스크(Bitmask)는 비트 연산을 통해 여러 개의 상태나 옵션을 하나의 정수로 표현하는 기법
