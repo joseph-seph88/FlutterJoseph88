@@ -40,8 +40,6 @@ class ShoppingList {
       }
     }
 
-    items.map(toElement)
-
     return resultList;
   }
 }
