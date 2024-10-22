@@ -19,7 +19,7 @@
 
 // 파이썬으로 풀 때
 
-// message = "________"
+message = "Let's go!"
 
-// print("3________2________1")
-// print(message)
+print("3\n2\n1")
+print(message)
