@@ -5,11 +5,9 @@
 // Topics
 // Companies
 // Hint
-// Given a string s, find the length of the longest 
+// Given a string s, find the length of the longest
 // substring
 //  without repeating characters.
-
- 
 
 // Example 1:
 
@@ -27,7 +25,6 @@
 // Output: 3
 // Explanation: The answer is "wke", with the length of 3.
 // Notice that the answer must be a substring, "pwke" is a subsequence and not a substring.
- 
 
 // Constraints:
 
@@ -36,8 +33,17 @@
 
 // Dart로 풀기
 
-// class Solution {
-//   int lengthOfLongestSubstring(String s) {
-    
-//   }
-// }
+void main() {
+  String s = "abcabcbb";
+
+  Solution solution = Solution();
+  print(solution.lengthOfLongestSubstring(s));
+}
+
+class Solution {
+  int lengthOfLongestSubstring(String s) {
+    int result = 0;
+
+    return result;
+  }
+}
