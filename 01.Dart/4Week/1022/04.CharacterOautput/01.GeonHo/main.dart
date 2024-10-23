@@ -18,8 +18,8 @@
 // 빈칸을 채우지 않을 경우, 실행 결과에 에러 메시지가 표시됩니다.
 
 void main() {
-  String message = "___";
+  String message = "Let's go!";
 
-  print("3___2___1");
+  print("3\n2\n1");
   print(message);
 }
