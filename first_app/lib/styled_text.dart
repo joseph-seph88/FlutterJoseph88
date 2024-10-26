@@ -1,17 +1,19 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
-class StyledText extends StatelessWidget {
-  const StyledText({super.key});
+// class StyledText extends StatelessWidget {
+//   const StyledText(this.text, {super.key});
 
-  @override
-  Widget build(context) {
-    return Text(
-      'Welcom, Master!',
-      style: TextStyle(
-        color: const Color.fromARGB(255, 143, 159, 143),
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-}
+//   final String text;
+
+//   @override
+//   Widget build(context) {
+//     return Text(
+//       text,
+//       style: const TextStyle(
+//         color: const Color.fromARGB(255, 143, 159, 143),
+//         fontSize: 32,
+//         fontWeight: FontWeight.bold,
+//       ),
+//     );
+//   }
+// }
