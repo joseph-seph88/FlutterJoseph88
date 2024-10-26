@@ -41,7 +41,23 @@
 
 class Solution {
   int romanToInt(String s) {
+    Map<String, int> mapRoman = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000};
+
     int answer = 0;
+    int prev = 0;
+
+    for (String roman in s.split('').reversed) {
+      int value = mapRoman[roman]!;
+
+      if (value >= prev) {
+        answer += value;
+      } else {
+        answer -= value;
+      }
+
+      prev = value;
+    }
+
     return answer;
   }
 }
