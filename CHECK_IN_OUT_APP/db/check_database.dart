@@ -1,4 +1,4 @@
-import 'package:check_app_ver02/models/check_models.dart';
+import 'package:check_app_ver02/CHECK_IN_OUT_APP/models/check_models.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:math';

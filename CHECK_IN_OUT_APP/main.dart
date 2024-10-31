@@ -1,4 +1,4 @@
-import 'package:check_app_ver02/screens/check_homescreen.dart';
+import 'package:check_app_ver02/CHECK_IN_OUT_APP/screens/check_homescreen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

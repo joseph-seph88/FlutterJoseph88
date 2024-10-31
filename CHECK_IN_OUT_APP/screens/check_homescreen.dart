@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:check_app_ver02/models/check_models.dart';
-import 'package:check_app_ver02/db/check_database.dart';
-
+import 'package:check_app_ver02/CHECK_IN_OUT_APP/models/check_models.dart';
+import 'package:check_app_ver02/CHECK_IN_OUT_APP/db/check_database.dart';
 class CheckHomescreen extends StatefulWidget {
   const CheckHomescreen({super.key});
 
