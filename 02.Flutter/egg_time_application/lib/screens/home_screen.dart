@@ -1,5 +1,6 @@
 import 'package:egg_time_application/common/color_styles.dart';
 import 'package:egg_time_application/screens/settings_screen.dart';
+import 'package:egg_time_application/screens/statistics_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Center(child: Text("page 1")),
           Center(child: Text("page 2")),
           Center(child: Text("page 3")),
-          Center(child: Text("page 4")),
+          StatisticsScreen(),
           SettingsScreen(),
         ],
       ),

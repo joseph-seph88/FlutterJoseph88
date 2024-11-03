@@ -1,9 +1,11 @@
 import 'package:egg_time_application/inherited_widgets/settings_inherited_widget.dart';
 import 'package:egg_time_application/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  await initializeDateFormatting();
   runApp(const MyApp());
 }
 
