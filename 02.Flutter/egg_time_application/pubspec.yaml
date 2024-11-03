@@ -72,6 +72,7 @@ flutter:
     - assets/egg33.png
     - assets/fonts/Jua-Regular.ttf # 필요 시 assets 목록에도 추가 가능
     - assets/audios/frying_egg.wav
+    - assets/img/
   fonts:
     - family: Jua
       fonts:
@@ -82,6 +83,9 @@ flutter:
     - family: Hyemin_Regular
       fonts:
         - asset: assets/fonts/IM_Hyemin-Regular.otf
+    - family: font1
+      fonts:
+        - asset: assets/fonts/font1.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -89,7 +93,7 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
