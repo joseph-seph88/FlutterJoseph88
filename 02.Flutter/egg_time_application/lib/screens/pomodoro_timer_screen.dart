@@ -226,26 +226,26 @@ class PomodoroTimerScreenState extends State<PomodoroTimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: EggColors().yellowstyle3,
-        title: Text(
-          'Egg Time',
-          style: TextStyle(
-              fontFamily: 'Hyemin_Bold', color: EggColors().yellowstyle7),
-        ),
-        iconTheme: IconThemeData(
-          color: EggColors().yellowstyle6,
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              soundOn ? Icons.volume_up : Icons.volume_off,
-              color: EggColors().yellowstyle6,
-            ),
-            onPressed: toggleSound,
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: EggColors().yellowstyle3,
+      //   title: Text(
+      //     'Egg Time',
+      //     style: TextStyle(
+      //         fontFamily: 'Hyemin_Bold', color: EggColors().yellowstyle7),
+      //   ),
+      //   iconTheme: IconThemeData(
+      //     color: EggColors().yellowstyle6,
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       icon: Icon(
+      //         soundOn ? Icons.volume_up : Icons.volume_off,
+      //         color: EggColors().yellowstyle6,
+      //       ),
+      //       onPressed: toggleSound,
+      //     ),
+      //   ],
+      // ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

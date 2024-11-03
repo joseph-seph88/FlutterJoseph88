@@ -1,6 +1,8 @@
 import 'package:egg_time_application/common/color_styles.dart';
+import 'package:egg_time_application/screens/pomodoro_timer_screen.dart';
 import 'package:egg_time_application/screens/settings_screen.dart';
 import 'package:egg_time_application/screens/statistics_screen.dart';
+import 'package:egg_time_application/screens/todo_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -97,8 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _pageController,
         // onPageChanged: _onItemTap,
         children: const [
-          Center(child: Text("page 1")),
-          Center(child: Text("page 2")),
+          PomodoroTimerScreen(),
+          TodoListScreen(),
           Center(child: Text("page 3")),
           StatisticsScreen(),
           SettingsScreen(),
