@@ -41,6 +41,11 @@ dependencies:
   sqflite: ^2.4.0
   path_provider: ^2.1.4
   path: ^1.9.0
+  provider: ^6.1.2 # 상태 관리
+  flutter_animator: ^3.2.2 # 애니메이션 (선택사항)
+  audioplayers: ^6.1.0
+
+
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +63,25 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/egg1.png
+    - assets/egg2.png
+    - assets/egg3.png
+    - assets/egg11.png
+    - assets/egg22.png
+    - assets/egg33.png
+    - assets/fonts/Jua-Regular.ttf # 필요 시 assets 목록에도 추가 가능
+    - assets/audios/frying_egg.wav
+  fonts:
+    - family: Jua
+      fonts:
+        - asset: assets/fonts/Jua-Regular.ttf
+    - family: Hyemin_Bold
+      fonts:
+        - asset: assets/fonts/IM_Hyemin-Bold.otf
+    - family: Hyemin_Regular
+      fonts:
+        - asset: assets/fonts/IM_Hyemin-Regular.otf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

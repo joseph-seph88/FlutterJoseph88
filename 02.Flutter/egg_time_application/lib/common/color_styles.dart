@@ -42,6 +42,7 @@ class EggColors {
   final orangestyle3 = const Color(0xffe3a16a);
   final orangestyle4 = const Color(0xffe29253);
   final orangestyle5 = const Color(0xffd57114);
+  final yellowstyle7 = const Color.fromARGB(255, 216, 160, 7);
 
   final pinkstyle1 = const Color(0xfff2d9d8);
   final pinkstyle2 = const Color(0xffebc9c7);
@@ -64,3 +65,19 @@ class EggColors {
   final basestyle2 = const Color(0xfffff5e1); //흰색이 아닌 미색이 필요한때 추천
   final basestyle3 = const Color(0xff101010); //기본 제공되는 검정색대신 사용해주세요
 }
+
+final MaterialColor yellowstyle = MaterialColor(
+  0xfffde67c, // 기본 색상 값
+  <int, Color>{
+    50: const Color(0xfffffee8), // yellowstyle1보다 더 밝은 단계
+    100: EggColors().yellowstyle1, // 기본 밝은 색상
+    200: EggColors().yellowstyle2, // 중간 밝기
+    300: const Color(0xfffde084), // 추가 밝기 단계
+    400: EggColors().yellowstyle3, // 기본 색상
+    500: EggColors().yellowstyle4, // 중간보다 살짝 어두운 단계
+    600: const Color(0xfff2c43b), // 추가 어두운 색상
+    700: EggColors().yellowstyle5, // 어두운 단계
+    800: const Color(0xffe7b30f), // 추가 어두운 색상
+    900: EggColors().yellowstyle6, // 가장 어두운 색상
+  },
+);
