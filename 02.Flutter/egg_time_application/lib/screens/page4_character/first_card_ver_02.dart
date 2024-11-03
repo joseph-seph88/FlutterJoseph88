@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'colors_style.dart';
+import 'package:egg_time_application/common/color_styles.dart';
 
 class FirstCardVer02 extends StatefulWidget {
   const FirstCardVer02({super.key});
@@ -33,8 +33,8 @@ class _FirstCardVer02State extends State<FirstCardVer02> {
             margin: const EdgeInsets.only(bottom: 28),
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [ColorsStyle.purplestyle1, ColorsStyle.purplestyle2],
+                gradient: LinearGradient(
+                  colors: [EggColors().purplestyle1, EggColors().purplestyle2],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -48,13 +48,13 @@ class _FirstCardVer02State extends State<FirstCardVer02> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: ColorsStyle.purplestyle3.withOpacity(0.2),
+                      color: EggColors().purplestyle3.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       icons[index],
                       size: 26,
-                      color: ColorsStyle.purplestyle6,
+                      color: EggColors().purplestyle6,
                     ),
                   ),
                   const SizedBox(width: 18),
@@ -64,9 +64,9 @@ class _FirstCardVer02State extends State<FirstCardVer02> {
                       children: [
                         Text(
                           data[index],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
-                            color: ColorsStyle.purplestyle3,
+                            color: EggColors().purplestyle3,
                             fontFamily: 'font1',
                             fontWeight: FontWeight.w600,
                           ),
@@ -75,7 +75,7 @@ class _FirstCardVer02State extends State<FirstCardVer02> {
                           data2[index],
                           style: TextStyle(
                             fontSize: 32,
-                            color: ColorsStyle.purplestyle5,
+                            color: EggColors().purplestyle5,
                             fontFamily: 'font1',
                             fontWeight: FontWeight.bold,
                             shadows: [

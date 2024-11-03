@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'detail_description.dart';
 import 'first_card_ver_02.dart';
-import 'colors_style.dart';
+import 'package:egg_time_application/common/color_styles.dart';
 import 'character.dart';
+
 class CharacterFirstpage extends StatefulWidget {
   const CharacterFirstpage({super.key});
 
@@ -56,8 +57,8 @@ class _CharacterFirstpageState extends State<CharacterFirstpage> {
                 children: [
                   Text(
                     randomItem.text,
-                    style: const TextStyle(
-                        fontSize: 28, color: ColorsStyle.purplestyle6),
+                    style: TextStyle(
+                        fontSize: 28, color: EggColors().purplestyle6),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -75,17 +76,17 @@ class _CharacterFirstpageState extends State<CharacterFirstpage> {
                           );
                         },
                         icon: const Icon(Icons.adb_rounded),
-                        color: ColorsStyle.purplestyle6,
+                        color: EggColors().purplestyle6,
                       ),
                       IconButton(
                         onPressed: _expCountButton,
                         icon: const Icon(Icons.add),
-                        color: ColorsStyle.purplestyle6,
+                        color: EggColors().purplestyle6,
                       ),
                       IconButton(
                         onPressed: _eatCountButton,
                         icon: const Icon(Icons.access_alarm),
-                        color: ColorsStyle.purplestyle6,
+                        color: EggColors().purplestyle6,
                       ),
                     ],
                   ),
@@ -94,8 +95,8 @@ class _CharacterFirstpageState extends State<CharacterFirstpage> {
             if (_isCardVisible)
               Text(
                 'LV.${randomItem.level} ${randomItem.name}',
-                style: const TextStyle(
-                    fontSize: 28, color: ColorsStyle.purplestyle6),
+                style: TextStyle(
+                    fontSize: 28, color: EggColors().purplestyle6),
               ),
             const SizedBox(height: 30),
             GestureDetector(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'colors_style.dart';
+import 'package:egg_time_application/common/color_styles.dart';
 
 class DescriptionPage extends StatelessWidget {
   final String description;
 
-  DescriptionPage({required this.description});
+  const DescriptionPage({super.key, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +22,11 @@ class DescriptionPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Text(
             description,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 34,
               fontFamily: 'font1',
               fontWeight: FontWeight.bold,
-              color: ColorsStyle.purplestyle6,
+              color: EggColors().purplestyle6,
             ),
           ),
         ),
