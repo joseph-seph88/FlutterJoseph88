@@ -14,18 +14,6 @@ void showTodoDetailDialog(BuildContext context, int index) {
   subItemController.text = todoViewModel.subItems[index];
   detailController.text = todoViewModel.details[index];
 
-  // final TextEditingController _todoController = TextEditingController();
-  // final TextEditingController _subItemController = TextEditingController();
-  // final TextEditingController _detailController = TextEditingController();
-  // final todoViewModel = Provider.of<ToDoViewModel>(context, listen: false);
-
-  // _todoController.text =
-  // Provider.of<ToDoViewModel>(context, listen: false).todoItems[index];
-  // _subItemController.text =
-  // Provider.of<ToDoViewModel>(context, listen: false).subItems[index];
-  // _detailController.text =
-  // Provider.of<ToDoViewModel>(context, listen: false).details[index];
-
   showDialog(
     context: context,
     builder: (BuildContext context) {
