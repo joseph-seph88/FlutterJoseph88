@@ -1,3 +1,4 @@
+import 'package:class_10_firebase/screens/home_screen.dart';
 import 'package:class_10_firebase/services/login_service.dart';
 import 'package:class_10_firebase/screens/register_screen.dart';
 import 'package:class_10_firebase/screens/todo_screen.dart';
@@ -102,7 +103,7 @@ class LoginScreen extends ConsumerWidget {
                         passwordController.clear();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => TodoScreen()),
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

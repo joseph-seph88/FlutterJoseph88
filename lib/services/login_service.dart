@@ -2,17 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginService {
+  final _login = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
+
   Future<User?> loginUser(String email, String password) async {
     try {
-      final userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      final userCredential = await _login.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       final userId = userCredential.user?.uid;
-      final db = FirebaseFirestore.instance;
-      final userDoc = await db.collection("users").doc(userId).get();
+      final userDoc = await _db.collection("users").doc(userId).get();
 
       if (userDoc.exists) {
         return userCredential.user;
@@ -31,16 +32,15 @@ class LoginService {
   }) async {
     try {
       final userCredential =
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await _login.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       final userId = userCredential.user?.uid;
       if (userId != null) {
-        final db = FirebaseFirestore.instance;
 
-        await db.collection("users").doc(userId).set({
+        await _db.collection("users").doc(userId).set({
           'email': email,
           'createdAt': FieldValue.serverTimestamp(),
         });
