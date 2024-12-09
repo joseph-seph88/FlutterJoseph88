@@ -2,10 +2,10 @@ import 'package:class_10_firebase/screens/setting_screen.dart';
 import 'package:class_10_firebase/screens/todo_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/home_provider.dart';
+import '../providers/page_navigation_provider.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+class MainScreen extends ConsumerWidget {
+  const MainScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

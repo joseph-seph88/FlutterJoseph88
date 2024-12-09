@@ -24,3 +24,12 @@ final deleteTodoProvider = Provider((ref){
   final todoService = ref.watch(todoServiceProvider);
   return (String id) => todoService.deleteTodo(id);
 });
+
+final selectTodoProvider = StateNotifierProvider<SelectTodoNotifier, Todo?>((ref){
+  return SelectTodoNotifier();
+});
+
+class SelectTodoNotifier extends StateNotifier<Todo?>{
+  SelectTodoNotifier():super(null);
+  void select(Todo todo) => state = todo;
+}

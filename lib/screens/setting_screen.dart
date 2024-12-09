@@ -63,10 +63,12 @@ class SettingScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 await ref.read(authProvider).signOut();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("로그아웃되었습니다.")),
-                );
-                Navigator.pop(context);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("로그아웃되었습니다.")),
+                  );
+                  Navigator.pop(context);
+                }
               },
               child: const Text("로그아웃"),
             ),

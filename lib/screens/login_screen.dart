@@ -1,7 +1,7 @@
-import 'package:class_10_firebase/screens/home_screen.dart';
+import 'package:class_10_firebase/google_login.dart';
+import 'package:class_10_firebase/screens/main_screen.dart';
 import 'package:class_10_firebase/services/login_service.dart';
 import 'package:class_10_firebase/screens/register_screen.dart';
-import 'package:class_10_firebase/screens/todo_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/login_provider.dart';
@@ -103,7 +103,8 @@ class LoginScreen extends ConsumerWidget {
                         passwordController.clear();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const MainScreen()),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +140,39 @@ class LoginScreen extends ConsumerWidget {
                           fontSize: 15),
                     ))
               ],
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.all(50),
+              child: ElevatedButton(
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.indigo[300]),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignInDemo()));
+                  },
+                  child: const Text(
+                    "Google Login",
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(50),
+            //   child: ElevatedButton(
+            //       style:
+            //       ElevatedButton.styleFrom(backgroundColor: Colors.indigo[300]),
+            //       onPressed: () {
+            //         Navigator.push(
+            //             context,
+            //             MaterialPageRoute(
+            //                 builder: (context) => const NaverLoginScreen()));
+            //       },
+            //       child: const Text(
+            //         "Naver Login",
+            //         style: TextStyle(color: Colors.white),
+            //       )),
+            // )
           ],
         ),
       ),

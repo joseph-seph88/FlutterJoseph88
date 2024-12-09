@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class LoginService {
   final _login = FirebaseAuth.instance;
@@ -21,7 +22,6 @@ class LoginService {
         return null;
       }
     } catch (e) {
-      print('Error logging in user: $e');
       return null;
     }
   }
@@ -52,5 +52,8 @@ class LoginService {
       return '오류 발생: ${e.message}';
     }
   }
+
+  // databaseUrl = https://joseph-firebase-default-rtdb.firebaseio.com/:null
+
 }
 
