@@ -16,7 +16,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isTap1 = false;
   bool isTap2 = false;
-  bool isTap3 = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    isTap1 = !isTap1;
+                    isTap1 = true;
                   });
                 },
                 child: Text('name button'),
@@ -41,7 +40,7 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    isTap2 = !isTap2;
+                    isTap2 = true;
                   });
                 },
                 child: Text('url button'),

@@ -31,6 +31,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Set environment variables
+        run: |
+          echo "API_URL=${{ secrets.API_URL }}" >> $GITHUB_ENV
+          echo "MASTER_NAME=${{ secrets.MASTER_NAME }}" >> $GITHUB_ENV
       
       - name: Analyze code
         run: flutter analyze
