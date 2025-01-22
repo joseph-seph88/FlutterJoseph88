@@ -3,29 +3,35 @@ name: Flutter CI/CD
 on:
   push:
     branches:
-      - main   # main 브랜치에 푸시할 때마다 실행
+      - coin
+  pull_request:
+    branches:
+      - coin
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ubuntu 환경에서 실행
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.7.0'  # 사용하려는 Flutter 버전
+        flutter-version: 'stable'
 
     - name: Install dependencies
       run: flutter pub get
 
     - name: Run tests
-      run: flutter test  # 단위 테스트 실행
+      run: flutter test
 
-    - name: Build the app (Android)
-      run: flutter build apk --release  # Android 빌드
+    - name: Build Flutter app
+      run: flutter build apk --release  # Android 앱 빌드 (필요시 iOS 빌드로 변경 가능)
 
-    - name: Build the app (iOS)
-      run: flutter build ios --release  # iOS 빌드
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifact
+        path: build/app/outputs/flutter-apk/app-release.apk  # 빌드된 APK 파일 경로

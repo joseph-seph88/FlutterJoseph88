@@ -1,38 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async{
+  await dotenv.load(fileName: ".env");
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  int counter = 0;
-  final count = 22;
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('CI/CD 테스트 앱'),
-        ),
+        appBar: AppBar(title: Text('Expanded Widget Example')),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('버튼 클릭 횟수: $counter'),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    counter++;
-                  });
-                },
-                child: Text('카운터 증가'),
-              ),
+              // 여기에 Expanded 위젯 설정
+              Text("FVM!"),
+              SizedBox(height: 20),
+              Text("${dotenv.env['MASTER_NAME']}"),
+              SizedBox(height: 20),
+              Text("${dotenv.env['API_URL']}"),
             ],
           ),
         ),
