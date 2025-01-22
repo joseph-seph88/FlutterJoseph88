@@ -42,11 +42,12 @@ jobs:
       - name: Check formatting
         run: dart format --set-exit-if-changed .
 
-      - name: Run unit/widget tests
-        run: flutter test
+      - name: Run unit/widget tests with environment variables
+        run: flutter test --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
 
       - name: Run coverage
-        run: flutter test --coverage
+        run: flutter test --coverage --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
+
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
@@ -86,18 +87,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      
       - name: Analyze code
         run: flutter analyze
 
       - name: Check formatting
         run: dart format --set-exit-if-changed .
 
-      - name: Run unit/widget tests
-        run: flutter test
+      - name: Run unit/widget tests with environment variables
+        run: flutter test --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
 
       - name: Run coverage
-        run: flutter test --coverage
+        run: flutter test --coverage --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
+
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
@@ -131,7 +132,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK for release
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -156,7 +157,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK for release
-        run: flutter build ios --release
+        run: flutter build ios --release --dart-define=API_URL=${{ secrets.API_URL }} --dart-define=MASTER_NAME=${{ secrets.MASTER_NAME }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
