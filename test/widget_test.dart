@@ -3,9 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_class_16_deploy/main.dart';
 
 void main() {
-    setUpAll(() async {
+  setUpAll(() async {
     await dotenv.load(fileName: ".env");
   });
+
   testWidgets("버튼 클릭 시 UI 테스트", (WidgetTester tester) async {
     await tester.pumpWidget(MyApp());
 

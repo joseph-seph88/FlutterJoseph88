@@ -16,6 +16,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isTap1 = false;
   bool isTap2 = false;
+  bool isTap3 = false;
 
   @override
   Widget build(BuildContext context) {
