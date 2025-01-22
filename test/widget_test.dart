@@ -2,7 +2,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_class_16_deploy/main.dart';
 
-void main() {
+void main() async {
+  await dotenv.load();
   testWidgets("버튼 클릭 시 UI 테스트", (WidgetTester tester) async {
     await tester.pumpWidget(MyApp());
 
