@@ -3,10 +3,10 @@ name: Flutter CI/CD
 on:
   push:
     branches:
-      - coin
+      - action
   pull_request:
     branches:
-      - coin
+      - action
 
 jobs:
   test-android:
