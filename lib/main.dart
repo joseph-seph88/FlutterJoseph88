@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async{
+void main() async {
   await dotenv.load(fileName: ".env");
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isTap1 = false;
+  bool isTap2 = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,12 +25,27 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: Column(
             children: [
-              // 여기에 Expanded 위젯 설정
-              Text("FVM!"),
+              Text("GITHUB ACTIONS TEST"),
               SizedBox(height: 20),
-              Text("${dotenv.env['MASTER_NAME']}"),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isTap1 = !isTap1;
+                  });
+                },
+                child: Text('name button'),
+              ),
+              Text(isTap1 == true ? "${dotenv.env['MASTER_NAME']}" : "no name"),
               SizedBox(height: 20),
-              Text("${dotenv.env['API_URL']}"),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isTap2 = !isTap2;
+                  });
+                },
+                child: Text('url button'),
+              ),
+              Text(isTap2 == true ? "${dotenv.env['API_URL']}" : "no url"),
             ],
           ),
         ),
