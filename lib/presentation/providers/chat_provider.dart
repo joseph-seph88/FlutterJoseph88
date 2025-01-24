@@ -15,7 +15,7 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
       unreadMessageCount: 1,
       lastMessage: 'hi',
       lastMessageSender: 'buyer',
-      lastMessageTime: DateTime.now().toString(),
+      lastMessageTime: DateTime(2025, 1, 1),
     ),
     ChatRoom(id: '2',
       buyer: 'buyer',
@@ -23,7 +23,7 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
       unreadMessageCount: 2,
       lastMessage: 'hello',
       lastMessageSender: 'seller',
-      lastMessageTime: DateTime.now().toString(),
+      lastMessageTime: DateTime(2024, 11, 1),
     ),
     ChatRoom(id: '3', buyer: 'buyer', seller: "seller", unreadMessageCount: 0),
   ]);

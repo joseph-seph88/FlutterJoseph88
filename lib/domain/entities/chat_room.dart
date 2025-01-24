@@ -4,7 +4,7 @@ class ChatRoom {
   final String seller;
   final int unreadMessageCount;
   final String? lastMessage;
-  final String? lastMessageTime;
+  final DateTime? lastMessageTime;
   final String? lastMessageSender;
 
   ChatRoom({

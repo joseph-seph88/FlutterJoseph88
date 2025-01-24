@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/domain/utils/date_util.dart';
 
 class ChatRoomTile extends StatelessWidget {
   final ChatRoom chatRoom;
@@ -19,7 +20,7 @@ class ChatRoomTile extends StatelessWidget {
           ),
           SizedBox(width: 12),
           Text(
-            chatRoom.lastMessageTime ?? '',
+            chatRoom.lastMessageTime?.toElapsedTimeString() ?? '',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 12,
