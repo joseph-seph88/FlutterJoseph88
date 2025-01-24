@@ -16,8 +16,9 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription<Position>? _positionStreamSubscription;
   Position? _currentPosition;
   NMarker? _marker = NMarker(
-      id: 'test',
-      position: const NLatLng(37.506932467450326, 127.05578661133796));
+    id: 'test',
+    position: const NLatLng(37.506932467450326, 127.05578661133796),
+  );
 
   @override
   void initState() {

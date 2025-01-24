@@ -5,7 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 class PermissionManager {
   Future<void> requestLocationPermission() async {
     var status = await Permission.location.request();
-
     if (Platform.isAndroid) {
       await _handleAndroidPermission(status);
     } else if (Platform.isIOS) {
