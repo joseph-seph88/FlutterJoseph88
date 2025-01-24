@@ -20,7 +20,7 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
     ChatRoom(id: '2',
       buyer: 'buyer',
       seller: 'seller',
-      unreadMessageCount: 2,
+      unreadMessageCount: 20,
       lastMessage: 'hello',
       lastMessageSender: 'seller',
       lastMessageTime: DateTime(2024, 11, 1),

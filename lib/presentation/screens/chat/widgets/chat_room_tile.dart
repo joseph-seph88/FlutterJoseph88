@@ -29,6 +29,9 @@ class ChatRoomTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(chatRoom.lastMessage ?? '', maxLines: 1),
+      trailing: chatRoom.unreadMessageCount == 0
+          ? null
+          : Badge.count(count: chatRoom.unreadMessageCount),
     );
   }
 }
