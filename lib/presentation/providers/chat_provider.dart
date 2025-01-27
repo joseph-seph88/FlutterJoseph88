@@ -1,30 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/data/repositories/chat_repository_impl.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/domain/usecases/chat_usecases.dart';
 
-final chatRoomProvider = StateNotifierProvider<ChatRoomNotifier, List<ChatRoom>>(
-  (ref) => ChatRoomNotifier(),
+final chatRoomProvider =
+    StateNotifierProvider<ChatRoomNotifier, List<ChatRoom>>(
+  (ref) => ChatRoomNotifier(ref),
 );
 
 class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
+  final Ref ref;
 
-  ChatRoomNotifier() : super([
-    ChatRoom(id: '0', buyer: 'buyer', seller: 'seller', unreadMessageCount: 0),
-    ChatRoom(id: '1',
-      buyer: 'buyer',
-      seller: 'seller',
-      unreadMessageCount: 1,
-      lastMessage: 'hi',
-      lastMessageSender: 'buyer',
-      lastMessageTime: DateTime(2025, 1, 1),
-    ),
-    ChatRoom(id: '2',
-      buyer: 'buyer',
-      seller: 'seller',
-      unreadMessageCount: 20,
-      lastMessage: 'hello',
-      lastMessageSender: 'seller',
-      lastMessageTime: DateTime(2024, 11, 1),
-    ),
-    ChatRoom(id: '3', buyer: 'buyer', seller: "seller", unreadMessageCount: 0),
-  ]);
+  ChatRoomNotifier(this.ref) : super([]) {
+    _fetchChatRooms();
+  }
+
+  void _fetchChatRooms() {
+    final userId = 'a';
+    final getChatRoomListUseCase =
+        GetChatRoomListUseCase(ref.read(chatRepositoryProvider));
+
+    getChatRoomListUseCase(userId).listen((data) {
+      state = data;
+    });
+  }
 }
