@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
+import 'package:o2/presentation/screens/product/detail_screen.dart';
 import 'package:o2/presentation/screens/product/write_screen.dart';
 
 void main() async {
@@ -42,6 +43,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: "/write",
       builder: (context, state) => const WriteScreen(),
+    ),
+    GoRoute(
+      path: "/detail/:id",
+      builder: (context, state) => const ProductDetailScreen(),
     ),
   ],
 );
