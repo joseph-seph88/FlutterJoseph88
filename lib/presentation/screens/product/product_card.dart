@@ -33,7 +33,7 @@ class ProductCard extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(width: AppStyles.smallSpacing),
+              const SizedBox(width: AppStyles.defaultSpacing),
               // 상품 정보
               Expanded(
                 child: Column(
@@ -41,7 +41,9 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.title,
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.text,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -58,10 +60,13 @@ class ProductCard extends StatelessWidget {
                             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                             (Match m) => '${m[1]},',
                           )}원',
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.text,
+                      ),
                     ),
                     const SizedBox(height: AppStyles.smallSpacing),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Icon(
                           Icons.remove_red_eye_outlined,

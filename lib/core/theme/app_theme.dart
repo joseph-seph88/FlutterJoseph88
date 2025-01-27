@@ -72,6 +72,13 @@ class AppTheme {
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: AppColors.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.text,
+        titleTextStyle: AppStyles.titleLarge.copyWith(
+          color: AppColors.text,
+        ),
+      ),
       cardTheme: const CardTheme(
         elevation: 0.5,
         margin: EdgeInsets.symmetric(
