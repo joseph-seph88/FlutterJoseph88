@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/data/dummy/dummy_products.dart';
+import 'package:o2/presentation/screens/product/product_card.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -11,6 +13,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   bool _isSearching = false;
+  int _selectedTabIndex = 0;
+
+  final _tabs = ['통합', '중고거래', '동네업체'];
 
   @override
   void dispose() {
@@ -25,60 +30,124 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Container(
           height: 40,
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
           ),
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            onChanged: (value) {
-              setState(() {
-                _isSearching = value.isNotEmpty;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: '인창동 근처에서 검색',
-              hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: (value) {
+                    setState(() {
+                      _isSearching = value.isNotEmpty;
+                    });
+                  },
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: AppColors.text,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: '노트북 백팩',
+                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppStyles.defaultSpacing,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
               ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppStyles.defaultSpacing,
-                vertical: 8,
-              ),
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _isSearching
-                  ? IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _isSearching = false;
-                        });
-                      },
-                    )
-                  : null,
-            ),
+              if (_isSearching)
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _isSearching = false;
+                    });
+                  },
+                ),
+            ],
           ),
         ),
+        actions: [
+          if (_isSearching)
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                '알림 받기',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+        ],
       ),
-      body: _isSearching ? _buildSearchResults() : _buildInitialContent(theme),
+      body: _isSearching ? _buildSearchResults(theme) : _buildInitialContent(theme),
     );
   }
 
-  Widget _buildSearchResults() {
-    return ListView.builder(
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: const Icon(Icons.search),
-          title: const Text('미개봉 노트북'),
-          onTap: () {},
-        );
-      },
+  Widget _buildSearchResults(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 카테고리 탭
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: AppStyles.defaultPadding.copyWith(
+            top: AppStyles.smallSpacing,
+            bottom: AppStyles.smallSpacing,
+          ),
+          child: Row(
+            children: _tabs.asMap().entries.map((entry) {
+              final index = entry.key;
+              final tab = entry.value;
+              final isSelected = index == _selectedTabIndex;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  label: Text(tab),
+                  onPressed: () {
+                    setState(() {
+                      _selectedTabIndex = index;
+                    });
+                  },
+                  backgroundColor: isSelected ? AppColors.text : AppColors.surface,
+                  side: BorderSide(
+                    color: isSelected ? AppColors.text : AppColors.divider,
+                  ),
+                  labelStyle: theme.textTheme.labelLarge?.copyWith(
+                    color: isSelected ? AppColors.surface : AppColors.text,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const Divider(height: 1),
+        // 검색 결과
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: dummyProducts.length,
+            itemBuilder: (context, index) {
+              final product = dummyProducts[index];
+              return ProductCard(product: product);
+            },
+          ),
+        ),
+      ],
     );
   }
 
