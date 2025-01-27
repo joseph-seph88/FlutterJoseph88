@@ -10,6 +10,7 @@ final mapControllerProvider =
 final locationPermissionProvider =
     StateNotifierProvider<LocationPermissionNotifier, PermissionStatus?>((ref) {
   final permissionManagerPro = ref.watch(permissionManagerProvider);
+
   return LocationPermissionNotifier(permissionManagerPro);
 });
 

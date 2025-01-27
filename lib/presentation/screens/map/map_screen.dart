@@ -78,7 +78,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       "id": "10",
       "position": const NLatLng(37.492052, 126.948716),
       "address": "신림역 (근처)"
-    }
+    },
   ];
 
   @override

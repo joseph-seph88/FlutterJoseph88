@@ -49,7 +49,7 @@ class LikeShopPage extends ConsumerWidget {
                       subtitle: Text("주소"),
                     );
                   }),
-            )
+            ),
           ],
         ),
       ),

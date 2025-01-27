@@ -27,7 +27,8 @@ class HomeScreen2 extends ConsumerWidget {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
-          BottomNavigationBarItem(icon: Icon(Icons.location_on), label: "동네지도"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.location_on), label: "동네 지도"),
         ],
         currentIndex: currentIndex,
         onTap: (index) async {

@@ -38,11 +38,13 @@ class AddShopPage extends ConsumerWidget {
               child: Stack(
                 children: [
                   const Positioned.fill(
-                      child: NaverMap(
-                    options: NaverMapViewOptions(
-                        initialCameraPosition: NCameraPosition(
-                            target: NLatLng(37.499889, 126.920056), zoom: 15)),
-                  )),
+                    child: NaverMap(
+                      options: NaverMapViewOptions(
+                          initialCameraPosition: NCameraPosition(
+                              target: NLatLng(37.499889, 126.920056),
+                              zoom: 15)),
+                    ),
+                  ),
                   Positioned(
                     right: 20,
                     bottom: 80,
@@ -74,7 +76,10 @@ class AddShopPage extends ConsumerWidget {
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green[300]),
-                        child: const Text("선택", style: TextStyle(color: Colors.white),)),
+                        child: const Text(
+                          "선택",
+                          style: TextStyle(color: Colors.white),
+                        )),
                   ),
                 ],
               ),
