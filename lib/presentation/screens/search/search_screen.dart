@@ -13,6 +13,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   bool _isSearching = false;
+  bool _showResults = false;
   int _selectedTabIndex = 0;
 
   final _tabs = ['통합', '중고거래', '동네업체'];
@@ -21,6 +22,12 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearch(String query) {
+    setState(() {
+      _showResults = true;
+    });
   }
 
   @override
@@ -49,8 +56,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   onChanged: (value) {
                     setState(() {
                       _isSearching = value.isNotEmpty;
+                      _showResults = false;
                     });
                   },
+                  onSubmitted: _onSearch,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: AppColors.text,
                   ),
@@ -74,6 +83,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     _searchController.clear();
                     setState(() {
                       _isSearching = false;
+                      _showResults = false;
                     });
                   },
                 ),
@@ -81,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         actions: [
-          if (_isSearching)
+          if (_showResults)
             TextButton(
               onPressed: () {},
               child: Text(
@@ -93,7 +103,32 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
         ],
       ),
-      body: _isSearching ? _buildSearchResults(theme) : _buildInitialContent(theme),
+      body: _isSearching
+          ? _showResults
+              ? _buildSearchResults(theme)
+              : _buildAutoComplete(theme)
+          : _buildInitialContent(theme),
+    );
+  }
+
+  Widget _buildAutoComplete(ThemeData theme) {
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return ListTile(
+          leading: const Icon(Icons.search),
+          title: Text(
+            '${_searchController.text} 관련 검색어 $index',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: AppColors.text,
+            ),
+          ),
+          onTap: () {
+            _searchController.text = '${_searchController.text} 관련 검색어 $index';
+            _onSearch(_searchController.text);
+          },
+        );
+      },
     );
   }
 
