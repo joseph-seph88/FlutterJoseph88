@@ -7,7 +7,7 @@ class ChatRoomModel {
   final String seller;
   final int unreadMessageCount;
   final String lastMessage;
-  final DateTime lastMessageTime;
+  final Timestamp lastMessageTime;
   final String lastMessageSender;
 
   ChatRoomModel({
@@ -27,7 +27,7 @@ class ChatRoomModel {
       seller: json['seller'],
       unreadMessageCount: json['unreadMessageCount'],
       lastMessage: json['lastMessage'],
-      lastMessageTime: (json['lastMessageTime'] as Timestamp).toDate(),
+      lastMessageTime: json['lastMessageTime'],
       lastMessageSender: json['lastMessageSender'],
     );
   }
@@ -39,7 +39,7 @@ class ChatRoomModel {
       seller: seller,
       unreadMessageCount: unreadMessageCount,
       lastMessage: lastMessage,
-      lastMessageTime: lastMessageTime,
+      lastMessageTime: lastMessageTime.toDate(),
       lastMessageSender: lastMessageSender,
     );
   }
