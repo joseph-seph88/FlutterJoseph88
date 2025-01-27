@@ -68,7 +68,7 @@ class ProductDetailScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '체리주빌레',
+                                product.sellerId, // TODO: User 모델 추가 후 닉네임으로 변경
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: AppColors.text,
                                 ),
@@ -93,7 +93,7 @@ class ProductDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '40.9°C',
+                                  '36.5°C', // TODO: User 모델 추가 후 실제 매너온도로 변경
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: theme.colorScheme.primary,
                                   ),
@@ -217,7 +217,6 @@ class ProductDetailScreen extends StatelessWidget {
       ),
     );
   }
-
 
   //정건님 코드 합쳐지면 삭제
   String _getTimeAgo(DateTime dateTime) {
