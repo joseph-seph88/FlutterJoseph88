@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:o2/domain/models/product.dart';
 
 class ProductCard extends StatelessWidget {
-  final String title;
-  final String location;
-  final String category;
-  final int price;
-  final String imageUrl;
-  final int viewCount;
-  final int likeCount;
+  final Product product;
 
   const ProductCard({
     super.key,
-    required this.title,
-    required this.location,
-    required this.category,
-    required this.price,
-    required this.imageUrl,
-    required this.viewCount,
-    required this.likeCount,
+    required this.product,
   });
 
   @override
@@ -39,7 +28,7 @@ class ProductCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  imageUrl,
+                  product.imageUrl,
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
@@ -52,7 +41,7 @@ class ProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      product.title,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -62,7 +51,7 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$location • $category',
+                      '${product.location} • ${product.category}',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 13,
@@ -70,7 +59,7 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${price.toString().replaceAllMapped(
+                      '${product.price.toString().replaceAllMapped(
                             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                             (Match m) => '${m[1]},',
                           )}원',
@@ -89,7 +78,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$viewCount',
+                          '${product.viewCount}',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 13,
@@ -103,7 +92,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$likeCount',
+                          '${product.likeCount}',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 13,
