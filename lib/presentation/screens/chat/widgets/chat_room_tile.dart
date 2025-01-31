@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_room.dart';
-import 'package:o2/domain/utils/date_util.dart';
 
 class ChatRoomTile extends StatelessWidget {
   final ChatRoom chatRoom;
@@ -32,6 +33,7 @@ class ChatRoomTile extends StatelessWidget {
       trailing: chatRoom.unreadMessageCount == 0
           ? null
           : Badge.count(count: chatRoom.unreadMessageCount),
+      onTap: () => context.push('/chats/${chatRoom.id}'),
     );
   }
 }
