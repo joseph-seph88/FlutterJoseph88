@@ -1,112 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/domain/models/product.dart';
 
 class ProductCard extends StatelessWidget {
-  final String title;
-  final String location;
-  final String category;
-  final int price;
-  final String imageUrl;
-  final int viewCount;
-  final int likeCount;
+  final Product product;
 
   const ProductCard({
     super.key,
-    required this.title,
-    required this.location,
-    required this.category,
-    required this.price,
-    required this.imageUrl,
-    required this.viewCount,
-    required this.likeCount,
+    required this.product,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
-      elevation: 0.5,
       child: InkWell(
-        onTap: () {},
+        onTap: () => context.push('/detail/${product.id}'),
+        borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: AppStyles.defaultPadding,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 상품 이미지
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                 child: Image.network(
-                  imageUrl,
+                  product.imageUrl,
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppStyles.defaultSpacing),
               // 상품 정보
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                      product.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.text,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppStyles.smallSpacing),
                     Text(
-                      '$location • $category',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 13,
+                      '${product.location} • ${product.category}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppStyles.smallSpacing),
                     Text(
-                      '${price.toString().replaceAllMapped(
+                      '${product.price.toString().replaceAllMapped(
                             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                             (Match m) => '${m[1]},',
                           )}원',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.text,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppStyles.smallSpacing),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Icon(
                           Icons.remove_red_eye_outlined,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$viewCount',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
+                          '${product.viewCount}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppStyles.smallSpacing),
                         Icon(
                           Icons.favorite_border,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$likeCount',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
+                          '${product.likeCount}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],

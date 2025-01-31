@@ -4,13 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:o2/core/utils/permission_manager.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
-import 'package:o2/presentation/screens/home_screen2.dart';
-import 'package:o2/presentation/screens/map/add_shop_page.dart';
-import 'package:o2/presentation/screens/map/like_shop_page.dart';
-import 'package:o2/presentation/screens/map/map_screen.dart';
+import 'package:o2/presentation/screens/product/detail_screen.dart';
+import 'package:o2/presentation/screens/product/write_screen.dart';
+import 'package:o2/presentation/screens/search/search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +35,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
+      theme: AppTheme.light(),
     );
   }
 }
@@ -45,27 +45,19 @@ final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: "/",
-      builder: (context, state) {
-        return const HomeScreen2();
-      },
+      builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
-      path: "/map",
-      builder: (context, state) {
-        return MapScreen();
-      },
+      path: "/write",
+      builder: (context, state) => const WriteScreen(),
     ),
     GoRoute(
-      path: "/addShop",
-      builder: (context, state) {
-        return AddShopPage();
-      },
+      path: "/detail/:id",
+      builder: (context, state) => const ProductDetailScreen(),
     ),
     GoRoute(
-      path: "/likeShop",
-      builder: (context, state) {
-        return const LikeShopPage();
-      },
+      path: "/search",
+      builder: (context, state) => const SearchScreen(),
     ),
   ],
 );
