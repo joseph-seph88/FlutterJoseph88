@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:o2/data/repositories/chat_repository_impl.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
-import 'package:o2/domain/usecases/chat_usecases.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
 final chatRoomProvider =
     StateNotifierProvider<ChatRoomNotifier, List<ChatRoom>>(
@@ -18,10 +17,9 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
 
   void _fetchChatRooms() {
     final userId = 'a';
-    final getChatRoomListUseCase =
-        GetChatRoomListUseCase(ref.read(chatRepositoryProvider));
+    final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
 
-    getChatRoomListUseCase(userId).listen((data) {
+    getChatRoomsUseCase(userId).listen((data) {
       state = data;
     });
   }
@@ -29,39 +27,19 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
 
 final chatMessageProvider =
     StateNotifierProvider<ChatMessageNotifier, List<ChatMessage>>(
-  (ref) => ChatMessageNotifier(),
+  (ref) => ChatMessageNotifier(ref),
 );
 
 class ChatMessageNotifier extends StateNotifier<List<ChatMessage>> {
-  ChatMessageNotifier()
-      : super([
-          ChatMessage(
-            id: '0',
-            senderId: 'b',
-            type: ChatMessageType.text,
-            content: 'hi',
-            sentTime: DateTime(2025, 1, 26),
-          ),
-          ChatMessage(
-            id: '1',
-            senderId: 'b',
-            type: ChatMessageType.text,
-            content: '안녕하세요?',
-            sentTime: DateTime(2025, 1, 26),
-          ),
-          ChatMessage(
-            id: '2',
-            senderId: 'a',
-            type: ChatMessageType.text,
-            content: 'hello',
-            sentTime: DateTime.now(),
-          ),
-          ChatMessage(
-            id: '3',
-            senderId: 'b',
-            type: ChatMessageType.text,
-            content: 'zzz',
-            sentTime: DateTime.now(),
-          ),
-        ]);
+  final Ref ref;
+
+  ChatMessageNotifier(this.ref) : super([]);
+
+  void fetchChatMessages(String chatRoomId) {
+    final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
+
+    getChatMessagesUseCase(chatRoomId).listen((data) {
+      state = data;
+    });
+  }
 }

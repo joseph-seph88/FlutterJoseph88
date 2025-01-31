@@ -13,9 +13,10 @@ class ChatMessageList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(chatMessageProvider.notifier).fetchChatMessages(chatRoomId);
     final chatMessages = ref.watch(chatMessageProvider);
     String? currentDate;
-    String currentSender = chatMessages.first.senderId;
+    String currentSender = chatMessages.firstOrNull?.senderId ?? '';
 
     return ListView.builder(
       padding: EdgeInsets.all(12),
