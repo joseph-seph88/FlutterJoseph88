@@ -35,7 +35,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -235,7 +235,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: const NaverMap(
+                              child: NaverMap(
                                 options: NaverMapViewOptions(
                                   initialCameraPosition: NCameraPosition(
                                     target: NLatLng(37.5666102, 126.9783881),
@@ -300,7 +300,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => context.push('/chat/${product.id}'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
