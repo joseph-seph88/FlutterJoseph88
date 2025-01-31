@@ -33,6 +33,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
               ),
               child: TextField(
                 controller: _messageController,
+                style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   hintText: '메시지 보내기',
                   border: InputBorder.none,
