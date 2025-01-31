@@ -22,6 +22,16 @@ class GetChatMessagesUseCase {
   }
 }
 
+class CreateChatRoomUseCase {
+  final ChatRepository _repository;
+
+  CreateChatRoomUseCase(this._repository);
+
+  Future<String> call(String content, String otherUserId, String senderId) {
+    return _repository.createChatRoom(content, otherUserId, senderId);
+  }
+}
+
 class SendChatMessageUseCase {
   final ChatRepository _repository;
 

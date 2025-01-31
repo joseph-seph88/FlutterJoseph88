@@ -7,6 +7,9 @@ abstract interface class ChatRemoteDataSource {
   Stream<QuerySnapshot<Map<String, dynamic>>> getChatMessages(
       String chatRoomId);
 
+  Future<String> createChatRoom(
+      String content, String otherUserId, String senderId);
+
   Future<void> sendMessage(String chatRoomId, String content, String senderId);
 
   Future<void> markChatAsRead(String chatRoomId, String userId);
@@ -39,7 +42,38 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<void> sendMessage(String chatRoomId, String content, String senderId) async {
+  Future<String> createChatRoom(
+      String content, String otherUserId, String senderId) async {
+    final timestamp = Timestamp.now();
+    final message = ChatMessageModel(
+      id: '',
+      senderId: senderId,
+      type: 'text',
+      content: content,
+      sentTime: timestamp,
+    ).toJson();
+
+    final chatRoomId = (await _firestore.collection('chats').add({
+      'buyer': senderId,
+      'seller': otherUserId,
+      'lastMessage': content,
+      'lastMessageTime': timestamp,
+      'lastMessageSender': senderId,
+      'unreadMessageCount': 1,
+    })).id;
+
+    _firestore
+        .collection('chats')
+        .doc(chatRoomId)
+        .collection('messages')
+        .add(message);
+
+    return chatRoomId;
+  }
+
+  @override
+  Future<void> sendMessage(
+      String chatRoomId, String content, String senderId) async {
     final timestamp = Timestamp.now();
     final message = ChatMessageModel(
       id: '',
