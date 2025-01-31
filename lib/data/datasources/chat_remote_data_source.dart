@@ -8,6 +8,8 @@ abstract interface class ChatRemoteDataSource {
       String chatRoomId);
 
   Future<void> sendMessage(String chatRoomId, String content, String senderId);
+
+  Future<void> markChatAsRead(String chatRoomId, String userId);
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -59,5 +61,17 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       'lastMessageTime': timestamp,
       'unreadMessageCount': FieldValue.increment(1),
     });
+  }
+
+  @override
+  Future<void> markChatAsRead(String chatRoomId, String userId) async {
+    final chatRoom = await _firestore.collection('chats').doc(chatRoomId).get();
+    final senderId = chatRoom['lastMessageSender'];
+
+    if (userId != senderId) {
+      await _firestore.collection('chats').doc(chatRoomId).update({
+        'unreadMessageCount': 0,
+      });
+    }
   }
 }

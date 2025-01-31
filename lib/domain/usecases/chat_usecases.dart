@@ -31,3 +31,13 @@ class SendChatMessageUseCase {
     await _repository.sendMessage(chatRoomId, content, senderId);
   }
 }
+
+class MarkChatAsReadUseCase {
+  final ChatRepository _repository;
+
+  MarkChatAsReadUseCase(this._repository);
+
+  Future<void> call(String chatRoomId, String userId) async {
+    await _repository.markChatAsRead(chatRoomId, userId);
+  }
+}

@@ -30,7 +30,13 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<void> sendMessage(String chatRoomId, String content, String senderId) async {
+  Future<void> sendMessage(
+      String chatRoomId, String content, String senderId) async {
     await _dataSource.sendMessage(chatRoomId, content, senderId);
+  }
+
+  @override
+  Future<void> markChatAsRead(String chatRoomId, String userId) async {
+    await _dataSource.markChatAsRead(chatRoomId, userId);
   }
 }
