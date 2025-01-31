@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/presentation/providers/map_provider.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
-import 'package:o2/presentation/screens/product/product_list_view.dart';
+import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 
 final currentIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -27,15 +27,12 @@ class HomeScreen2 extends ConsumerWidget {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.location_on), label: "동네 지도"),
+          BottomNavigationBarItem(icon: Icon(Icons.location_on), label: "동네 지도"),
         ],
         currentIndex: currentIndex,
         onTap: (index) async {
           if (index == 1) {
-            await ref
-                .read(locationPermissionProvider.notifier)
-                .requestPermission();
+            await ref.read(locationPermissionProvider.notifier).requestPermission();
           }
           ref.read(currentIndexProvider.notifier).state = index;
         },
