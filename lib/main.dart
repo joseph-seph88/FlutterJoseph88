@@ -7,6 +7,7 @@ import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/product/detail_screen.dart';
 import 'package:o2/presentation/screens/product/write_screen.dart';
+import 'package:o2/presentation/screens/search/search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: "/detail/:id",
       builder: (context, state) => const ProductDetailScreen(),
+    ),
+    GoRoute(
+      path: "/search",
+      builder: (context, state) => const SearchScreen(),
     ),
   ],
 );
