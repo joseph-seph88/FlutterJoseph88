@@ -8,6 +8,9 @@ import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/product/detail_screen.dart';
 import 'package:o2/presentation/screens/product/write_screen.dart';
 import 'package:o2/presentation/screens/search/search_screen.dart';
+import 'package:o2/data/datasources/product_data_source.dart';
+import 'package:o2/data/repositories/product_repository_impl.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +19,13 @@ void main() async {
   );
 
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        productRepositoryProvider.overrideWithValue(
+          ProductRepositoryImpl(ProductDataSource()),
+        ),
+      ],
+      child: const MyApp(),
     ),
   );
 }
