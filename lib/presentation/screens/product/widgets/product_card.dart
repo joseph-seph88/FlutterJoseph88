@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/product.dart';
-import 'package:o2/domain/utils/date_util.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;

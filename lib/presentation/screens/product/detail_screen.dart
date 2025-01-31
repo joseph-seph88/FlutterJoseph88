@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/domain/utils/date_util.dart';
+import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
