@@ -1,5 +1,19 @@
 enum ChatMessageType {
-  text, image, video, deleted,
+  text('text'),
+  image('image'),
+  video('video'),
+  deleted('deleted');
+
+  final String code;
+
+  const ChatMessageType(this.code);
+
+  factory ChatMessageType.getByCode(String code) {
+    return ChatMessageType.values.firstWhere(
+      (value) => value.code == code,
+      orElse: () => ChatMessageType.text,
+    );
+  }
 }
 
 class ChatMessage {
