@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/domain/models/product.dart';
 
@@ -16,7 +17,7 @@ class ProductCard extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        onTap: () {},
+        onTap: () => context.push('/detail/${product.id}'),
         borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
         child: Padding(
           padding: AppStyles.defaultPadding,
