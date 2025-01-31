@@ -5,7 +5,7 @@ import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 
 class ChatMessageList extends ConsumerWidget {
-  final String chatRoomId;
+  final String? chatRoomId;
   final String userId;
 
   const ChatMessageList(
@@ -13,7 +13,9 @@ class ChatMessageList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(chatMessageProvider.notifier).fetchChatMessages(chatRoomId);
+    if (chatRoomId != null) {
+      ref.read(chatMessageProvider.notifier).fetchChatMessages(chatRoomId!);
+    }
     final chatMessages = ref.watch(chatMessageProvider);
     String? currentDate;
     String currentSender = chatMessages.firstOrNull?.senderId ?? '';

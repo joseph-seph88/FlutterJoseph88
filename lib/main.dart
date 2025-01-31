@@ -62,15 +62,22 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const SearchScreen(),
     ),
     GoRoute(
-        path: "/chats",
-        builder: (context, state) => ChatListScreen(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            builder: (context, state) =>
-                ChatRoomScreen(chatRoomId: state.pathParameters['id']!),
-          ),
-        ],
+      path: "/chats",
+      builder: (context, state) => ChatListScreen(),
+      routes: [
+        GoRoute(
+          path: '/chat_room',
+          builder: (context, state) {
+            final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
+            final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
+
+            return ChatRoomScreen(
+              chatRoomId: chatRoomId,
+              otherUserId: otherUserId,
+            );
+          },
+        ),
+      ],
     ),
   ],
 );

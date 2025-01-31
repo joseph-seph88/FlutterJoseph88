@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
-  final String chatRoomId;
+  final String? chatRoomId;
+  final String otherUserId;
 
-  const ChatMessageInput(this.chatRoomId, {super.key});
+  const ChatMessageInput(
+      {super.key, required this.chatRoomId, required this.otherUserId});
 
   @override
   ConsumerState createState() => _ChatMessageInputState();
@@ -70,7 +73,19 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
     final senderId = 'a';
     final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
 
-    await sendChatMessageUseCase(
-        widget.chatRoomId, _messageController.text, senderId);
+    if (widget.chatRoomId == null) {
+      final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
+      final chatRoomId = await createChatRoomUseCase(
+          _messageController.text, widget.otherUserId, senderId);
+      if (mounted) {
+        context.go('/chats/chat_room', extra: {
+          'chatRoomId': chatRoomId,
+          'otherUserId': widget.otherUserId,
+        });
+      }
+    } else {
+      await sendChatMessageUseCase(
+          widget.chatRoomId!, _messageController.text, senderId);
+    }
   }
 }
