@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/presentation/screens/product/%08widgets/home_app_bar.dart';
-import 'package:o2/presentation/screens/product/%08widgets/product_list_view.dart';
+import 'package:o2/presentation/screens/product/widgets/home_app_bar.dart';
+import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 import 'package:o2/presentation/widgets/bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {

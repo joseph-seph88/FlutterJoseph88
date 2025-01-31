@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
-import 'package:o2/presentation/screens/product/%08widgets/product_card.dart';
+import 'package:o2/presentation/screens/product/widgets/product_card.dart';
 
 class ProductListView extends ConsumerWidget {
   final String? category;
