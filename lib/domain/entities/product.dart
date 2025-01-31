@@ -1,3 +1,5 @@
+import 'package:o2/data/models/product_model.dart';
+
 class Product {
   final String id;
   final String title;
@@ -30,4 +32,23 @@ class Product {
     required this.status,
     required this.chatCount,
   });
+
+  factory Product.fromModel(ProductModel model) {
+    return Product(
+      id: model.id,
+      title: model.title,
+      description: model.description,
+      price: model.price,
+      location: model.location,
+      category: model.category,
+      images: model.images,
+      viewCount: model.viewCount,
+      likeCount: model.likeCount,
+      createdAt: model.createdAt.toDate(),
+      sellerId: model.sellerId,
+      isOfferEnabled: model.isOfferEnabled,
+      status: model.status,
+      chatCount: model.chatCount,
+    );
+  }
 }

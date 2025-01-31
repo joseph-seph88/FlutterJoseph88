@@ -8,52 +8,29 @@ class ProductRepositoryImpl implements ProductRepository {
 
   ProductRepositoryImpl(this._dataSource);
 
-  Product _modelToEntity(ProductModel model) {
-    return Product(
-      id: model.id,
-      title: model.title,
-      description: model.description,
-      price: model.price,
-      location: model.location,
-      category: model.category,
-      images: model.images,
-      viewCount: model.viewCount,
-      likeCount: model.likeCount,
-      createdAt: model.createdAt.toDate(),
-      sellerId: model.sellerId,
-      isOfferEnabled: model.isOfferEnabled,
-      status: model.status,
-      chatCount: model.chatCount,
-    );
-  }
-
   @override
   Future<List<Product>> getProducts() async {
-    final docs = await _dataSource.getProducts();
-    final models = docs.map((doc) => ProductModel.fromFirebase(doc)).toList();
-    return models.map(_modelToEntity).toList();
+    final snapshots = await _dataSource.getProducts();
+    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
   }
 
   @override
   Future<Product?> getProduct(String id) async {
-    final doc = await _dataSource.getProduct(id);
-    if (doc == null || !doc.exists) return null;
-    final model = ProductModel.fromFirebase(doc);
-    return _modelToEntity(model);
+    final snapshot = await _dataSource.getProduct(id);
+    if (snapshot == null) return null;
+    return Product.fromModel(ProductModel.fromFirebase(snapshot));
   }
 
   @override
   Future<List<Product>> searchProducts(String query) async {
-    final docs = await _dataSource.searchProducts(query);
-    final models = docs.map((doc) => ProductModel.fromFirebase(doc)).toList();
-    return models.map(_modelToEntity).toList();
+    final snapshots = await _dataSource.searchProducts(query);
+    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
   }
 
   @override
   Future<List<Product>> getProductsByCategory(String category) async {
-    final docs = await _dataSource.getProductsByCategory(category);
-    final models = docs.map((doc) => ProductModel.fromFirebase(doc)).toList();
-    return models.map(_modelToEntity).toList();
+    final snapshots = await _dataSource.getProductsByCategory(category);
+    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
   }
 
   @override
