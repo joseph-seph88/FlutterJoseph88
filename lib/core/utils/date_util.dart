@@ -19,4 +19,24 @@ extension DateTimeExtensions on DateTime {
       return '$year-$month-$day';
     }
   }
+
+  String toDateOnlyString() {
+    return '$year년 $month월 $day일';
+  }
+
+  String toTimeOnlyString() {
+    String ap = hour < 12 ? '오전' : '오후';
+    String hh = hour == 0 ? '12' : hour > 12 ? '${hour % 12}' : '$hour';
+    String mm = minute < 10 ? '0$minute' : '$minute';
+
+    return '$ap $hh:$mm';
+  }
+
+  bool isTimeSame(DateTime time) {
+    return year == time.year &&
+        month == time.month &&
+        day == time.day &&
+        hour == time.hour &&
+        minute == time.minute;
+  }
 }
