@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/screens/product/home_app_bar.dart';
 import 'package:o2/presentation/screens/product/product_list_view.dart';
 import 'package:o2/presentation/widgets/bottom_nav_bar.dart';
@@ -21,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: const HomeAppBar(),
       body: const Column(
@@ -34,10 +38,29 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: AppStyles.largeSpacing),
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/write'),
+          backgroundColor: theme.colorScheme.primary,
+          label: Row(
+            children: [
+              Icon(
+                Icons.add,
+                color: AppColors.surface,
+              ),
+              const SizedBox(width: AppStyles.smallSpacing),
+              Text(
+                '글쓰기',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: AppColors.surface,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
