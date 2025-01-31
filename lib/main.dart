@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
+import 'package:o2/data/datasources/product_data_source.dart';
+import 'package:o2/data/repositories/product_repository_impl.dart';
 import 'package:o2/firebase_options.dart';
-import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
-import 'package:o2/presentation/screens/chat/chat_room_screen.dart';
-import 'package:o2/presentation/screens/home_screen.dart';
-import 'package:o2/presentation/screens/product/detail_screen.dart';
-import 'package:o2/presentation/screens/product/write_screen.dart';
-import 'package:o2/presentation/screens/search/search_screen.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
+
+import 'route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +20,16 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        productRepositoryProvider.overrideWithValue(
+          ProductRepositoryImpl(ProductDataSource()),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -41,43 +48,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-final GoRouter router = GoRouter(
-  initialLocation: "/",
-  routes: <RouteBase>[
-    GoRoute(
-      path: "/",
-      builder: (context, state) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: "/write",
-      builder: (context, state) => const WriteScreen(),
-    ),
-    GoRoute(
-      path: "/detail/:id",
-      builder: (context, state) => const ProductDetailScreen(),
-    ),
-    GoRoute(
-      path: "/search",
-      builder: (context, state) => const SearchScreen(),
-    ),
-    GoRoute(
-      path: "/chats",
-      builder: (context, state) => ChatListScreen(),
-      routes: [
-        GoRoute(
-          path: '/chat_room',
-          builder: (context, state) {
-            final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
-            final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
-
-            return ChatRoomScreen(
-              chatRoomId: chatRoomId,
-              otherUserId: otherUserId,
-            );
-          },
-        ),
-      ],
-    ),
-  ],
-);

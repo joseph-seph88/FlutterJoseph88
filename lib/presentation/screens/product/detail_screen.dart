@@ -1,22 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/data/dummy/dummy_products.dart';
+import 'package:o2/core/utils/date_util.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key});
 
   @override
+  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final id = GoRouterState.of(context).pathParameters['id'] ?? '';
+      ref.read(productNotifierProvider(id).notifier).incrementViewCount(id);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final id = GoRouterState.of(context).pathParameters['id'];
-    final product = dummyProducts.firstWhere((p) => p.id == id);
+    final id = GoRouterState.of(context).pathParameters['id'] ?? '';
+    final productAsync = ref.watch(productDetailProvider(id));
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -29,214 +48,281 @@ class ProductDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 이미지 슬라이더
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: PageView.builder(
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        return Image.network(
-                          product.imageUrl,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                  ),
-                  // 프로필 영역
-                  Padding(
-                    padding: AppStyles.defaultPadding,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: AppColors.divider,
-                          child: Icon(
-                            Icons.person_outline,
-                            color: AppColors.textSecondary,
-                          ),
+      body: productAsync.when(
+        data: (product) {
+          if (product == null) {
+            return const Center(child: Text('상품을 찾을 수 없습니다.'));
+          }
+
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 상품 이미지
+                    if (product.images.isNotEmpty)
+                      SizedBox(
+                        height: 300,
+                        child: PageView.builder(
+                          itemCount: product.images.length,
+                          itemBuilder: (context, index) {
+                            return Image.network(
+                              product.images[index],
+                              fit: BoxFit.cover,
+                            );
+                          },
                         ),
-                        const SizedBox(width: AppStyles.defaultSpacing),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.sellerId, // TODO: User 모델 추가 후 닉네임으로 변경
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: AppColors.text,
+                      ),
+                    // 판매자 정보
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.grey[200],
+                            child: const Icon(Icons.person_outline),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.sellerId,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.text,
+                                      ),
                                 ),
+                                Text(
+                                  product.location,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    '36.5°C',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          color: Colors.orange,
+                                        ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.sentiment_satisfied_alt,
+                                    color: Colors.orange,
+                                  ),
+                                ],
                               ),
                               Text(
-                                product.location,
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                '매너온도',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    // 상품 정보
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.title,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.text,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${product.category} · ${product.createdAt.toElapsedTimeString()}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.textSecondary,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            product.description,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.text,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Text(
+                                '조회 ${product.viewCount}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                '관심 ${product.likeCount}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                '채팅 ${product.chatCount}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    // 거래 희망 장소
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '거래희망장소',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.text,
+                                    ),
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      product.location,
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.thermostat_outlined,
-                                  color: theme.colorScheme.primary,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '36.5°C', // TODO: User 모델 추가 후 실제 매너온도로 변경
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 160,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.divider),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: NaverMap(
+                                options: NaverMapViewOptions(
+                                  initialCameraPosition: NCameraPosition(
+                                    target: NLatLng(37.5666102, 126.9783881),
+                                    zoom: 15,
                                   ),
                                 ),
-                              ],
-                            ),
-                            Text(
-                              '매너온도',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  // 상품 정보
-                  Padding(
-                    padding: AppStyles.defaultPadding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: AppColors.text,
-                          ),
-                        ),
-                        const SizedBox(height: AppStyles.smallSpacing),
-                        Text(
-                          '${product.category} • ${_getTimeAgo(product.createdAt)}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: AppStyles.defaultSpacing),
-                        Text(
-                          product.description,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: AppColors.text,
-                          ),
-                        ),
-                        const SizedBox(height: AppStyles.defaultSpacing),
-                        Row(
-                          children: [
-                            Text(
-                              '조회 ${product.viewCount}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: AppStyles.defaultSpacing),
-                            Text(
-                              '관심 ${product.likeCount}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // 하단 영역
-          Container(
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.divider,
+                    const SizedBox(height: 80),
+                  ],
                 ),
               ),
-            ),
-            padding: AppStyles.defaultPadding,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {},
-                ),
-                const SizedBox(width: AppStyles.smallSpacing),
-                const VerticalDivider(width: 1),
-                const SizedBox(width: AppStyles.smallSpacing),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+              // 하단 버튼
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(color: AppColors.divider),
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        '${product.price.toString().replaceAllMapped(
-                              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                              (Match m) => '${m[1]},',
-                            )}원',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: AppColors.text,
+                      IconButton(
+                        onPressed: () {
+                          ref.read(productNotifierProvider(id).notifier).toggleLike(id, true);
+                        },
+                        icon: Icon(
+                          product.likeCount > 0 ? Icons.favorite : Icons.favorite_border,
+                          color: product.likeCount > 0 ? Colors.red : AppColors.textSecondary,
                         ),
                       ),
-                      Text(
-                        '가격 제안 불가',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${product.price}원',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.text,
+                                  ),
+                            ),
+                            if (product.isOfferEnabled)
+                              Text(
+                                '가격 제안 가능',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                          ],
                         ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => context.push('/chat/${product.id}'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: const Text('채팅하기'),
                       ),
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('채팅하기'),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('에러가 발생했습니다: $error'),
+        ),
       ),
     );
-  }
-
-  //정건님 코드 합쳐지면 삭제
-  String _getTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return '방금 전';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}분 전';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inDays < 30) {
-      return '${(difference.inDays / 7).floor()}주 전';
-    } else if (difference.inDays < 365) {
-      return '${(difference.inDays / 30).floor()}달 전';
-    } else {
-      return '${(difference.inDays / 365).floor()}년 전';
-    }
   }
 }
