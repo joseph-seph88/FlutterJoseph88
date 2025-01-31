@@ -5,6 +5,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/product/detail_screen.dart';
@@ -15,7 +16,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NaverMapSdk.instance.initialize();
   await PermissionManager().requestLocationPermission();
-  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
