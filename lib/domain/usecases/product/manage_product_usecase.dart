@@ -1,0 +1,15 @@
+import 'package:o2/domain/repositories/product_repository.dart';
+
+class ManageProductUseCase {
+  final ProductRepository _repository;
+
+  ManageProductUseCase(this._repository);
+
+  Future<void> incrementViewCount(String id) async {
+    await _repository.incrementViewCount(id);
+  }
+
+  Future<void> toggleLike(String id, bool isLiked) async {
+    await _repository.toggleLike(id, isLiked);
+  }
+}
