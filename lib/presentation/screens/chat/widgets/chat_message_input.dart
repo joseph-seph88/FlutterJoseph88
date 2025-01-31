@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
-  const ChatMessageInput({super.key});
+  final String chatRoomId;
+
+  const ChatMessageInput(this.chatRoomId, {super.key});
 
   @override
   ConsumerState createState() => _ChatMessageInputState();
@@ -44,12 +47,30 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
                   filled: true,
                   fillColor: ColorScheme.of(context).surfaceContainerHigh,
                 ),
+                onSubmitted: (_) async {
+                  await _sendMessage();
+                  _messageController.clear();
+                },
               ),
             ),
           ),
-          IconButton(onPressed: () {}, icon: Icon(Icons.send)),
+          IconButton(
+            onPressed: () async {
+              await _sendMessage();
+              _messageController.clear();
+            },
+            icon: Icon(Icons.send),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _sendMessage() async {
+    final senderId = 'a';
+    final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
+
+    await sendChatMessageUseCase(
+        widget.chatRoomId, _messageController.text, senderId);
   }
 }

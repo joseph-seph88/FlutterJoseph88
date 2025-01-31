@@ -25,7 +25,7 @@ class ChatRoomScreen extends ConsumerWidget {
           Expanded(
             child: ChatMessageList(chatRoomId: chatRoomId, userId: userId),
           ),
-          ChatMessageInput(),
+          ChatMessageInput(chatRoomId),
           SizedBox(height: 8),
         ],
       ),

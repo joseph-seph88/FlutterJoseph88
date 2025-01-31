@@ -28,4 +28,9 @@ class ChatRepositoryImpl implements ChatRepository {
     return models
         .map((data) => data.map((element) => element.toEntity()).toList());
   }
+
+  @override
+  Future<void> sendMessage(String chatRoomId, String content, String senderId) async {
+    await _dataSource.sendMessage(chatRoomId, content, senderId);
+  }
 }

@@ -26,6 +26,15 @@ class ChatMessageModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'senderId': senderId,
+      'type': type,
+      'content': content,
+      'sentTime': sentTime,
+    };
+  }
+
   ChatMessage toEntity() {
     return ChatMessage(
       id: id,
