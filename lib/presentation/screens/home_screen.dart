@@ -27,13 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: const HomeAppBar(),
-      body: const Column(
-        children: [
-          Expanded(
-            child: ProductListView(),
-          ),
-        ],
-      ),
+      body: const ProductListView(),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,

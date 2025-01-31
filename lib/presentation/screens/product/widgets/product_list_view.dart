@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/screens/product/widgets/product_card.dart';
 
@@ -22,15 +23,12 @@ class ProductListView extends ConsumerWidget {
           return const Center(child: Text('상품이 없습니다.'));
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.75,
-          ),
+        return ListView.separated(
           itemCount: products.length,
+          separatorBuilder: (context, index) => const Divider(
+            height: 1,
+            color: AppColors.divider,
+          ),
           itemBuilder: (context, index) {
             final product = products[index];
             return ProductCard(
