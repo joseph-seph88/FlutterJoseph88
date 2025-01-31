@@ -18,7 +18,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = 'buyer';
+    final userId = 'a';
     final chatRooms = ref
         .watch(chatRoomProvider)
         .where(
