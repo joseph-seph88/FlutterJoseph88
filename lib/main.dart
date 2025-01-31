@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/firebase_options.dart';
-import 'package:o2/presentation/screens/home_screen.dart';
-import 'package:o2/presentation/screens/product/detail_screen.dart';
-import 'package:o2/presentation/screens/product/write_screen.dart';
-import 'package:o2/presentation/screens/search/search_screen.dart';
+
+import 'route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,25 +36,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-final GoRouter router = GoRouter(
-  initialLocation: "/",
-  routes: <RouteBase>[
-    GoRoute(
-      path: "/",
-      builder: (context, state) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: "/write",
-      builder: (context, state) => const WriteScreen(),
-    ),
-    GoRoute(
-      path: "/detail/:id",
-      builder: (context, state) => const ProductDetailScreen(),
-    ),
-    GoRoute(
-      path: "/search",
-      builder: (context, state) => const SearchScreen(),
-    ),
-  ],
-);
