@@ -40,10 +40,10 @@ class ProductDetailScreen extends StatelessWidget {
                   AspectRatio(
                     aspectRatio: 1,
                     child: PageView.builder(
-                      itemCount: 1,
+                      itemCount: product.images.length,
                       itemBuilder: (context, index) {
                         return Image.network(
-                          product.imageUrl,
+                          product.images[index],
                           fit: BoxFit.cover,
                         );
                       },
