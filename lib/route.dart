@@ -40,11 +40,11 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: "/map",
-      builder: (context, state) => MapScreen(),
+      builder: (context, state) => const MapScreen(),
       routes: [
         GoRoute(
           path: "/addShop",
-          builder: (context, state) => AddShopPage(),
+          builder: (context, state) => const AddShopPage(),
         ),
         GoRoute(
           path: "/likeShop",

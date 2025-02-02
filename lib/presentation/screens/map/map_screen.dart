@@ -48,7 +48,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.black,
+      statusBarColor: AppColors.text,
       statusBarIconBrightness: Brightness.light,
     ));
     super.dispose();
@@ -92,6 +92,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         id: 'default',
         position: _latLng,
         icon: defaultIconPath,
+        iconTintColor: AppColors.primary,
         size: const NSize(30, 30),
         caption: placeAddress != null
             ? NOverlayCaption(text: '$shortAddress')
@@ -175,12 +176,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               final overlay = controller.getLocationOverlay();
               overlay.setIsVisible(true);
             },
-            onSymbolTapped: (symbol) async {},
             onMapTapped: (NPoint point, NLatLng latLng) async {
               await onMapTapped(point, latLng);
-            },
-            onCameraIdle: () async {
-              // addMarkersToMap();
             },
           ),
           Positioned(
@@ -188,15 +185,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             left: 20,
             right: 20,
             child: Container(
-              color: Colors.white,
+              color: AppColors.surface,
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: "여기서 업체 검색",
+                  hintStyle: AppStyles.labelLarge
+                      .copyWith(color: AppColors.textSecondary),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius:
+                        BorderRadius.circular(AppStyles.defaultRadius),
                   ),
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -204,8 +207,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           Positioned(
               bottom: 120,
               left: 20,
-              // child: ElevatedButton(
-              //     onPressed: addMarker, child: const Icon(Icons.add))),
               child: ElevatedButton(
                   onPressed: moveCamera, child: const Icon(Icons.my_location))),
           Positioned(
@@ -219,10 +220,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 label: const Row(
                   children: [
                     Icon(Icons.add),
-                    Text(
-                      "추가하기",
-                      style: AppStyles.labelMedium,
-                    )
+                    Text("추가하기", style: AppStyles.labelMedium)
                   ],
                 )),
           ),
@@ -235,18 +233,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(20),
-                      color: Colors.white,
+                      padding: AppStyles.defaultPadding.copyWith(
+                        top: AppStyles.verticalPadding.top + 10,
+                        bottom: AppStyles.verticalPadding.bottom + 10,
+                      ),
+                      color: AppColors.surface,
                       child: Row(
                         children: [
                           const Icon(Icons.location_on),
+                          const SizedBox(width: 5),
                           shortAddress != null
                               ? Text(
                                   '$shortAddress',
-                                  style: const TextStyle(color: Colors.black),
+                                  style: AppStyles.labelLarge
+                                      .copyWith(color: AppColors.text),
                                 )
-                              : const Text('보라매역',
-                                  style: TextStyle(color: Colors.black))
+                              : Text('보라매역',
+                                  style: AppStyles.labelLarge
+                                      .copyWith(color: AppColors.text)),
                         ],
                       ),
                     ),
@@ -267,8 +271,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           return Container(
                               width: 60,
                               height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                              decoration: const BoxDecoration(
+                                color: AppColors.textSecondary,
                                 shape: BoxShape.circle,
                               ),
                               child: ElevatedButton(
