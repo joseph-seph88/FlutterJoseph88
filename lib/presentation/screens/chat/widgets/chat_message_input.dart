@@ -54,6 +54,9 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
                   await _sendMessage();
                   _messageController.clear();
                 },
+                onTapOutside: (event) {
+                  FocusScope.of(context).unfocus();
+                },
               ),
             ),
           ),
