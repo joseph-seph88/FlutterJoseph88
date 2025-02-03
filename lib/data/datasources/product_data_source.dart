@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:o2/data/models/product_model.dart';
 
 class ProductDataSource {
@@ -35,7 +36,7 @@ class ProductDataSource {
       final fallbackSnapshot = await _firestore
           .collection(_collection)
           .where('title', isGreaterThanOrEqualTo: lowercaseQuery)
-          .where('title', isLessThan: lowercaseQuery + '\uf8ff')
+          .where('title', isLessThan: '$lowercaseQuery\uf8ff')
           .get();
 
       return fallbackSnapshot.docs;
@@ -83,7 +84,7 @@ class ProductDataSource {
         });
       }
     } catch (e) {
-      print('Error updating search keywords: $e');
+      debugPrint('Error updating search keywords: $e');
       rethrow;
     }
   }
