@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
@@ -41,6 +43,21 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             child:
                 ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
           ),
+          if (selectedImage != null) ...[
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                SizedBox(
+                  height: 200,
+                  width: MediaQuery.of(context).size.width,
+                  child: Center(
+                    child: Image.file(File(selectedImage.path)),
+                  ),
+                ),
+                IconButton(onPressed: () {}, icon: Icon(Icons.close)),
+              ],
+            )
+          ],
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
             otherUserId: widget.otherUserId,
@@ -48,26 +65,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             onAddButtonClicked: _onAddButtonClicked,
           ),
           _isAddButtonClicked
-              ? Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildIconButtonWithText(
-                        onPressed: () {
-                          ref.read(selectedImageProvider.notifier).pickImage();
-                        },
-                        icon: Icons.photo,
-                        text: '사진',
-                      ),
-                      _buildIconButtonWithText(
-                        onPressed: () {},
-                        icon: Icons.location_pin,
-                        text: '장소',
-                      ),
-                    ],
-                  ),
-                )
+              ? _buildAddItemSelectionField()
               : SizedBox(height: 8),
         ],
       ),
@@ -78,6 +76,29 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     setState(() {
       _isAddButtonClicked = !_isAddButtonClicked;
     });
+  }
+
+  Widget _buildAddItemSelectionField() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 40),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildIconButtonWithText(
+            onPressed: () {
+              ref.read(selectedImageProvider.notifier).pickImage();
+            },
+            icon: Icons.photo,
+            text: '사진',
+          ),
+          _buildIconButtonWithText(
+            onPressed: () {},
+            icon: Icons.location_pin,
+            text: '장소',
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildIconButtonWithText(
