@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
@@ -25,6 +26,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final userId = 'a';
+    final selectedImage = ref.watch(selectedImageProvider);
 
     if (widget.chatRoomId != null) {
       final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
@@ -52,7 +54,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildIconButtonWithText(
-                        onPressed: () {},
+                        onPressed: () {
+                          ref.read(selectedImageProvider.notifier).pickImage();
+                        },
                         icon: Icons.photo,
                         text: '사진',
                       ),
