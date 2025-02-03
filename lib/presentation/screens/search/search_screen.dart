@@ -7,6 +7,7 @@ import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/screens/product/widgets/product_card.dart';
 import 'package:o2/presentation/screens/search/widgets/auto_complete_item.dart';
 import 'package:o2/presentation/screens/search/widgets/search_app_bar.dart';
+import 'package:o2/presentation/screens/search/widgets/search_content.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -19,9 +20,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _searchController = TextEditingController();
   Timer? _debounce;
   String _query = '';
-  final List<String> _recentSearches = ['노트북 파우치', '백팩', '샘소나이트', '노트북 마개봉', '미개봉 노트북'];
   List<String> _autoCompleteResults = [];
   bool _isSearching = false;
+
+  // TODO: 실제 사용자 ID로 교체해야 합니다.
+  final String _userId = 'test_user';
 
   @override
   void dispose() {
@@ -39,27 +42,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return;
     }
 
-    // 이전 타이머가 있다면 취소
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
-    // 1초 후에 자동완성 결과 표시
     _debounce = Timer(const Duration(seconds: 1), () async {
       if (!mounted) return;
 
       try {
-        // 검색 결과 가져오기
         final results = await ref.read(searchProductsProvider(value).future);
 
         if (!mounted) return;
 
         setState(() {
           _isSearching = true;
-          // 검색 결과의 제목을 자동완성 결과로 사용
-          _autoCompleteResults = results
-              .map((product) => product.title)
-              .where((title) => title.toLowerCase() != value.toLowerCase())
-              .take(5) // 최대 5개까지만 표시
-              .toList();
+          _autoCompleteResults = results.map((product) => product.title).where((title) => title.toLowerCase() != value.toLowerCase()).take(5).toList();
         });
       } catch (e) {
         if (!mounted) return;
@@ -71,41 +66,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
   }
 
-  void _onSearch(String value, {bool keepFocus = false}) {
+  Future<void> _onSearch(String value, {bool keepFocus = false}) async {
     if (value.isEmpty) return;
 
     setState(() {
       _query = value;
       _isSearching = false;
       _autoCompleteResults = [];
-      if (!_recentSearches.contains(value)) {
-        _recentSearches.insert(0, value);
-        if (_recentSearches.length > 10) {
-          _recentSearches.removeLast();
-        }
-      }
     });
 
-    // keepFocus가 false일 때만 포커스 해제
+    try {
+      await ref.read(saveRecentSearchProvider(_userId))(value);
+      await ref.read(incrementSearchCountProvider)(value);
+    } catch (e) {
+      debugPrint('검색어 저장 실패: $e');
+    }
+
+    if (!mounted) return;
+
     if (!keepFocus) {
       FocusScope.of(context).unfocus();
     }
   }
 
-  void _removeRecentSearch(String search) {
-    setState(() {
-      _recentSearches.remove(search);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final searchResultsAsync = ref.watch(searchProductsProvider(_query));
+    final recentSearchesAsync = ref.watch(recentSearchesProvider(_userId));
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: SearchAppBar(
-        searchController: _searchController,
+        controller: _searchController,
         onChanged: _updateAutoComplete,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
@@ -120,8 +112,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _autoCompleteResults = [];
           });
         },
-        recentSearches: _recentSearches,
-        onSearchSelect: (value) => _onSearch(value, keepFocus: true),
       ),
       body: Column(
         children: [
@@ -207,88 +197,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             )
           else
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    if (_recentSearches.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '최근 검색',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.text,
-                                  ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _recentSearches.clear();
-                                });
-                              },
-                              child: Text(
-                                '전체 삭제',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _recentSearches.length,
-                        itemBuilder: (context, index) {
-                          final search = _recentSearches[index];
-                          return InkWell(
-                            onTap: () {
-                              _searchController.text = search;
-                              _onSearch(search, keepFocus: true);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.history,
-                                    size: 20,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      search,
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            color: AppColors.text,
-                                          ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 20,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    onPressed: () => _removeRecentSearch(search),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ],
+              child: recentSearchesAsync.when(
+                data: (recentSearches) => SearchContent(
+                  searchController: _searchController,
+                  onSearchSelect: (value) => _onSearch(value),
+                  recentSearches: recentSearches,
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => SearchContent(
+                  searchController: _searchController,
+                  onSearchSelect: _onSearch,
+                  recentSearches: const [],
                 ),
               ),
             ),

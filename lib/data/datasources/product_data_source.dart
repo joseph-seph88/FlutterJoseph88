@@ -149,4 +149,28 @@ class ProductDataSource {
       'recentSearches': [],
     });
   }
+
+  // 검색어 카운트 증가
+  Future<void> incrementSearchCount(String keyword) async {
+    final searchStatsRef = _firestore.collection('searchStats').doc('keywords');
+
+    await searchStatsRef.set({
+      keyword: FieldValue.increment(1),
+    }, SetOptions(merge: true));
+  }
+
+  // 인기 검색어 가져오기
+  Future<List<String>> getPopularSearches({int limit = 5}) async {
+    final searchStatsRef = _firestore.collection('searchStats').doc('keywords');
+    final snapshot = await searchStatsRef.get();
+
+    if (!snapshot.exists) {
+      return [];
+    }
+
+    final data = snapshot.data() as Map<String, dynamic>;
+    final sortedEntries = data.entries.toList()..sort((a, b) => (b.value as num).compareTo(a.value as num));
+
+    return sortedEntries.take(limit).map((e) => e.key).toList();
+  }
 }

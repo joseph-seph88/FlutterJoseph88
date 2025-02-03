@@ -2,49 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:o2/core/theme/app_theme.dart';
 
 class RecentSearchItem extends StatelessWidget {
-  final String search;
+  final String label;
   final VoidCallback onTap;
-  final VoidCallback onRemove;
+  final VoidCallback onDelete;
 
   const RecentSearchItem({
     super.key,
-    required this.search,
+    required this.label,
     required this.onTap,
-    required this.onRemove,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 4,
-        ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
             const Icon(
               Icons.history,
-              size: 20,
+              size: 16,
               color: AppColors.textSecondary,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                search,
+                label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.text,
                     ),
               ),
             ),
-            IconButton(
-              icon: const Icon(
-                Icons.close,
-                size: 20,
-                color: AppColors.textSecondary,
+            InkWell(
+              onTap: onDelete,
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              onPressed: onRemove,
             ),
           ],
         ),
