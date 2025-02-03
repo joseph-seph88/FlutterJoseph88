@@ -1,36 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/providers.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
 
-class ChatRoomScreen extends ConsumerWidget {
+class ChatRoomScreen extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
 
-  const ChatRoomScreen(
-      {super.key, required this.chatRoomId, required this.otherUserId});
+  const ChatRoomScreen({
+    super.key,
+    required this.chatRoomId,
+    required this.otherUserId,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState createState() => _ChatRoomScreenState();
+}
+
+class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
+  bool _isAddButtonClicked = false;
+
+  @override
+  Widget build(BuildContext context) {
     final userId = 'a';
 
-    if (chatRoomId != null) {
+    if (widget.chatRoomId != null) {
       final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
-      markChatAsReadUseCase(chatRoomId!, userId);
+      markChatAsReadUseCase(widget.chatRoomId!, userId);
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(otherUserId)),
+      appBar: AppBar(title: Text(widget.otherUserId)),
       body: Column(
         children: [
           Expanded(
-            child: ChatMessageList(chatRoomId: chatRoomId, userId: userId),
+            child:
+                ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
           ),
-          ChatMessageInput(chatRoomId: chatRoomId, otherUserId: otherUserId),
-          SizedBox(height: 8),
+          ChatMessageInput(
+            chatRoomId: widget.chatRoomId,
+            otherUserId: widget.otherUserId,
+            isAddButtonClicked: _isAddButtonClicked,
+            onAddButtonClicked: _onAddButtonClicked,
+          ),
+          _isAddButtonClicked
+              ? Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildIconButtonWithText(
+                        onPressed: () {},
+                        icon: Icons.photo,
+                        text: '사진',
+                      ),
+                      _buildIconButtonWithText(
+                        onPressed: () {},
+                        icon: Icons.location_pin,
+                        text: '장소',
+                      ),
+                    ],
+                  ),
+                )
+              : SizedBox(height: 8),
         ],
       ),
+    );
+  }
+
+  void _onAddButtonClicked() {
+    setState(() {
+      _isAddButtonClicked = !_isAddButtonClicked;
+    });
+  }
+
+  Widget _buildIconButtonWithText(
+      {VoidCallback? onPressed, required IconData icon, required String text}) {
+    return Column(
+      children: [
+        IconButton.outlined(onPressed: onPressed, icon: Icon(icon)),
+        Text(text, style: TextStyle(color: AppColors.text)),
+      ],
     );
   }
 }

@@ -6,16 +6,31 @@ import 'package:o2/presentation/providers/providers.dart';
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final bool isAddButtonClicked;
+  final Function onAddButtonClicked;
 
   const ChatMessageInput(
-      {super.key, required this.chatRoomId, required this.otherUserId});
+      {super.key,
+      required this.chatRoomId,
+      required this.otherUserId,
+      required this.isAddButtonClicked,
+      required this.onAddButtonClicked});
 
   @override
   ConsumerState createState() => _ChatMessageInputState();
 }
 
-class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
+class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
+    with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController =
+        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+  }
 
   @override
   void dispose() {
@@ -29,7 +44,17 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
       padding: EdgeInsets.all(8),
       child: Row(
         children: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.add)),
+          RotationTransition(
+            turns: Tween(begin: 0.0, end: 0.125).animate(_animationController),
+            child: IconButton(
+                onPressed: () {
+                  widget.onAddButtonClicked();
+                  widget.isAddButtonClicked
+                      ? _animationController.reverse()
+                      : _animationController.forward();
+                },
+                icon: Icon(Icons.add)),
+          ),
           Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16),
