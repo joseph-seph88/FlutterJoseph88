@@ -44,19 +44,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
           ),
           if (selectedImage != null) ...[
-            Stack(
-              alignment: Alignment.topRight,
-              children: [
-                SizedBox(
-                  height: 200,
-                  width: MediaQuery.of(context).size.width,
-                  child: Center(
-                    child: Image.file(File(selectedImage.path)),
-                  ),
-                ),
-                IconButton(onPressed: () {}, icon: Icon(Icons.close)),
-              ],
-            )
+            _buildSelectedImage(selectedImage.path)
           ],
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
@@ -107,6 +95,25 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       children: [
         IconButton.outlined(onPressed: onPressed, icon: Icon(icon)),
         Text(text, style: TextStyle(color: AppColors.text)),
+      ],
+    );
+  }
+
+  Widget _buildSelectedImage(String path) {
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        Container(
+          height: 200,
+          width: MediaQuery.of(context).size.width,
+          color: AppColors.surface,
+          child: Center(
+            child: Image.file(File(path)),
+          ),
+        ),
+        IconButton(onPressed: () {
+          ref.read(selectedImageProvider.notifier).clear();
+        }, icon: Icon(Icons.close)),
       ],
     );
   }

@@ -15,4 +15,8 @@ class SelectedImageNotifier extends StateNotifier<XFile?> {
   void pickImage() async {
     state = await _picker.pickImage(source: ImageSource.gallery);
   }
+
+  void clear() {
+    state = null;
+  }
 }
