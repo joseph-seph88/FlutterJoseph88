@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+
+import '../widgets/auth_button.dart';
+import '../widgets/auth_text_field.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -16,78 +20,61 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   bool _showPassword = true;
 
+  void _togglePasswordVisible() {
+    setState(() {
+      _showPassword = !_showPassword;
+    });
+  }
+
+  void _onClickedLogInButton() async {
+    final success = await ref.read(authProvider.notifier).signIn(
+          _emailController.text,
+          _passwordController.text,
+        );
+
+    if (success && mounted) {
+      context.push("/home");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppStyles.defaultPadding,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Spacer(),
-            TextField(
+            AuthTextField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.people_alt),
-                border: OutlineInputBorder(),
-                hintText: "Email",
-              ),
-              keyboardType: TextInputType.emailAddress,
+              fieldName: "email",
+              //hintText: "Email",
+              //icon: Icons.people_alt,
             ),
-            const SizedBox(height: 20),
-            TextField(
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthTextField(
               controller: _passwordController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _showPassword = !_showPassword;
-                    });
-                  },
-                  icon: _showPassword
-                      ? const Icon(Icons.visibility_off)
-                      : const Icon(Icons.visibility),
-                ),
-                border: const OutlineInputBorder(),
-                hintText: "Password",
-              ),
+              fieldName: "password",
+              //hintText: "Password",
+              //icon: Icons.lock,
               obscureText: _showPassword,
+              onSuffixIconPressed: _togglePasswordVisible,
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 48,
-              width: MediaQuery.of(context).size.width,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final success = await ref.read(authProvider.notifier).signIn(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
-                  if (success && context.mounted) {
-                    //TODO: 로그인 성공 페이지 이동
-                  }
-                },
-                child: const Text("로그인"),
-              ),
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthButton(
+              onPressed: _onClickedLogInButton,
+              text: "로그인",
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 48,
-              width: MediaQuery.of(context).size.width,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: const Text("구글"),
-              ),
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthButton(
+              onPressed: () {},
+              text: "구글",
             ),
             Spacer(),
-            SizedBox(
-              height: 48,
-              width: MediaQuery.of(context).size.width,
-              child: ElevatedButton(
-                onPressed: () => context.push("/signUp"),
-                child: const Text("새 계정 만들기"),
-              ),
+            AuthButton(
+              onPressed: () => context.push("/signUp"),
+              text: "새 계정 만들기",
             ),
           ],
         ),
