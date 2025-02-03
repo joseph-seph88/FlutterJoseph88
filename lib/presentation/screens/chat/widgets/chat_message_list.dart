@@ -10,8 +10,11 @@ class ChatMessageList extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String userId;
 
-  const ChatMessageList(
-      {super.key, required this.chatRoomId, required this.userId});
+  const ChatMessageList({
+    super.key,
+    required this.chatRoomId,
+    required this.userId
+  });
 
   @override
   ConsumerState createState() => _ChatMessageListState();
@@ -39,7 +42,6 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
   @override
   Widget build(BuildContext context) {
     final chatMessages = ref.watch(chatMessageProvider);
-    String currentSender = chatMessages.firstOrNull?.senderId ?? '';
 
     return Align(
       alignment: Alignment.topCenter,
@@ -50,27 +52,17 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
         itemCount: chatMessages.length,
         itemBuilder: (context, index) {
           final message = chatMessages[index];
-          final messageDate = message.sentTime.toDateOnlyString();
-          final messageSender = message.senderId;
+          final prevMessage = index > 0 ? chatMessages[index - 1] : null;
+          final nextMessage = chatMessages.elementAtOrNull(index + 1);
 
-          final showDateDivider = index ==
-              chatMessages.lastIndexWhere((element) =>
-                  element.sentTime.toDateOnlyString() == messageDate);
-          final showTimestamp = index ==
-              chatMessages.indexWhere(
-                  (element) => element.sentTime.isTimeSame(message.sentTime));
-          final isSenderChanged = currentSender != messageSender;
-          final isMine = messageSender == widget.userId;
-
-          if (isSenderChanged) {
-            currentSender = messageSender;
-          }
+          final showDateDivider = message.sentTime.toDateOnlyString() != nextMessage?.sentTime.toDateOnlyString();
+          final showTimestamp = prevMessage == null || !message.sentTime.isTimeSame(prevMessage.sentTime);
+          final isMine = message.senderId == widget.userId;
 
           return Column(
             children: [
-              if (showDateDivider) _buildDateDivider(context, messageDate),
-              _buildMessageItem(
-                  context, message, showTimestamp, isSenderChanged, isMine),
+              if (showDateDivider) _buildDateDivider(context, message.sentTime.toDateOnlyString()),
+              _buildMessageItem(context, message, showTimestamp, isMine),
             ],
           );
         },
@@ -92,9 +84,9 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
   }
 
   Widget _buildMessageItem(BuildContext context, ChatMessage message,
-      bool showTimestamp, bool isSenderChanged, bool isMine) {
+      bool showTimestamp, bool isMine) {
     return Padding(
-      padding: EdgeInsets.only(bottom: isSenderChanged ? 8 : 4),
+      padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
       child: Row(
         mainAxisAlignment:
             isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -105,25 +97,13 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
             SizedBox(width: 8),
           ],
           if (isMine && showTimestamp) ...[
-            Text(
-              message.sentTime.toTimeOnlyString(),
-              style: TextStyle(
-                fontSize: 12,
-                color: ColorScheme.of(context).onSurfaceVariant,
-              ),
-            ),
+            _buildTimestamp(context, message.sentTime),
             SizedBox(width: 4),
           ],
           _buildMessageBubble(context, message, isMine),
           if (!isMine && showTimestamp) ...[
             SizedBox(width: 4),
-            Text(
-              message.sentTime.toTimeOnlyString(),
-              style: TextStyle(
-                fontSize: 12,
-                color: ColorScheme.of(context).onSurfaceVariant,
-              ),
-            )
+            _buildTimestamp(context, message.sentTime),
           ],
         ],
       ),
@@ -152,6 +132,16 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
           color: isMine || isDarkMode ? Colors.white : Colors.black,
           fontSize: 16,
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimestamp(BuildContext context, DateTime sentTime) {
+    return Text(
+      sentTime.toTimeOnlyString(),
+      style: TextStyle(
+        fontSize: 12,
+        color: ColorScheme.of(context).onSurfaceVariant,
       ),
     );
   }
