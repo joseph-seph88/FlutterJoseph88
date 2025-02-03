@@ -16,8 +16,9 @@ class ProductModel {
   final bool isOfferEnabled;
   final String status;
   final int chatCount;
+  final List<String> searchKeywords; // 검색 키워드 필드 추가
 
-  const ProductModel({
+  ProductModel({
     required this.id,
     required this.title,
     required this.description,
@@ -33,7 +34,8 @@ class ProductModel {
     required this.isOfferEnabled,
     required this.status,
     required this.chatCount,
-  });
+    List<String>? searchKeywords, // 선택적 매개변수로 추가
+  }) : searchKeywords = searchKeywords ?? generateSearchKeywords(title, description);
 
   factory ProductModel.fromFirebase(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -53,6 +55,7 @@ class ProductModel {
       isOfferEnabled: data['isOfferEnabled'] as bool,
       status: data['status'] as String,
       chatCount: data['chatCount'] as int,
+      searchKeywords: List<String>.from(data['searchKeywords'] ?? []),
     );
   }
 
@@ -72,6 +75,46 @@ class ProductModel {
       'isOfferEnabled': isOfferEnabled,
       'status': status,
       'chatCount': chatCount,
+      'searchKeywords': searchKeywords,
     };
+  }
+
+  // 검색 키워드 생성 메서드
+  static List<String> generateSearchKeywords(String title, String description) {
+    final Set<String> keywords = {};
+
+    // 제목과 설명을 소문자로 변환
+    final lowercaseTitle = title.toLowerCase();
+    final lowercaseDescription = description.toLowerCase();
+
+    // 1. 제목에서 키워드 생성 (부분 문자열)
+    for (int i = 0; i < lowercaseTitle.length; i++) {
+      for (int j = i + 1; j <= lowercaseTitle.length; j++) {
+        final substring = lowercaseTitle.substring(i, j);
+        if (substring.length >= 2) {
+          // 2글자 이상만 포함
+          keywords.add(substring);
+        }
+      }
+    }
+
+    // 2. 제목을 공백으로 분리하여 각 단어를 키워드로 추가
+    final titleWords = lowercaseTitle.split(' ');
+    keywords.addAll(titleWords.where((word) => word.length >= 2));
+
+    // 3. 설명에서 주요 단어 추출 (2글자 이상인 단어만)
+    final descriptionWords = lowercaseDescription.split(' ').where((word) => word.length >= 2);
+    keywords.addAll(descriptionWords);
+
+    // 4. 카테고리 관련 키워드 추가 (예: "중고", "새제품" 등)
+    final commonKeywords = [
+      '중고',
+      '새제품',
+      '할인',
+      '급처',
+    ];
+    keywords.addAll(commonKeywords);
+
+    return keywords.toList();
   }
 }

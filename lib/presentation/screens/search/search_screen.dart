@@ -43,19 +43,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
     // 1초 후에 자동완성 결과 표시
-    _debounce = Timer(const Duration(seconds: 1), () {
+    _debounce = Timer(const Duration(seconds: 1), () async {
       if (!mounted) return;
 
-      setState(() {
-        _isSearching = true;
-        _autoCompleteResults = [
-          '$value 중고',
-          '$value 새제품',
-          '$value 급처',
-          '$value 가방',
-          '$value 파우치',
-        ].where((result) => result != value).toList();
-      });
+      try {
+        // 검색 결과 가져오기
+        final results = await ref.read(searchProductsProvider(value).future);
+
+        if (!mounted) return;
+
+        setState(() {
+          _isSearching = true;
+          // 검색 결과의 제목을 자동완성 결과로 사용
+          _autoCompleteResults = results
+              .map((product) => product.title)
+              .where((title) => title.toLowerCase() != value.toLowerCase())
+              .take(5) // 최대 5개까지만 표시
+              .toList();
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isSearching = false;
+          _autoCompleteResults = [];
+        });
+      }
     });
   }
 
