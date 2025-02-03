@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_theme.dart';
 
 class LikeShopPage extends ConsumerWidget {
   const LikeShopPage({super.key});
@@ -21,7 +22,7 @@ class LikeShopPage extends ConsumerWidget {
           children: [
             const Text("님이 추천하고 싶은 업체는 어디인가요?"),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: AppStyles.defaultPadding,
               child: TextField(
                 decoration: InputDecoration(
                     hintText: "업체명으로 검색",
@@ -30,13 +31,13 @@ class LikeShopPage extends ConsumerWidget {
                       onPressed: () {},
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                     )),
               ),
             ),
             const Text("혹시 이 업체는 어떠세요?"),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: AppStyles.defaultPadding,
               height: 300,
               child: ListView.builder(
                   itemCount: 10,
