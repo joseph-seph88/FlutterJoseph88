@@ -5,7 +5,7 @@ import 'package:o2/presentation/screens/map/like_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 import 'package:o2/presentation/screens/search/search_screen.dart';
-import '../providers/map_provider.dart';
+import '../providers/permission_provider.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 final currentIndexProvider = StateProvider<int>((ref) => 0);

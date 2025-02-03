@@ -3,6 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/widgets/show_bottom_sheet.dart';
 import '../../providers/map_provider.dart';
@@ -20,27 +21,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final _searchController = TextEditingController();
   Set<NMarker> markers = {};
   String? shortAddress = "영등포구 보라매역 공원";
-  final List<Map<String, dynamic>> items = [
-    {"icon": "assets/icons/coffee.png", "label": "커피", "color": Colors.brown},
-    {"icon": "assets/icons/fish.png", "label": "붕어빵", "color": Colors.orange},
-    {"icon": "assets/icons/food.png", "label": "음식", "color": Colors.indigo},
-    {
-      "icon": "assets/icons/icecream.png",
-      "label": "아이스크림",
-      "color": Colors.lightGreen
-    },
-    {
-      "icon": "assets/icons/trash.png",
-      "label": "쓰레기통",
-      "color": Colors.deepPurple
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: AppConstant.transparentColor,
       statusBarIconBrightness: Brightness.dark,
     ));
   }
@@ -48,9 +34,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppColors.text,
+      statusBarColor: AppConstant.blackColor,
       statusBarIconBrightness: Brightness.light,
     ));
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -82,10 +69,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final defaultIconPath =
           NOverlayImage.fromAssetImage(mapState.defaultIconPath);
       _latLng = latLng;
-
       final placeAddress =
           await ref.read(mapProvider.notifier).transAddressFromGeo(_latLng);
-
       shortAddress = getFormattedAddress(placeAddress);
 
       final tempMarker = NMarker(
@@ -116,10 +101,44 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     //       .addMarker(geoPosition, iconPath, _latLng);
     // }
 
-    Future<void> addMarkersToMap(int index) async {
+    // Future<void> addMarkersDistance() async {
+    //   const geoPosition = GeoPoint(37.499889, 126.920056);
+    //   await ref.read(mapProvider.notifier).getMarkers(geoPosition);
+    //   final mapState = ref.read(mapProvider);
+    //   await _mapController.clearOverlays();
+    //   markers.clear();
+    //
+    //   if (mapState.mapDataList.isNotEmpty) {
+    //     for (var mapEntity in mapState.mapDataList) {
+    //       final marker = NMarker(
+    //           id: mapEntity.mapId ?? '1',
+    //           position: NLatLng(
+    //               mapEntity.position.latitude, mapEntity.position.longitude),
+    //           icon: NOverlayImage.fromAssetImage(mapEntity.iconPath),
+    //           size: const NSize(20, 20),
+    //           iconTintColor: AppConstant.indigoColor);
+    //
+    //       marker.setOnTapListener((overlay) async {
+    //         final infoWindow = NInfoWindow.onMarker(
+    //           id: mapEntity.mapId ?? '1',
+    //           text: mapEntity.address,
+    //         );
+    //
+    //         bool isOpen = await marker.hasOpenInfoWindow();
+    //         if (!isOpen) {
+    //           await marker.openInfoWindow(infoWindow);
+    //         }
+    //       });
+    //       markers.add(marker);
+    //     }
+    //     await _mapController.addOverlayAll(markers);
+    //   }
+    // }
+
+    Future<void> addMarkersToMap(int index, List<Map<String, dynamic>> iconDataList) async {
       await ref
           .read(mapProvider.notifier)
-          .getMapDataWithIcon(items[index]['icon']);
+          .getMapDataWithIcon(iconDataList[index]['icon']);
       final mapState = ref.read(mapProvider);
       await _mapController.clearOverlays();
       markers.clear();
@@ -132,7 +151,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   mapEntity.position.latitude, mapEntity.position.longitude),
               icon: NOverlayImage.fromAssetImage(mapEntity.iconPath),
               size: const NSize(20, 20),
-              iconTintColor: items[index]['color']);
+              iconTintColor: iconDataList[index]['color']);
 
           marker.setOnTapListener((overlay) async {
             final infoWindow = NInfoWindow.onMarker(
@@ -179,6 +198,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             onMapTapped: (NPoint point, NLatLng latLng) async {
               await onMapTapped(point, latLng);
             },
+            onCameraIdle: () async{
+            },
           ),
           Positioned(
             top: 50,
@@ -201,6 +222,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     color: AppColors.textSecondary,
                   ),
                 ),
+                style: AppStyles.labelLarge.copyWith(color: Colors.black),
               ),
             ),
           ),
@@ -229,6 +251,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             minChildSize: 0.1,
             maxChildSize: 0.5,
             builder: (context, scrollController) {
+              final iconDataList = ref.read(mapProvider).iconDataList;
+
               return SingleChildScrollView(
                 child: Column(
                   children: [
@@ -265,7 +289,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           mainAxisSpacing: 10.0,
                           childAspectRatio: 1.0,
                         ),
-                        itemCount: items.length,
+                        itemCount: iconDataList.length,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           return Container(
@@ -277,18 +301,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               ),
                               child: ElevatedButton(
                                   onPressed: () async {
-                                    await addMarkersToMap(index);
+                                    await addMarkersToMap(index, iconDataList);
                                   },
                                   child: Column(
                                     children: [
                                       ImageIcon(
-                                        AssetImage(items[index]['icon']),
+                                        AssetImage(iconDataList[index]['icon']),
                                         size: 30,
-                                        color: items[index]['color'],
+                                        color: iconDataList[index]['color'],
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        items[index]['label'],
+                                        iconDataList[index]['label'],
                                         style: AppStyles.labelMedium,
                                       ),
                                     ],

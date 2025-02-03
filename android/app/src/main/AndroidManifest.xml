@@ -41,6 +41,9 @@
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="upjgr3km4l" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk"/>
             
     </application>
     <!-- Required to query activities that can process text, see:

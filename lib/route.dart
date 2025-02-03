@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
+import 'package:o2/presentation/screens/home_screen2.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
+import 'package:o2/presentation/screens/map/search_address_page.dart';
 import 'package:o2/presentation/screens/map/like_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
@@ -63,11 +65,17 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const MapScreen(),
       routes: [
         GoRoute(
-          path: "/addShop",
+          path: "addShop",
           builder: (context, state) => const AddShopPage(),
+          routes: [
+            GoRoute(
+              path: "searchAddr",
+              builder: (context, state) => const SearchAddressPage(),
+            ),
+          ]
         ),
         GoRoute(
-          path: "/likeShop",
+          path: "likeShop",
           builder: (context, state) => const LikeShopPage(),
         ),
       ]
