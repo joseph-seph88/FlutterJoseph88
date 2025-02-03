@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/widgets/show_bottom_sheet.dart';
+import '../../providers/map_provider.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -12,72 +15,24 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  final _searchController = TextEditingController();
   late NaverMapController _mapController;
-
-  final List<Map<String, dynamic>> iconData = [
-    {"name": "아지트", "icon": Icons.star, "color": Colors.blue},
-    {"name": "커피샵", "icon": Icons.home, "color": Colors.brown},
-    {"name": "음식점", "icon": Icons.favorite, "color": Colors.green},
-    {"name": "뷰티", "icon": Icons.search, "color": Colors.orange},
-    {"name": "미용실", "icon": Icons.access_alarm, "color": Colors.deepPurple},
-    {"name": "다이소", "icon": Icons.camera, "color": Colors.red},
-    {"name": "운동", "icon": Icons.accessibility, "color": Colors.yellow},
-    {"name": "취미", "icon": Icons.airplanemode_active, "color": Colors.pink},
-    {"name": "타코야끼", "icon": Icons.account_balance, "color": Colors.cyan},
-    {"name": "붕어빵", "icon": Icons.account_circle, "color": Colors.teal},
-  ];
-
-  final List<Map<String, dynamic>> markerData = [
+  late NLatLng _latLng;
+  final _searchController = TextEditingController();
+  Set<NMarker> markers = {};
+  String? shortAddress = "영등포구 보라매역 공원";
+  final List<Map<String, dynamic>> items = [
+    {"icon": "assets/icons/coffee.png", "label": "커피", "color": Colors.brown},
+    {"icon": "assets/icons/fish.png", "label": "붕어빵", "color": Colors.orange},
+    {"icon": "assets/icons/food.png", "label": "음식", "color": Colors.indigo},
     {
-      "id": "1",
-      "position": const NLatLng(37.499889, 126.920056),
-      "address": "보라매역"
+      "icon": "assets/icons/icecream.png",
+      "label": "아이스크림",
+      "color": Colors.lightGreen
     },
     {
-      "id": "2",
-      "position": const NLatLng(37.498306, 126.948045),
-      "address": "보라매공원"
-    },
-    {
-      "id": "3",
-      "position": const NLatLng(37.490033, 126.952046),
-      "address": "대림역"
-    },
-    {
-      "id": "4",
-      "position": const NLatLng(37.499533, 126.943524),
-      "address": "삼성생명빌딩"
-    },
-    {
-      "id": "5",
-      "position": const NLatLng(37.494521, 126.948514),
-      "address": "서울아트센터"
-    },
-    {
-      "id": "6",
-      "position": const NLatLng(37.489247, 126.949136),
-      "address": "서울과학기술대학교"
-    },
-    {
-      "id": "7",
-      "position": const NLatLng(37.497115, 126.944978),
-      "address": "서울대학교병원"
-    },
-    {
-      "id": "8",
-      "position": const NLatLng(37.493748, 126.941469),
-      "address": "이수역"
-    },
-    {
-      "id": "9",
-      "position": const NLatLng(37.495808, 126.946205),
-      "address": "대림미술관"
-    },
-    {
-      "id": "10",
-      "position": const NLatLng(37.492052, 126.948716),
-      "address": "신림역 (근처)"
+      "icon": "assets/icons/trash.png",
+      "label": "쓰레기통",
+      "color": Colors.deepPurple
     },
   ];
 
@@ -86,233 +41,264 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
     ));
   }
 
-  void showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            padding: const EdgeInsets.all(12),
-            height: 220,
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    context.push('/likeShop');
-                  },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.heart_broken,
-                          size: 30,
-                          color: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: 28),
-                      const Text("업체 후기"),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-                TextButton(
-                  onPressed: () {
-                    context.push('/addShop');
-                  },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.orange,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 28),
-                      const Text("업체 추가"),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
+  @override
+  void dispose() {
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.black,
+      statusBarIconBrightness: Brightness.light,
+    ));
+    super.dispose();
   }
 
-  void _moveCameraToMarker(int index) async {
-    final targetLocation = markerData[index]['position'];
+  void moveCamera() async {
     final cameraUpdate = NCameraUpdate.fromCameraPosition(
-      NCameraPosition(
-        target: targetLocation,
+      const NCameraPosition(
+        target: NLatLng(37.499889, 126.920056),
         zoom: 15,
       ),
     );
     await _mapController.updateCamera(cameraUpdate);
   }
 
-  // void _addMarkers() async {
-  //   NMarker marker = NMarker(
-  //     id: "1",
-  //     position: const NLatLng(37.499889, 126.920056),
-  //   );
-  //   await _mapController.addOverlay(marker);
-  //
-  // }
-
-  void _addAllMarkers() async {
-    Set<NAddableOverlay> markers = {};
-
-    for (var data in markerData) {
-      NMarker marker = NMarker(
-        id: data['id'],
-        position: data['position'],
-      );
-      final infoWindow = NInfoWindow.onMarker(
-        id: marker.info.id,
-        text: data['address'],
-      );
-      marker.setOnTapListener((NMarker tappedMarker) {
-        tappedMarker.openInfoWindow(infoWindow);
-      });
-      markers.add(marker);
+  String? getFormattedAddress(Placemark? placeAddress) {
+    if (placeAddress?.street == null) return null;
+    String fullAddress = placeAddress!.street!;
+    List<String> parts = fullAddress.split(' ');
+    if (parts.length >= 3) {
+      return parts.sublist(parts.length - 3).join(' ');
     }
-    await _mapController.addOverlayAll(markers);
+    return fullAddress;
   }
 
   @override
   Widget build(BuildContext context) {
+    final mapState = ref.watch(mapProvider);
+
+    Future<void> onMapTapped(NPoint point, NLatLng latLng) async {
+      final defaultIconPath =
+          NOverlayImage.fromAssetImage(mapState.defaultIconPath);
+      _latLng = latLng;
+
+      final placeAddress =
+          await ref.read(mapProvider.notifier).transAddressFromGeo(_latLng);
+
+      shortAddress = getFormattedAddress(placeAddress);
+
+      final tempMarker = NMarker(
+        id: 'default',
+        position: _latLng,
+        icon: defaultIconPath,
+        size: const NSize(30, 30),
+        caption: placeAddress != null
+            ? NOverlayCaption(text: '$shortAddress')
+            : const NOverlayCaption(text: "Unknown"),
+      );
+      await _mapController.addOverlay(tempMarker);
+    }
+
+    // void addMarker() async {
+    //   const iconPath = 'assets/icons/coffee.png';
+    //   final geoPosition = GeoPoint(_latLng.latitude, _latLng.longitude);
+    //   final markerData = NMarker(
+    //     id: '${_latLng.latitude}_${_latLng.longitude}',
+    //     position: _latLng,
+    //     icon: const NOverlayImage.fromAssetImage(iconPath),
+    //     size: const NSize(30, 30),
+    //   );
+    //   await _mapController.addOverlay(markerData);
+    //   await ref
+    //       .read(mapProvider.notifier)
+    //       .addMarker(geoPosition, iconPath, _latLng);
+    // }
+
+    Future<void> addMarkersToMap(int index) async {
+      await ref
+          .read(mapProvider.notifier)
+          .getMapDataWithIcon(items[index]['icon']);
+      final mapState = ref.read(mapProvider);
+      await _mapController.clearOverlays();
+      markers.clear();
+
+      if (mapState.mapDataList.isNotEmpty) {
+        for (var mapEntity in mapState.mapDataList) {
+          final marker = NMarker(
+              id: mapEntity.mapId ?? '1',
+              position: NLatLng(
+                  mapEntity.position.latitude, mapEntity.position.longitude),
+              icon: NOverlayImage.fromAssetImage(mapEntity.iconPath),
+              size: const NSize(20, 20),
+              iconTintColor: items[index]['color']);
+
+          marker.setOnTapListener((overlay) async {
+            final infoWindow = NInfoWindow.onMarker(
+              id: mapEntity.mapId ?? '1',
+              text: mapEntity.address,
+            );
+
+            bool isOpen = await marker.hasOpenInfoWindow();
+            if (!isOpen) {
+              await marker.openInfoWindow(infoWindow);
+            }
+          });
+          markers.add(marker);
+        }
+        await _mapController.addOverlayAll(markers);
+      }
+    }
+
+    if (mapState.isLoading) {
+      return const CircularProgressIndicator();
+    }
+
+    if (mapState.error.isNotEmpty) {
+      return Text("Error: ${mapState.error}");
+    }
+
     return Scaffold(
-        body: Stack(
-      children: [
-        NaverMap(
-          options: const NaverMapViewOptions(
-            initialCameraPosition: NCameraPosition(
-                target: NLatLng(37.499889, 126.920056), zoom: 15),
+      body: Stack(
+        children: [
+          NaverMap(
+            options: const NaverMapViewOptions(
+              initialCameraPosition: NCameraPosition(
+                  target: NLatLng(37.499889, 126.920056), zoom: 15),
+              extent: NLatLngBounds(
+                southWest: NLatLng(31.43, 122.37),
+                northEast: NLatLng(44.35, 132.0),
+              ),
+            ),
+            onMapReady: (controller) async {
+              _mapController = controller;
+              final overlay = controller.getLocationOverlay();
+              overlay.setIsVisible(true);
+            },
+            onSymbolTapped: (symbol) async {},
+            onMapTapped: (NPoint point, NLatLng latLng) async {
+              await onMapTapped(point, latLng);
+            },
+            onCameraIdle: () async {
+              // addMarkersToMap();
+            },
           ),
-          onMapReady: (controller) {
-            _mapController = controller;
-            _addAllMarkers();
-          },
-        ),
-        Positioned(
-          top: 50,
-          left: 20,
-          right: 20,
-          child: Container(
-            color: Colors.white,
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "여기서 업체 검색",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+          Positioned(
+            top: 50,
+            left: 20,
+            right: 20,
+            child: Container(
+              color: Colors.white,
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: "여기서 업체 검색",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  prefixIcon: const Icon(Icons.search),
                 ),
-                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
-        ),
-        Positioned(
+          Positioned(
+              bottom: 120,
+              left: 20,
+              // child: ElevatedButton(
+              //     onPressed: addMarker, child: const Icon(Icons.add))),
+              child: ElevatedButton(
+                  onPressed: moveCamera, child: const Icon(Icons.my_location))),
+          Positioned(
             bottom: 120,
-            left: 20,
-            child: ElevatedButton(
+            right: 20,
+            child: FloatingActionButton.extended(
                 onPressed: () {
-                  _moveCameraToMarker(0);
+                  final customBottomSheet = ref.read(bottomSheetProvider);
+                  customBottomSheet.bottomSheetWithTwoBtn(context);
                 },
-                child: const Icon(Icons.my_location))),
-        Positioned(
-          bottom: 120,
-          right: 20,
-          child: FloatingActionButton.extended(
-              onPressed: () {
-                showBottomSheet(context);
-              },
-              label: const Row(
-                children: [Icon(Icons.add), Text("추가하기")],
-              )),
-        ),
-        DraggableScrollableSheet(
-          initialChildSize: 0.1,
-          minChildSize: 0.1,
-          maxChildSize: 0.5,
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    color: Colors.white,
-                    child: const Row(
-                      children: [
-                        Icon(Icons.location_on),
-                        Text("영등포구 보라매역 공원"),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      controller: scrollController,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        crossAxisSpacing: 10.0,
-                        mainAxisSpacing: 10.0,
-                        childAspectRatio: 1.0,
+                label: const Row(
+                  children: [
+                    Icon(Icons.add),
+                    Text(
+                      "추가하기",
+                      style: AppStyles.labelMedium,
+                    )
+                  ],
+                )),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.1,
+            minChildSize: 0.1,
+            maxChildSize: 0.5,
+            builder: (context, scrollController) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.white,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on),
+                          shortAddress != null
+                              ? Text(
+                                  '$shortAddress',
+                                  style: const TextStyle(color: Colors.black),
+                                )
+                              : const Text('보라매역',
+                                  style: TextStyle(color: Colors.black))
+                        ],
                       ),
-                      itemCount: iconData.length,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
+                    ),
+                    Container(
+                      color: Colors.white,
+                      child: GridView.builder(
+                        controller: scrollController,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 10.0,
+                          mainAxisSpacing: 10.0,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: items.length,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          return Container(
                               width: 60,
                               height: 60,
                               decoration: BoxDecoration(
                                 color: Colors.grey[200],
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
-                                iconData[index]['icon'],
-                                color: iconData[index]['color'],
-                                size: 30,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              iconData[index]['name'],
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        );
-                      },
+                              child: ElevatedButton(
+                                  onPressed: () async {
+                                    await addMarkersToMap(index);
+                                  },
+                                  child: Column(
+                                    children: [
+                                      ImageIcon(
+                                        AssetImage(items[index]['icon']),
+                                        size: 30,
+                                        color: items[index]['color'],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        items[index]['label'],
+                                        style: AppStyles.labelMedium,
+                                      ),
+                                    ],
+                                  )));
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    ));
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
