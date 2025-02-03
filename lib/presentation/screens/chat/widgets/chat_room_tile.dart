@@ -30,10 +30,14 @@ class ChatRoomTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(chatRoom.lastMessage ?? '', maxLines: 1),
-      trailing: chatRoom.unreadMessageCount == 0
+      trailing: userId == chatRoom.lastMessageSender ||
+              chatRoom.unreadMessageCount == 0
           ? null
           : Badge.count(count: chatRoom.unreadMessageCount),
-      onTap: () => context.push('/chats/${chatRoom.id}'),
+      onTap: () => context.push('/chats/chat_room', extra: {
+        'chatRoomId': chatRoom.id,
+        'otherUserId': userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
+      }),
     );
   }
 }

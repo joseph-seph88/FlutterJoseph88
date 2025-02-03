@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:o2/data/repositories/chat_repository_impl.dart';
+import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
-import 'package:o2/domain/usecases/chat_usecases.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
 final chatRoomProvider =
     StateNotifierProvider<ChatRoomNotifier, List<ChatRoom>>(
@@ -17,10 +19,28 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
 
   void _fetchChatRooms() {
     final userId = 'a';
-    final getChatRoomListUseCase =
-        GetChatRoomListUseCase(ref.read(chatRepositoryProvider));
+    final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
 
-    getChatRoomListUseCase(userId).listen((data) {
+    getChatRoomsUseCase(userId).listen((data) {
+      state = data;
+    });
+  }
+}
+
+final chatMessageProvider =
+    StateNotifierProvider.autoDispose<ChatMessageNotifier, List<ChatMessage>>(
+  (ref) => ChatMessageNotifier(ref),
+);
+
+class ChatMessageNotifier extends StateNotifier<List<ChatMessage>> {
+  final Ref ref;
+
+  ChatMessageNotifier(this.ref) : super([]);
+
+  StreamSubscription fetchChatMessages(String chatRoomId) {
+    final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
+
+    return getChatMessagesUseCase(chatRoomId).listen((data) {
       state = data;
     });
   }

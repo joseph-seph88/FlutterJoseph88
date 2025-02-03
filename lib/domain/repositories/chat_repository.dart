@@ -1,5 +1,15 @@
+import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
 
 abstract interface class ChatRepository {
-  Stream<List<ChatRoom>> getChatRoomList(String userId);
+  Stream<List<ChatRoom>> getChatRooms(String userId);
+
+  Stream<List<ChatMessage>> getChatMessages(String chatRoomId);
+
+  Future<String> createChatRoom(
+      String content, String otherUserId, String senderId);
+
+  Future<void> sendMessage(String chatRoomId, String content, String senderId);
+
+  Future<void> markChatAsRead(String chatRoomId, String userId);
 }
