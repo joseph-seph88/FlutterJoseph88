@@ -5,7 +5,8 @@ class ProductModel {
   final String title;
   final String description;
   final int price;
-  final String location;
+  final String locationName; // 주소명 (예: "인창동")
+  final GeoPoint location; // 위도, 경도
   final String category;
   final List<String> images;
   final int viewCount;
@@ -21,6 +22,7 @@ class ProductModel {
     required this.title,
     required this.description,
     required this.price,
+    required this.locationName,
     required this.location,
     required this.category,
     required this.images,
@@ -40,7 +42,8 @@ class ProductModel {
       title: data['title'] as String,
       description: data['description'] as String,
       price: data['price'] as int,
-      location: data['location'] as String,
+      locationName: data['locationName'] as String,
+      location: data['location'] as GeoPoint,
       category: data['category'] as String,
       images: List<String>.from(data['images']),
       viewCount: data['viewCount'] as int,
@@ -58,6 +61,7 @@ class ProductModel {
       'title': title,
       'description': description,
       'price': price,
+      'locationName': locationName,
       'location': location,
       'category': category,
       'images': images,
