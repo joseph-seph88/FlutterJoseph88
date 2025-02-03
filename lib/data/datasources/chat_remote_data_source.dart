@@ -37,7 +37,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         .collection('chats')
         .doc(chatRoomId)
         .collection('messages')
-        .orderBy('sentTime')
+        .orderBy('sentTime', descending: true)
         .snapshots();
   }
 

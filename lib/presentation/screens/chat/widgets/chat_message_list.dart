@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 
-class ChatMessageList extends ConsumerWidget {
+class ChatMessageList extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String userId;
 
@@ -12,43 +14,67 @@ class ChatMessageList extends ConsumerWidget {
       {super.key, required this.chatRoomId, required this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (chatRoomId != null) {
-      ref.read(chatMessageProvider.notifier).fetchChatMessages(chatRoomId!);
+  ConsumerState createState() => _ChatMessageListState();
+}
+
+class _ChatMessageListState extends ConsumerState<ChatMessageList> {
+  StreamSubscription? _chatMessageSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.chatRoomId != null) {
+      _chatMessageSubscription = ref
+          .read(chatMessageProvider.notifier)
+          .fetchChatMessages(widget.chatRoomId!);
     }
+  }
+
+  @override
+  void dispose() {
+    _chatMessageSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final chatMessages = ref.watch(chatMessageProvider);
-    String? currentDate;
     String currentSender = chatMessages.firstOrNull?.senderId ?? '';
 
-    return ListView.builder(
-      padding: EdgeInsets.all(12),
-      itemCount: chatMessages.length,
-      itemBuilder: (context, index) {
-        final message = chatMessages[index];
-        final messageDate = message.sentTime.toDateOnlyString();
-        final messageSender = message.senderId;
-        final showDateDivider = currentDate != messageDate;
-        final showTimestamp = index == chatMessages.length - 1 ||
-            messageSender != chatMessages[index + 1].senderId ||
-            !message.sentTime.isTimeSame(chatMessages[index + 1].sentTime);
-        final isSenderChanged = currentSender != messageSender;
-        final isMine = messageSender == userId;
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ListView.builder(
+        reverse: true,
+        shrinkWrap: true,
+        padding: EdgeInsets.all(12),
+        itemCount: chatMessages.length,
+        itemBuilder: (context, index) {
+          final message = chatMessages[index];
+          final messageDate = message.sentTime.toDateOnlyString();
+          final messageSender = message.senderId;
 
-        if (showDateDivider) {
-          currentDate = messageDate;
-        }
-        if (isSenderChanged) {
-          currentSender = messageSender;
-        }
+          final showDateDivider = index ==
+              chatMessages.lastIndexWhere((element) =>
+                  element.sentTime.toDateOnlyString() == messageDate);
+          final showTimestamp = index ==
+              chatMessages.indexWhere(
+                  (element) => element.sentTime.isTimeSame(message.sentTime));
+          final isSenderChanged = currentSender != messageSender;
+          final isMine = messageSender == widget.userId;
 
-        return Column(
-          children: [
-            if (showDateDivider) _buildDateDivider(context, messageDate),
-            _buildMessageItem(
-                context, message, showTimestamp, isSenderChanged, isMine),
-          ],
-        );
-      },
+          if (isSenderChanged) {
+            currentSender = messageSender;
+          }
+
+          return Column(
+            children: [
+              if (showDateDivider) _buildDateDivider(context, messageDate),
+              _buildMessageItem(
+                  context, message, showTimestamp, isSenderChanged, isMine),
+            ],
+          );
+        },
+      ),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
@@ -26,7 +28,7 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
 }
 
 final chatMessageProvider =
-    StateNotifierProvider<ChatMessageNotifier, List<ChatMessage>>(
+    StateNotifierProvider.autoDispose<ChatMessageNotifier, List<ChatMessage>>(
   (ref) => ChatMessageNotifier(ref),
 );
 
@@ -35,10 +37,10 @@ class ChatMessageNotifier extends StateNotifier<List<ChatMessage>> {
 
   ChatMessageNotifier(this.ref) : super([]);
 
-  void fetchChatMessages(String chatRoomId) {
+  StreamSubscription fetchChatMessages(String chatRoomId) {
     final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
 
-    getChatMessagesUseCase(chatRoomId).listen((data) {
+    return getChatMessagesUseCase(chatRoomId).listen((data) {
       state = data;
     });
   }
