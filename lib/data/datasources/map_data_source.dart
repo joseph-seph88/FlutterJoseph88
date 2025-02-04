@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:o2/data/models/map_model.dart';
@@ -42,7 +40,8 @@ class MapDataSource {
     try {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
-        return LatLng(lat: locations.first.latitude, lng: locations.first.longitude);
+        return LatLng(
+            lat: locations.first.latitude, lng: locations.first.longitude);
       }
     } catch (e) {
       rethrow;
@@ -70,18 +69,6 @@ class MapDataSource {
     }
   }
 
-  Future<List<MapModel>> getMapDataWithIcon(String iconPath) async {
-    try {
-      final mapData = await _fireStore
-          .collection('maps')
-          .where('iconPath', isEqualTo: iconPath)
-          .get();
-      return mapData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<void> updateMarker(String mapId, MapModel mapData) async {
     try {
       await _fireStore.collection('maps').doc(mapId).update(mapData.toMap());
@@ -98,68 +85,53 @@ class MapDataSource {
     }
   }
 
+  Stream<List<MapModel?>> getMapDataWithIconStream(String iconPath, GeoPoint position) {
+    final CollectionReference<Map<String, dynamic>> collectionReference = _fireStore.collection('maps');
+    final GeoFirePoint center = GeoFirePoint(GeoPoint(position.latitude, position.longitude));
 
-  Future<List<MapModel>> getMarkersInRange(GeoPoint position) async {
-    const GeoPoint centerPoint = GeoPoint(37.499889, 126.920056);
-    const GeoFirePoint center = GeoFirePoint(centerPoint);
-    const double radiusInKm = 2;
-    const field = 'geo';
-    NCameraPosition cameraPosition;
+    GeoPoint geopointFrom(Map<String, dynamic> data) {
+      final geo = data['geo'] as Map<String, dynamic>;
+      final geoPoint = geo['geopoint'] as GeoPoint;
+      return geoPoint;
+    }
 
-    //
-    // final _geoQueryCondition = BehaviorSubject<_GeoQueryCondition>.seeded(
-    //   _GeoQueryCondition(
-    //     radiusInKm: radiusInKm,
-    //     cameraPosition: cameraPosition,
-    //   ),
-    // );
-    //
-    // NCameraPosition get _cameraPosition => _geoQueryCondition.value.cameraPosition;
+    return GeoCollectionReference<Map<String, dynamic>>(collectionReference)
+        .subscribeWithin(
+        center: center,
+        radiusInKm: 3 * 0.05,
+        field: 'geo',
+        geopointFrom: geopointFrom
+    )
+        .map((docs) {
+      final filteredDocs = docs.where((doc) {
+        final iconPathDoc = doc['iconPath'];
+        return iconPathDoc == iconPath;
+      }).toList();
 
-    final CollectionReference<Map<String, dynamic>> collectionReference =
-        _fireStore.collection('maps');
+      final mapModels = filteredDocs.map((doc) {
+        final data = doc.data();
+        return data != null ? MapModel.fromMap(data) : null;
+      }).where((mapModel) => mapModel != null).toList();
 
-    GeoPoint geopointFrom(Map<String, dynamic> data) =>
-        (data['geo'] as Map<String, dynamic>)['geoPoint'] as GeoPoint;
-
-    // late final Stream<List<DocumentSnapshot<Map<String, dynamic>>>> _stream =
-    // _geoQueryCondition.switchMap(
-    //       (geoQueryCondition) =>
-    //       GeoCollectionReference(collectionReference).subscribeWithin(
-    //         center: GeoFirePoint(
-    //           GeoPoint(
-    //             _cameraPosition.target.latitude,
-    //             _cameraPosition.target.longitude,
-    //           ),
-    //         ),
-    //         radiusInKm: geoQueryCondition.radiusInKm,
-    //         field: 'geo',
-    //         geopointFrom: (data) =>
-    //         (data['geo'] as Map<String, dynamic>)['geopoint'] as GeoPoint,
-    //         strictMode: true,
-    //       ),
-    // );
-
-    final snapshotList =
-        await GeoCollectionReference<Map<String, dynamic>>(collectionReference)
-            .fetchWithinWithDistance(
-      center: center,
-      radiusInKm: radiusInKm,
-      field: field,
-      geopointFrom: geopointFrom,
-          strictMode: false,
-          geohashField: 'geo.geoHash',
-          queryBuilder: (query) => query,
-    );
-
-    print("데이터 크기1: ${snapshotList.length}");
-    final mapList = snapshotList.map((doc) {
-      print("문서 데이터: ${doc.documentSnapshot.data()}");
-      return MapModel.fromMap(doc.documentSnapshot.data()!);
-    }).toList();
-    print("데이터 크기2: ${mapList.length}");
-    return mapList;
+      return mapModels;
+    });
   }
+
+
+  Future<List<MapModel>> searchStore(String queryText) async {
+    try {
+      var searchData = await FirebaseFirestore.instance
+          .collection('maps')
+          .where('storeName', isGreaterThanOrEqualTo: queryText)
+          .where('storeName', isLessThan: '$queryText\uf8ff')
+          .get();
+      print("검색디피 : ${searchData.size}");
+      return searchData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
+    } catch (e) {
+      throw Exception("DB서치에러");
+    }
+  }
+
 
   final List<Map<String, dynamic>> _selectIconData = [
     {
@@ -190,14 +162,4 @@ class MapDataSource {
   ];
 
   List<Map<String, dynamic>> get selectIconData => _selectIconData;
-}
-
-class _GeoQueryCondition {
-  _GeoQueryCondition({
-    required this.radiusInKm,
-    required this.cameraPosition,
-  });
-
-  final double radiusInKm;
-  final NCameraPosition cameraPosition;
 }

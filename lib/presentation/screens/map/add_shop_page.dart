@@ -18,7 +18,10 @@ class AddShopPage extends ConsumerStatefulWidget {
 
 class _AddShopPageState extends ConsumerState<AddShopPage> {
   final _searchController = TextEditingController();
+  final _storeTextController = TextEditingController();
   NaverMapController? _mapController;
+  NCameraPosition position =
+      const NCameraPosition(target: NLatLng(37.499889, 126.920056), zoom: 15);
   Placemark? placeAddress = const Placemark(street: "Default");
   NLatLng centerLatLng = const NLatLng(37.499889, 126.920056);
   LatLng? tranPosition = const LatLng(lat: 37.499889, lng: 126.920056);
@@ -49,10 +52,9 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
     }
   }
 
-  void _convertPositionToAddress() async {
-    if (_mapController == null) return;
+  Future<void> _convertPositionToAddress() async {
     final cameraPosition = await _mapController!.getCameraPosition();
-    centerLatLng = cameraPosition.target;
+    centerLatLng = NLatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
     final newPlaceAddress =
         await ref.read(mapProvider.notifier).transAddressFromGeo(centerLatLng);
     setState(() {
@@ -135,13 +137,19 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                             northEast: NLatLng(44.35, 132.0),
                           ),
                         ),
-                        onMapReady: (controller) {
+                        onMapReady: (controller) async {
                           setState(() {
                             _mapController = controller;
                           });
+                          if (_mapController != null) {
+                            position =
+                                await _mapController!.getCameraPosition();
+                          }
                         },
-                        onCameraIdle: () {
-                          _convertPositionToAddress();
+                        onCameraIdle: () async {
+                          if (_mapController != null) {
+                            _convertPositionToAddress();
+                          }
                         },
                       ),
                     ),
@@ -188,7 +196,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                               setState(() {
                                 selectedIndex = index;
                               });
-                               iconPath = iconData[selectedIndex!]['icon'];
+                              iconPath = iconData[selectedIndex!]['icon'];
                             },
                             itemBuilder: (context) {
                               ref.read(mapProvider.notifier).getIconDataList;
@@ -246,7 +254,33 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                         ),
                       ],
                     ),
-
+                    Container(
+                      padding: AppStyles.verticalPadding.copyWith(
+                        top: AppStyles.verticalPadding.top - 10,
+                        bottom: AppStyles.verticalPadding.bottom - 10,
+                      ),
+                      child: TextField(
+                        controller: _storeTextController,
+                        decoration: InputDecoration(
+                            labelText: "상호명 입력",
+                            hintText: "상호명 입력",
+                            hintStyle: AppStyles.labelLarge
+                                .copyWith(color: Colors.grey),
+                            prefixIcon: const Icon(
+                              Icons.storefront,
+                              color: AppColors.textSecondary,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppStyles.defaultRadius),
+                            ),
+                            contentPadding: AppStyles.defaultPadding.copyWith(
+                                top: AppStyles.verticalPadding.top - 5,
+                                bottom: AppStyles.verticalPadding.bottom - 5)),
+                        style:
+                            AppStyles.labelLarge.copyWith(color: Colors.black),
+                      ),
+                    ),
                     Container(
                       padding: AppStyles.verticalPadding.copyWith(
                         top: AppStyles.verticalPadding.top - 10,
@@ -258,9 +292,10 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                             final position = GeoPoint(
                                 centerLatLng.latitude, centerLatLng.longitude);
                             final address = placeAddress?.street;
+                            final storeName = _storeTextController.text;
                             await ref.read(mapProvider.notifier).addMarker(
-                                position, iconPath, address!);
-                            if(context.mounted){
+                                position, iconPath, address!, storeName);
+                            if (context.mounted) {
                               context.go('/map');
                             }
                           },

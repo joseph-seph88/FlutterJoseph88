@@ -9,11 +9,11 @@ abstract class MapRepository {
 
   Future<LatLng?> transPositionFromAddress(String address);
 
-  Future<void> addMarker(GeoPoint position, String address, String iconPath);
+  Future<void> addMarker(GeoPoint position, String address, String iconPath, String storeName);
 
-  Future<List<MapEntity>> getMarkerList(GeoPoint position);
+  Stream<List<MapEntity?>> getMapDataWithIconStream(String iconPath, GeoPoint position);
 
-  Future<List<MapEntity>> getMapDataWithIcon(String iconPath);
+  Future<List<MapEntity>> searchStore(String inputText);
 
   List<Map<String, dynamic>> get getIconDataList;
 

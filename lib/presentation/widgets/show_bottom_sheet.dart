@@ -18,6 +18,7 @@ class CustomBottomSheets {
                 children: [
                   TextButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       context.push('/map/likeShop');
                     },
                     style:
@@ -32,6 +33,7 @@ class CustomBottomSheets {
                   ),
                   TextButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       context.push('/map/addShop');
                     },
                     style:

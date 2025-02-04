@@ -5,11 +5,13 @@ class MapEntity {
   final GeoPoint position;
   final String address;
   final String iconPath;
+  final String storeName;
 
   MapEntity({
     this.mapId,
     required this.position,
     required this.address,
     required this.iconPath,
+    required this.storeName,
   });
 }

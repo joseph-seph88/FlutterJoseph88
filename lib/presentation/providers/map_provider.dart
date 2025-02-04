@@ -4,10 +4,31 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
+import '../../core/constants/app_constant.dart';
+import '../../domain/entities/map_entity.dart';
 import '../state/map_state.dart';
 
 // 주소 검색값
 final selectedAddressProvider = StateProvider<String>((ref) => '');
+
+final mapParamProvider = StateProvider<Map<String, dynamic>>((ref) => {
+  'iconPath': AppConstant.coffeePath,
+  'position': const GeoPoint(37.499889, 126.920056),
+});
+
+final mapDataStreamProvider = StreamProvider
+    .autoDispose<List<MapEntity>>((ref) {
+  final mapUseCase = ref.watch(mapUseCaseProvider);
+  final mapParam = ref.watch(mapParamProvider);
+  String iconPath = mapParam['iconPath'];
+  GeoPoint position = mapParam['position'];
+  print("프로바이더 파라미터: $iconPath + ${position.longitude}");
+
+  return mapUseCase.getMapDataWithIcon(iconPath, position).map((mapModels) {
+    return mapModels.whereType<MapEntity>().toList();
+  });
+});
+
 
 // Map Provider & Notifier
 final mapProvider = StateNotifierProvider<MapNotifier, MapState>((ref) {
@@ -23,17 +44,16 @@ class MapNotifier extends StateNotifier<MapState> {
           isLoading: false,
           error: '',
           placeAddress: null,
-          defaultIconPath: 'assets/icons/location.png',
           mapDataList: [],
           iconDataList: [],
           predictionList: [],
         ));
 
   Future<void> addMarker(
-      GeoPoint position, String iconPath, String address) async {
-    state = state.copyWith(isLoading: true);
+      GeoPoint position, String iconPath, String address, String storeName) async {
+    state = state.copyWith(isLoading: true, error: '');
     try {
-      await _mapUseCase.addMarker(position, address, iconPath);
+      await _mapUseCase.addMarker(position, address, iconPath, storeName);
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -42,29 +62,15 @@ class MapNotifier extends StateNotifier<MapState> {
     }
   }
 
-  Future<void> getMarkers(GeoPoint position) async {
-    state = state.copyWith(isLoading: false);
-    try {
-      final mapDataList = await _mapUseCase.getMarkers(position);
-      print("프로바이더: ${mapDataList.length}");
-      state = state.copyWith(isLoading: true, mapDataList: mapDataList);
-    } catch (e) {
+  Future<List<MapEntity>> searchStore(String inputText) async {
+    state = state.copyWith(error: '');
+    try{
+      final searchStoreDataList = await _mapUseCase.searchStore(inputText);
+      return searchStoreDataList;
+    }catch(e){
       state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
     }
-  }
-
-  Future<void> getMapDataWithIcon(String iconPath) async {
-    state = state.copyWith(isLoading: false);
-    try {
-      final mapDataList = await _mapUseCase.getMapDataWithIcon(iconPath);
-      state = state.copyWith(isLoading: true, mapDataList: mapDataList);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
-    }
+    return [];
   }
 
   Future<Placemark?> transAddressFromGeo(NLatLng clickPosition) async {

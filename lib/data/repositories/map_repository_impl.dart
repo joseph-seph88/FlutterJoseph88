@@ -20,16 +20,17 @@ class MapRepositoryImpl implements MapRepository {
   MapRepositoryImpl(this._mapDataSource);
 
   @override
-  Future<void> addMarker(
-      GeoPoint position, String address, String iconPath) async {
+  Future<void> addMarker(GeoPoint position, String address, String iconPath,
+      String storeName) async {
     final geoFirePoint = GeoFirePoint(position);
     final Map<String, dynamic> geo = {
-      'geoHash': geoFirePoint.geohash,
-      'geoPoint': geoFirePoint.geopoint,
+      'geohash': geoFirePoint.geohash,
+      'geopoint': geoFirePoint.geopoint,
     };
 
     try {
-      final mapData = MapModel(geo: geo, address: address, iconPath: iconPath);
+      final mapData = MapModel(
+          geo: geo, address: address, iconPath: iconPath, storeName: storeName);
       final mapId = await _mapDataSource.addMarker(mapData);
       final mapDataWithId = mapData.copyWith(mapId: mapId);
       await _mapDataSource.updateMarker(mapId, mapDataWithId);
@@ -39,43 +40,43 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  Future<List<MapEntity>> getMarkerList(GeoPoint position) async {
+  Stream<List<MapEntity?>> getMapDataWithIconStream(
+      String iconPath, GeoPoint position) {
     try {
-      final mapList = await _mapDataSource.getMarkersInRange(position);
-
-      if (mapList.isNotEmpty) {
-        return mapList.map((model) {
+      return _mapDataSource.getMapDataWithIconStream(iconPath, position).map((mapModels) {
+        return mapModels.map((model) {
           return MapEntity(
-            mapId: model.mapId,
-            position: model.geo['geoPoint'],
-            address: model.address,
+            mapId: model?.mapId,
+            position: model?.geo['geopoint'],
+            address: model!.address,
             iconPath: model.iconPath,
+            storeName: model.storeName,
           );
         }).toList();
-      }
+      });
     } catch (e) {
-      rethrow;
+      throw Exception('맵레포에러: $e');
     }
-    return [];
   }
 
   @override
-  Future<List<MapEntity>> getMapDataWithIcon(String iconPath) async {
+  Future<List<MapEntity>> searchStore(String inputText) async {
     try {
-      final mapList = await _mapDataSource.getMapDataWithIcon(iconPath);
+      final mapList = await _mapDataSource.searchStore(inputText);
 
       if (mapList.isNotEmpty) {
         return mapList.map((model) {
           return MapEntity(
             mapId: model.mapId,
-            position: model.geo['geoPoint'],
+            position: model.geo['geopoint'],
             address: model.address,
             iconPath: model.iconPath,
+            storeName: model.storeName,
           );
         }).toList();
       }
     } catch (e) {
-      rethrow;
+      throw Exception("레포구현에러: $e");
     }
     return [];
   }
@@ -94,7 +95,8 @@ class MapRepositoryImpl implements MapRepository {
   @override
   Future<LatLng?> transPositionFromAddress(String address) async {
     try {
-      final positionData = await _mapDataSource.transPositionFromAddress(address);
+      final positionData =
+          await _mapDataSource.transPositionFromAddress(address);
       if (positionData != null) {
         return positionData;
       }

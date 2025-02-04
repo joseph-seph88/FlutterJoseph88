@@ -7,7 +7,6 @@ class MapState {
   final String error;
   final Placemark? placeAddress;
   final LatLng? positionData;
-  final String defaultIconPath;
   final List<MapEntity> mapDataList;
   final List<Map<String, dynamic>> iconDataList;
   final List<AutocompletePrediction> predictionList;
@@ -17,7 +16,6 @@ class MapState {
     required this.error,
     this.placeAddress,
     this.positionData,
-    required this.defaultIconPath,
     required this.mapDataList,
     required this.iconDataList,
     required this.predictionList,
@@ -28,7 +26,6 @@ class MapState {
     String? error,
     Placemark? placeAddress,
     LatLng? positionData,
-    String? defaultIconPath,
     List<MapEntity>? mapDataList,
     List<Map<String, dynamic>>? iconDataList,
     List<AutocompletePrediction>? predictionList,
@@ -38,7 +35,6 @@ class MapState {
         error: error ?? this.error,
         placeAddress: placeAddress ?? this.placeAddress,
         positionData: positionData ?? this.positionData,
-        defaultIconPath: defaultIconPath ?? this.defaultIconPath,
         mapDataList: mapDataList ?? this.mapDataList,
         iconDataList: iconDataList ?? this.iconDataList,
         predictionList: predictionList ?? this.predictionList);
