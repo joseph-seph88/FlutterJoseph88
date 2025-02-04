@@ -1,85 +1,138 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final bool isAddButtonClicked;
+  final Function onAddButtonClicked;
 
   const ChatMessageInput(
-      {super.key, required this.chatRoomId, required this.otherUserId});
+      {super.key,
+      required this.chatRoomId,
+      required this.otherUserId,
+      required this.isAddButtonClicked,
+      required this.onAddButtonClicked});
 
   @override
-  ConsumerState createState() => _ChatMessageInputState();
+  ConsumerState<ChatMessageInput> createState() => _ChatMessageInputState();
 }
 
-class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
+class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
+    with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
+  late final AnimationController _animationController;
+  bool _isSendingMessage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.add)),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: ColorScheme.of(context).surfaceContainerHigh,
-              ),
-              child: TextField(
-                controller: _messageController,
-                style: TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  hintText: '메시지 보내기',
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                  filled: true,
-                  fillColor: ColorScheme.of(context).surfaceContainerHigh,
-                ),
-                onSubmitted: (_) async {
-                  await _sendMessage();
-                  _messageController.clear();
-                },
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              await _sendMessage();
-              _messageController.clear();
-            },
-            icon: Icon(Icons.send),
-          ),
+          _buildAddButton(),
+          _buildMessageTextField(),
+          _buildSendButton(),
         ],
       ),
     );
   }
 
+  Widget _buildAddButton() {
+    return RotationTransition(
+      turns: Tween(begin: 0.0, end: 0.125).animate(_animationController),
+      child: IconButton(
+        onPressed: _handleAddButtonPressed,
+        icon: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildMessageTextField() {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: ColorScheme.of(context).surfaceContainerHigh,
+        ),
+        child: TextField(
+          controller: _messageController,
+          style: const TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            hintText: '메시지 보내기',
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+            filled: true,
+            fillColor: ColorScheme.of(context).surfaceContainerHigh,
+          ),
+          onSubmitted: (_) => _handleMessageSubmitted(),
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSendButton() {
+    return IconButton(
+      constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
+      onPressed: _isSendingMessage ? null : _handleSendButtonPressed,
+      icon: _isSendingMessage
+          ? const CircularProgressIndicator()
+          : const Icon(Icons.send),
+    );
+  }
+
+  void _handleAddButtonPressed() {
+    widget.onAddButtonClicked();
+    if (widget.isAddButtonClicked) {
+      _animationController.reverse();
+    } else {
+      _animationController.forward();
+    }
+  }
+
+  Future<void> _handleMessageSubmitted() async {
+    await _sendMessage();
+    _messageController.clear();
+  }
+
+  void _handleSendButtonPressed() async {
+    setState(() => _isSendingMessage = true);
+    await _handleMessageSubmitted();
+    ref.read(selectedImageProvider.notifier).clear();
+    setState(() => _isSendingMessage = false);
+  }
+
   Future<void> _sendMessage() async {
-    final senderId = 'a';
-    final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
+    final senderId = 'a'; // TODO: 실제 이용자 id로 대체
 
     if (widget.chatRoomId == null) {
-      final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
-      final chatRoomId = await createChatRoomUseCase(
-          _messageController.text, widget.otherUserId, senderId);
+      final chatRoomId = await _createChatRoom(senderId);
+      await _sendContent(chatRoomId, senderId);
       if (mounted) {
         context.go('/chats/chat_room', extra: {
           'chatRoomId': chatRoomId,
@@ -87,8 +140,36 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput> {
         });
       }
     } else {
-      await sendChatMessageUseCase(
-          widget.chatRoomId!, _messageController.text, senderId);
+      await _sendContent(widget.chatRoomId!, senderId);
     }
+  }
+
+  Future<String> _createChatRoom(String senderId) {
+    final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
+    return createChatRoomUseCase(widget.otherUserId, senderId);
+  }
+
+  Future<void> _sendContent(String chatRoomId, String senderId) async {
+    final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
+    final sendChatImageUseCase = ref.read(sendChatImageUseCaseProvider);
+
+    await Future.wait([
+      Future(() async {
+        if (_messageController.text.isNotEmpty) {
+          await sendChatMessageUseCase(chatRoomId, ChatMessageType.text,
+              _messageController.text, senderId);
+        }
+      }),
+      Future(() async {
+        if (ref.read(selectedImageProvider) != null) {
+          await sendChatImageUseCase(
+            chatRoomId,
+            ChatMessageType.image,
+            ref.read(selectedImageProvider)!.path,
+            senderId,
+          );
+        }
+      }),
+    ]);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
 import 'package:o2/domain/repositories/chat_repository.dart';
+import 'package:o2/domain/repositories/image_repository.dart';
 
 class GetChatRoomsUseCase {
   final ChatRepository _repository;
@@ -27,8 +28,8 @@ class CreateChatRoomUseCase {
 
   CreateChatRoomUseCase(this._repository);
 
-  Future<String> call(String content, String otherUserId, String senderId) {
-    return _repository.createChatRoom(content, otherUserId, senderId);
+  Future<String> call(String otherUserId, String senderId) {
+    return _repository.createChatRoom(otherUserId, senderId);
   }
 }
 
@@ -37,8 +38,22 @@ class SendChatMessageUseCase {
 
   SendChatMessageUseCase(this._repository);
 
-  Future<void> call(String chatRoomId, String content, String senderId) async {
-    await _repository.sendMessage(chatRoomId, content, senderId);
+  Future<void> call(String chatRoomId, ChatMessageType type, String content,
+      String senderId) async {
+    await _repository.sendMessage(chatRoomId, type.code, content, senderId);
+  }
+}
+
+class SendChatImageUseCase {
+  final ChatRepository _chatRepository;
+  final ImageRepository _imageRepository;
+
+  SendChatImageUseCase(this._chatRepository, this._imageRepository);
+
+  Future<void> call(String chatRoomId, ChatMessageType type, String path,
+      String senderId) async {
+    final imageURL = await _imageRepository.uploadImage(chatRoomId, path);
+    await _chatRepository.sendMessage(chatRoomId, type.code, imageURL, senderId);
   }
 }
 
