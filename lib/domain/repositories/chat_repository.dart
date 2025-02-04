@@ -6,8 +6,7 @@ abstract interface class ChatRepository {
 
   Stream<List<ChatMessage>> getChatMessages(String chatRoomId);
 
-  Future<String> createChatRoom(
-      String content, String otherUserId, String senderId);
+  Future<String> createChatRoom(String otherUserId, String senderId);
 
   Future<void> sendMessage(
       String chatRoomId, String type, String content, String senderId);

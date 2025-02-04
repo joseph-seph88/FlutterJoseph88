@@ -28,8 +28,8 @@ class CreateChatRoomUseCase {
 
   CreateChatRoomUseCase(this._repository);
 
-  Future<String> call(String content, String otherUserId, String senderId) {
-    return _repository.createChatRoom(content, otherUserId, senderId);
+  Future<String> call(String otherUserId, String senderId) {
+    return _repository.createChatRoom(otherUserId, senderId);
   }
 }
 
