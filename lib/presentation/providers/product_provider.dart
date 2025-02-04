@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/domain/entities/product.dart';
 import 'package:o2/domain/repositories/product_repository.dart';
 import 'package:o2/domain/usecases/product/get_products_usecase.dart';
@@ -71,4 +72,45 @@ final productNotifierProvider = StateNotifierProvider.family<ProductNotifier, As
   final manageUseCase = ref.watch(manageProductUseCaseProvider);
   final detailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(manageUseCase, detailUseCase);
+});
+
+// ProductDataSource Provider
+final productDataSourceProvider = Provider<ProductDataSource>((ref) {
+  return ProductDataSource();
+});
+
+// 최근 검색어 Provider
+final recentSearchesProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, userId) async {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return await dataSource.getRecentSearches(userId);
+});
+
+// 최근 검색어 저장 Provider
+final saveRecentSearchProvider = Provider.family<Future<void> Function(String), String>((ref, userId) {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return (String keyword) => dataSource.saveRecentSearch(userId, keyword);
+});
+
+// 최근 검색어 삭제 Provider
+final removeRecentSearchProvider = Provider.family<Future<void> Function(String), String>((ref, userId) {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return (String keyword) => dataSource.removeRecentSearch(userId, keyword);
+});
+
+// 최근 검색어 전체 삭제 Provider
+final clearRecentSearchesProvider = Provider.family<Future<void> Function(), String>((ref, userId) {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return () => dataSource.clearRecentSearches(userId);
+});
+
+// 인기 검색어 Provider
+final popularSearchesProvider = FutureProvider<List<String>>((ref) async {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return dataSource.getPopularSearches();
+});
+
+// 검색어 카운트 증가 Provider
+final incrementSearchCountProvider = Provider<Future<void> Function(String)>((ref) {
+  final dataSource = ref.watch(productDataSourceProvider);
+  return (String keyword) => dataSource.incrementSearchCount(keyword);
 });

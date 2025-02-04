@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: theme.colorScheme.primary,
           label: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.add,
                 color: AppColors.surface,
               ),

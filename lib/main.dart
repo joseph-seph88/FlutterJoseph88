@@ -20,6 +20,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // 더미 데이터 업로드
+  // await uploadDummyData();
+
   runApp(
     ProviderScope(
       overrides: [
