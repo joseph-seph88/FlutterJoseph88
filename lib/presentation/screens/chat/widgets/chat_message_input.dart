@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
@@ -24,6 +26,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
   late final AnimationController _animationController;
+  bool _isSendingMessage = false;
 
   @override
   void initState() {
@@ -86,11 +89,19 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
             ),
           ),
           IconButton(
-            onPressed: () async {
+            onPressed: _isSendingMessage ? null : () async {
+              setState(() {
+                _isSendingMessage = true;
+              });
               await _sendMessage();
+
               _messageController.clear();
+              ref.read(selectedImageProvider.notifier).clear();
+              setState(() {
+                _isSendingMessage = false;
+              });
             },
-            icon: Icon(Icons.send),
+            icon: _isSendingMessage ? CircularProgressIndicator() : Icon(Icons.send),
           ),
         ],
       ),
@@ -100,6 +111,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   Future<void> _sendMessage() async {
     final senderId = 'a';
     final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
+    final sendChatImageUseCase = ref.read(sendChatImageUseCaseProvider);
 
     if (widget.chatRoomId == null) {
       final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
@@ -112,8 +124,20 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
         });
       }
     } else {
-      await sendChatMessageUseCase(
-          widget.chatRoomId!, _messageController.text, senderId);
+      await Future.wait([
+        Future(() async {
+          if (_messageController.text.isNotEmpty) {
+            await sendChatMessageUseCase(widget.chatRoomId!, ChatMessageType.text,
+                _messageController.text, senderId);
+          }
+        }),
+        Future(() async {
+          if (ref.read(selectedImageProvider) != null) {
+            await sendChatImageUseCase(widget.chatRoomId!, ChatMessageType.image,
+                ref.read(selectedImageProvider)!.path, senderId);
+          }
+        }),
+      ]);
     }
   }
 }
