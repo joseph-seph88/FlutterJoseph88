@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/home_app_bar.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 import 'package:o2/presentation/widgets/bottom_nav_bar.dart';
@@ -33,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context.go('/chat');
         break;
       case 4:
-        context.go('/mypage');
+        context.go('/my');
         break;
     }
   }
@@ -44,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return const ProductListView();
       case 1:
         return const MapScreen();
+      case 4:
+        return const MyScreen();
       default:
         return const SizedBox.shrink();
     }
