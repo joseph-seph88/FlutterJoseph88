@@ -25,5 +25,4 @@ class AppConstant {
   static const lightGreenColor = Colors.lightGreen;
   static const deepPurpleColor = Colors.deepPurple;
   static const transparentColor = Colors.transparent;
-
 }

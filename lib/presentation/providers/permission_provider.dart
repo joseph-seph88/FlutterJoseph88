@@ -9,7 +9,6 @@ StateNotifierProvider<LocationPermissionNotifier, PermissionStatus?>((ref) {
   return LocationPermissionNotifier(permissionManagerPro);
 });
 
-
 class LocationPermissionNotifier extends StateNotifier<PermissionStatus?> {
   final PermissionManager _permissionManager;
 

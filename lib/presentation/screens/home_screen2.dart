@@ -8,6 +8,7 @@ import 'package:o2/presentation/screens/search/search_screen.dart';
 import '../providers/permission_provider.dart';
 import '../widgets/bottom_nav_bar.dart';
 
+
 final currentIndexProvider = StateProvider<int>((ref) => 0);
 
 class HomeScreen2 extends ConsumerWidget {

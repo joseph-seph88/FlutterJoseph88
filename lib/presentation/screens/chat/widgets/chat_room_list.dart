@@ -11,12 +11,12 @@ class ChatRoomList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (chatRoomList.isEmpty) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.chat_bubble_outline, size: 48),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text('채팅방이 없습니다', style: TextStyle(fontSize: 16)),
           ],
         ),

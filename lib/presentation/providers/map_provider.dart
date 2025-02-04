@@ -8,6 +8,7 @@ import '../../core/constants/app_constant.dart';
 import '../../domain/entities/map_entity.dart';
 import '../state/map_state.dart';
 
+
 // 주소 검색값
 final selectedAddressProvider = StateProvider<String>((ref) => '');
 

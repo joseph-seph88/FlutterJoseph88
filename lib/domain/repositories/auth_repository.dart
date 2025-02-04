@@ -1,8 +1,8 @@
-import '../../data/models/user_model.dart';
+import 'package:o2/domain/entities/user_entity.dart';
 
 abstract class AuthRepository {
-  Future<UserModel?> signUp(String email, String password);
-  Future<UserModel?> signIn(String email, String password);
+  Future<UserEntity?> signUp(UserEntity userEntity, String password);
+  Future<UserEntity?> signIn(String email, String password);
   Future<void> signOut();
-  UserModel? getCurrentUser();
+  Future<bool> validEmail(String email);
 }

@@ -18,7 +18,7 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
   }
 
   void _fetchChatRooms() {
-    final userId = 'a';
+    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 수정
     final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
 
     getChatRoomsUseCase(userId).listen((data) {

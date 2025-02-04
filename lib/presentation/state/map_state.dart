@@ -2,6 +2,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../domain/entities/map_entity.dart';
 
+
 class MapState {
   final bool isLoading;
   final String error;

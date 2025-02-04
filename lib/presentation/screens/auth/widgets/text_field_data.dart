@@ -6,6 +6,7 @@ class TextFieldData {
   final FocusNode focusNode;
   bool isValid;
   bool showField;
+  String? errorText;
 
   TextFieldData(this.fieldName)
       : controller = TextEditingController(),

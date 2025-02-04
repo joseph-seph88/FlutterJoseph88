@@ -6,7 +6,6 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/map_provider.dart';
 import '../../state/map_state.dart';
 
-
 class SearchAddressPage extends ConsumerStatefulWidget {
   const SearchAddressPage({super.key});
 
