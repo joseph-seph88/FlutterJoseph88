@@ -4,6 +4,7 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/screens/product/widgets/home_app_bar.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 import 'package:o2/presentation/widgets/bottom_nav_bar.dart';
+import 'package:o2/presentation/screens/map/map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +20,33 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentIndex = index;
     });
+
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        break;
+      case 2:
+        context.go('/map');
+        break;
+      case 3:
+        context.go('/chat');
+        break;
+      case 4:
+        context.go('/mypage');
+        break;
+    }
+  }
+
+  Widget _buildScreen() {
+    switch (_currentIndex) {
+      case 0:
+        return const ProductListView();
+      case 1:
+        return const MapScreen();
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   @override
@@ -26,34 +54,36 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: const HomeAppBar(),
-      body: const ProductListView(),
+      appBar: _currentIndex == 1 ? null : const HomeAppBar(),
+      body: _buildScreen(),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
       ),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: AppStyles.largeSpacing),
-        child: FloatingActionButton.extended(
-          onPressed: () => context.push('/write'),
-          backgroundColor: theme.colorScheme.primary,
-          label: Row(
-            children: [
-              const Icon(
-                Icons.add,
-                color: AppColors.surface,
-              ),
-              const SizedBox(width: AppStyles.smallSpacing),
-              Text(
-                '글쓰기',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: AppColors.surface,
+      floatingActionButton: _currentIndex == 0
+          ? Container(
+              margin: const EdgeInsets.only(bottom: AppStyles.largeSpacing),
+              child: FloatingActionButton.extended(
+                onPressed: () => context.push('/write'),
+                backgroundColor: theme.colorScheme.primary,
+                label: Row(
+                  children: [
+                    const Icon(
+                      Icons.add,
+                      color: AppColors.surface,
+                    ),
+                    const SizedBox(width: AppStyles.smallSpacing),
+                    Text(
+                      '글쓰기',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: AppColors.surface,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
