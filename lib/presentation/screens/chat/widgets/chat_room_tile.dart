@@ -14,7 +14,7 @@ class ChatRoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: CircleAvatar(),
+      leading: const CircleAvatar(),
       title: Row(
         children: [
           Text(

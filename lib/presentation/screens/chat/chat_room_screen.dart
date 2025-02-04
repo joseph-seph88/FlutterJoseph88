@@ -27,7 +27,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = 'a';
+    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 수정
     final selectedImage = ref.watch(selectedImageProvider);
 
     if (widget.chatRoomId != null) {
@@ -54,7 +54,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ),
           _isAddButtonClicked
               ? _buildAddItemSelectionField()
-              : SizedBox(height: 8),
+              : const SizedBox(height: 8),
         ],
       ),
     );
@@ -68,7 +68,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildAddItemSelectionField() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -94,7 +94,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     return Column(
       children: [
         IconButton.outlined(onPressed: onPressed, icon: Icon(icon)),
-        Text(text, style: TextStyle(color: AppColors.text)),
+        Text(text, style: const TextStyle(color: AppColors.text)),
       ],
     );
   }
@@ -113,7 +113,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         ),
         IconButton(onPressed: () {
           ref.read(selectedImageProvider.notifier).clear();
-        }, icon: Icon(Icons.close)),
+        }, icon: const Icon(Icons.close)),
       ],
     );
   }

@@ -46,7 +46,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
       child: ListView.builder(
         reverse: true,
         shrinkWrap: true,
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         itemCount: chatMessages.length,
         itemBuilder: (context, index) {
           final message = chatMessages[index];
@@ -73,7 +73,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
 
   Widget _buildDateDivider(BuildContext context, String date) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Text(
         date,
         style: TextStyle(
@@ -95,18 +95,18 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
         children: [
           if (!isMine) ...[
             _buildSenderAvatar(),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
           ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (isMine && showTimestamp) ...[
                 _buildTimestamp(context, message.sentTime),
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
               ],
               _buildMessageBubble(context, message, isMine),
               if (!isMine && showTimestamp) ...[
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
                 _buildTimestamp(context, message.sentTime),
               ],
             ],
@@ -117,7 +117,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
   }
 
   Widget _buildSenderAvatar() {
-    return CircleAvatar();
+    return const CircleAvatar();
   }
 
   Widget _buildMessageBubble(
@@ -128,7 +128,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       constraints: BoxConstraints(
         maxWidth: messageMaxWidth,
         maxHeight: messageMaxHeight,
@@ -136,7 +136,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
       decoration: BoxDecoration(
         color:
             isMine ? colorScheme.primary : colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
       child: _buildMessageContent(message, isMine, isDarkMode),
     );
@@ -176,7 +176,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
           },
         ),
       ChatMessageType.video => throw UnimplementedError(),
-      ChatMessageType.deleted => Text(
+      ChatMessageType.deleted => const Text(
           '삭제된 메세지입니다.',
           style: TextStyle(
             color: AppColors.textSecondary,
