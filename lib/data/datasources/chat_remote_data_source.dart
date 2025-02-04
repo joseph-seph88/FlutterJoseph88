@@ -61,8 +61,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       'lastMessageTime': timestamp,
       'lastMessageSender': senderId,
       'unreadMessageCount': 1,
-    }))
-        .id;
+    })).id;
 
     _firestore
         .collection('chats')
@@ -95,6 +94,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       'lastMessage': content,
       'lastMessageSender': senderId,
       'lastMessageTime': timestamp,
+      'lastMessageType': type,
       'unreadMessageCount': FieldValue.increment(1),
     });
   }
