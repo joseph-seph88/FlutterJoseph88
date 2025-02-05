@@ -36,7 +36,7 @@ class ChatRoomTile extends StatelessWidget {
               chatRoom.unreadMessageCount == 0
           ? null
           : Badge.count(count: chatRoom.unreadMessageCount),
-      onTap: () => context.push('/chats/chat_room', extra: {
+      onTap: () => context.push('/chat_room', extra: {
         'chatRoomId': chatRoom.id,
         'otherUserId':
             userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
