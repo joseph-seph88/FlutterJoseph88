@@ -30,8 +30,8 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<String> createChatRoom(String otherUserId, String senderId) {
-    return _dataSource.createChatRoom(otherUserId, senderId);
+  Future<String> createChatRoom(String otherUserId, String senderId, String productID) {
+    return _dataSource.createChatRoom(otherUserId, senderId, productID);
   }
 
   @override

@@ -12,11 +12,13 @@ import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final String productID;
 
   const ChatRoomScreen({
     super.key,
     required this.chatRoomId,
     required this.otherUserId,
+    required this.productID,
   });
 
   @override
@@ -61,6 +63,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
             otherUserId: widget.otherUserId,
+            productID: widget.productID,
             isAddButtonClicked: _isAddButtonClicked,
             onAddButtonClicked: _onAddButtonClicked,
           ),

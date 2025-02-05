@@ -9,6 +9,7 @@ import 'package:o2/presentation/providers/providers.dart';
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final String productID;
   final bool isAddButtonClicked;
   final Function onAddButtonClicked;
 
@@ -16,6 +17,7 @@ class ChatMessageInput extends ConsumerStatefulWidget {
       {super.key,
       required this.chatRoomId,
       required this.otherUserId,
+      required this.productID,
       required this.isAddButtonClicked,
       required this.onAddButtonClicked});
 
@@ -140,9 +142,10 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
       final chatRoomId = await _createChatRoom(senderId);
       await _sendContent(chatRoomId, senderId);
       if (mounted) {
-        context.go('/chats/chat_room', extra: {
+        context.pushReplacement('/chat_room', extra: {
           'chatRoomId': chatRoomId,
           'otherUserId': widget.otherUserId,
+          'productID': widget.productID,
         });
       }
     } else {
@@ -152,7 +155,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
 
   Future<String> _createChatRoom(String senderId) {
     final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
-    return createChatRoomUseCase(widget.otherUserId, senderId);
+    return createChatRoomUseCase(widget.otherUserId, senderId, widget.productID);
   }
 
   Future<void> _sendContent(String chatRoomId, String senderId) async {

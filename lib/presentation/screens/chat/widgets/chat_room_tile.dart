@@ -40,6 +40,7 @@ class ChatRoomTile extends StatelessWidget {
         'chatRoomId': chatRoom.id,
         'otherUserId':
             userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
+        'productID': chatRoom.productID!,
       }),
     );
   }

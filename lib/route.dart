@@ -50,8 +50,13 @@ final GoRouter _router = GoRouter(
       builder: (context, state) {
         final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
         final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
+        final productID = (state.extra as Map<String, String>)['productID']!;
 
-        return ChatRoomScreen(chatRoomId: chatRoomId, otherUserId: otherUserId);
+        return ChatRoomScreen(
+          chatRoomId: chatRoomId,
+          otherUserId: otherUserId,
+          productID: productID,
+        );
       },
     ),
     GoRoute(

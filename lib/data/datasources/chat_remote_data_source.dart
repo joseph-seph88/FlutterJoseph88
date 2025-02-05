@@ -7,7 +7,7 @@ abstract interface class ChatRemoteDataSource {
   Stream<QuerySnapshot<Map<String, dynamic>>> getChatMessages(
       String chatRoomId);
 
-  Future<String> createChatRoom(String otherUserId, String senderId);
+  Future<String> createChatRoom(String otherUserId, String senderId, String productID);
 
   Future<void> sendMessage(
       String chatRoomId, String type, String content, String senderId);
@@ -42,11 +42,12 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<String> createChatRoom(String otherUserId, String senderId) async {
+  Future<String> createChatRoom(String otherUserId, String senderId, String productID) async {
     final chatRoomId = (await _firestore.collection('chats').add({
       'buyer': senderId,
       'seller': otherUserId,
       'unreadMessageCount': 0,
+      'productID': productID,
     })).id;
 
     return chatRoomId;

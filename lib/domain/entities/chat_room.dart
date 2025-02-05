@@ -9,6 +9,7 @@ class ChatRoom {
   final DateTime? lastMessageTime;
   final ChatMessageType? lastMessageType;
   final String? lastMessageSender;
+  final String? productID;
 
   ChatRoom({
     required this.id,
@@ -19,5 +20,6 @@ class ChatRoom {
     this.lastMessageTime,
     this.lastMessageType,
     this.lastMessageSender,
+    this.productID,
   });
 }
