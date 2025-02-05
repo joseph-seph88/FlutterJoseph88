@@ -4,7 +4,6 @@ import 'package:o2/presentation/providers/permission_provider.dart';
 import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
 import 'package:o2/presentation/screens/map/like_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
-import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/product/product_list_screen.dart';
 import 'package:o2/presentation/screens/search/search_screen.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -23,7 +22,7 @@ class HomeScreen extends ConsumerWidget {
       const SearchScreen(),
       const MapScreen(),
       const ChatListScreen(),
-      const MyScreen(),
+      const LikeShopPage(),
     ];
 
     void onTabTapped(int index) async {
