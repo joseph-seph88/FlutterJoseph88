@@ -32,6 +32,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     if (userId == null) {
       return const Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error),
             Text('채팅 내역을 불러오던 중 문제가 발생했습니다!'),

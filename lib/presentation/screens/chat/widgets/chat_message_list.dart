@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
@@ -7,7 +5,7 @@ import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 
-class ChatMessageList extends ConsumerStatefulWidget {
+class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
   final String userId;
 
@@ -15,32 +13,19 @@ class ChatMessageList extends ConsumerStatefulWidget {
       {super.key, required this.chatRoomId, required this.userId});
 
   @override
-  ConsumerState createState() => _ChatMessageListState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stream = chatRoomId != null
+        ? ref.watch(chatMessageStreamProvider(chatRoomId!))
+        : const AsyncValue.data(<ChatMessage>[]);
 
-class _ChatMessageListState extends ConsumerState<ChatMessageList> {
-  StreamSubscription? _chatMessageSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.chatRoomId != null) {
-      _chatMessageSubscription = ref
-          .read(chatMessageProvider.notifier)
-          .fetchChatMessages(widget.chatRoomId!);
-    }
+    return stream.when(
+      data: (data) => _buildMessageBody(data),
+      error: (error, stackTrace) => _buildErrorBody(),
+      loading: () => const Center(child: CircularProgressIndicator()),
+    );
   }
 
-  @override
-  void dispose() {
-    _chatMessageSubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chatMessages = ref.watch(chatMessageProvider);
-
+  Widget _buildMessageBody(List<ChatMessage> chatMessages) {
     return Align(
       alignment: Alignment.topCenter,
       child: ListView.builder(
@@ -57,7 +42,7 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
               nextMessage?.sentTime.toDateOnlyString();
           final showTimestamp = prevMessage == null ||
               !message.sentTime.isTimeSame(prevMessage.sentTime);
-          final isMine = message.senderId == widget.userId;
+          final isMine = message.senderId == userId;
 
           return Column(
             children: [
@@ -67,6 +52,21 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildErrorBody() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error),
+          Text(
+            '채팅 내역을 불러오던 중 문제가 발생했습니다!',
+            style: TextStyle(color: AppColors.text),
+          ),
+        ],
       ),
     );
   }

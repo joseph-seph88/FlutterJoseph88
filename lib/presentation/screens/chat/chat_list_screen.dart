@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/domain/entities/chat_room.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
@@ -20,36 +21,34 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(authProvider)?.id;
-    if (userId == null) {
-      return const Center(
-        child: Column(
-          children: [
-            Icon(Icons.error),
-            Text('채팅 내역을 불러오던 중 문제가 발생했습니다!'),
-          ],
-        ),
-      );
-    }
-
-    final chatRooms = ref
-        .watch(chatRoomProvider)
-        .where(
-            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
-        .toList();
+    final stream = ref.watch(chatRoomStreamProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('채팅')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: _buildFilterChips(),
-          ),
-          Expanded(
-              child: ChatRoomList(chatRoomList: chatRooms, userId: userId)),
-        ],
-      ),
+      body: userId == null
+          ? _buildErrorBody()
+          : stream.when(
+              data: (data) => _buildChatListBody(data, userId),
+              error: (error, stackTrace) => _buildErrorBody(),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
+    );
+  }
+
+  Widget _buildChatListBody(List<ChatRoom> data, String userId) {
+    final filtered = data
+        .where(
+            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: _buildFilterChips(),
+        ),
+        Expanded(child: ChatRoomList(chatRoomList: filtered, userId: userId)),
+      ],
     );
   }
 
@@ -70,6 +69,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           },
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildErrorBody() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error),
+          Text(
+            '채팅 내역을 불러오던 중 문제가 발생했습니다!',
+            style: TextStyle(color: AppColors.text),
+          ),
+        ],
+      ),
     );
   }
 
