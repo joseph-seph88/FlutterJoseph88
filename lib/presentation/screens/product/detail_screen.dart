@@ -1,8 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
+import 'package:o2/domain/entities/product.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
@@ -300,9 +304,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () => context.push('/chat_room', extra: {
-                          'otherUserId': product.sellerId,
-                        }),
+                        onPressed: () => _onChatButtonClicked(product),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -326,5 +328,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
       ),
     );
+  }
+
+  void _onChatButtonClicked(Product product) async {
+    final userID = ref.read(authProvider)?.id;
+    if (userID == null) return;
+
+    final chatRooms = ref.read(chatRoomStreamProvider).value;
+    final chatRoom = chatRooms?.firstWhereOrNull((element) => element.productID == product.id);
+
+    if (mounted) {
+      context.push('/chat_room', extra: {
+        if (chatRoom != null) ...{
+          'chatRoomId': chatRoom.id,
+        },
+        'otherUserId': product.sellerId,
+        'productID': product.id,
+      });
+    }
   }
 }
