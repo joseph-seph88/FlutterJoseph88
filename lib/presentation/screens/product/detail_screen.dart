@@ -300,7 +300,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () => context.push('/chat/${product.id}'),
+                        onPressed: () => context.push('/chats/chat_room', extra: {
+                          'otherUserId': product.sellerId,
+                        }),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
