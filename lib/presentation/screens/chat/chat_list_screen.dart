@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_room_list.dart';
 
@@ -19,7 +20,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 변경
+    final userId = ref.watch(authProvider)?.id;
+    if (userId == null) {
+      return const Center(
+        child: Column(
+          children: [
+            Icon(Icons.error),
+            Text('채팅 내역을 불러오던 중 문제가 발생했습니다!'),
+          ],
+        ),
+      );
+    }
+
     final chatRooms = ref
         .watch(chatRoomProvider)
         .where(
@@ -37,12 +49,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ),
           Expanded(
               child: ChatRoomList(chatRoomList: chatRooms, userId: userId)),
-          // 새 채팅방 테스트용 버튼
-          OutlinedButton(onPressed: () {
-            context.push('/chats/chat_room', extra: {
-              'otherUserId': 'd',
-            });
-          }, child: const Text('new message')),
         ],
       ),
     );

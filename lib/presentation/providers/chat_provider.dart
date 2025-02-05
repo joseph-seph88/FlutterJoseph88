@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 final chatRoomProvider =
@@ -18,7 +19,11 @@ class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
   }
 
   void _fetchChatRooms() {
-    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 수정
+    final userId = ref.read(authProvider)?.id;
+    if (userId == null) {
+      state = [];
+      return;
+    }
     final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
 
     getChatRoomsUseCase(userId).listen((data) {

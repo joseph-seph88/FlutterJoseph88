@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
@@ -128,7 +129,12 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   }
 
   Future<void> _sendMessage() async {
-    final senderId = 'a'; // TODO: 실제 이용자 id로 대체
+    final senderId = ref.read(authProvider)?.id;
+    if (senderId == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('메시지를 전송할 수 없습니다')));
+      return;
+    }
 
     if (widget.chatRoomId == null) {
       final chatRoomId = await _createChatRoom(senderId);
