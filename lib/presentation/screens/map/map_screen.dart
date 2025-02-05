@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/presentation/widgets/show_bottom_sheet.dart';
 import '../../../domain/entities/map_entity.dart';
 import '../../providers/map_provider.dart';
 
@@ -346,9 +345,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             bottom: _buttonOffset,
             right: 20,
             child: FloatingActionButton.extended(
-                onPressed: () {
+                onPressed: () async{
+                  await ref.read(mapProvider.notifier).getStoreData();
                   final customBottomSheet = ref.read(bottomSheetProvider);
-                  customBottomSheet.bottomSheetWithTwoBtn(context);
+                  if(context.mounted){
+                    customBottomSheet.bottomSheetWithTwoBtn(context);
+                  }
                 },
                 label: const Row(
                   children: [
