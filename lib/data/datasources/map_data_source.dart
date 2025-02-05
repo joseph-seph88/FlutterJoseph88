@@ -120,12 +120,24 @@ class MapDataSource {
 
   Future<List<MapModel>> searchStore(String queryText) async {
     try {
-      var searchData = await FirebaseFirestore.instance
+      final searchData = await _fireStore
           .collection('maps')
           .where('storeName', isGreaterThanOrEqualTo: queryText)
           .where('storeName', isLessThan: '$queryText\uf8ff')
           .get();
       print("검색디피 : ${searchData.size}");
+      return searchData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
+    } catch (e) {
+      throw Exception("DB서치에러");
+    }
+  }
+
+  Future<List<MapModel>> getStoreData() async {
+    try {
+      final searchData = await _fireStore
+          .collection('maps')
+          .get();
+
       return searchData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
     } catch (e) {
       throw Exception("DB서치에러");

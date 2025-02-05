@@ -25,6 +25,8 @@ abstract class MapUseCase {
 
   Future<List<MapEntity>> searchStore(String inputText);
 
+  Future<List<MapEntity>> getStoreData();
+
   List<Map<String, dynamic>> get getIconDataList;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
@@ -50,6 +52,16 @@ class MapUseCaseImpl implements MapUseCase {
       final searchDataList = await _repository.searchStore(inputText);
       return searchDataList;
     } catch (e) {
+      throw Exception("유스에러 $e");
+    }
+  }
+
+  @override
+  Future<List<MapEntity>> getStoreData() async {
+    try{
+      final dataList = await _repository.getStoreData();
+      return dataList;
+    }catch(e){
       throw Exception("유스에러 $e");
     }
   }

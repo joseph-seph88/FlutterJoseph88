@@ -82,6 +82,28 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
+  Future<List<MapEntity>> getStoreData() async {
+    try {
+      final mapList = await _mapDataSource.getStoreData();
+
+      if (mapList.isNotEmpty) {
+        return mapList.map((model) {
+          return MapEntity(
+            mapId: model.mapId,
+            position: model.geo['geopoint'],
+            address: model.address,
+            iconPath: model.iconPath,
+            storeName: model.storeName,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      throw Exception("레포구현에러: $e");
+    }
+    return [];
+  }
+
+  @override
   Future<Placemark?> transAddressFromGeo(NLatLng clickPosition) async {
     try {
       final mapAddress = _mapDataSource.transAddressFromGeo(

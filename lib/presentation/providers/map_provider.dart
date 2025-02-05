@@ -7,18 +7,20 @@ import 'package:o2/domain/usecases/map_use_case.dart';
 import '../../core/constants/app_constant.dart';
 import '../../domain/entities/map_entity.dart';
 import '../state/map_state.dart';
+import '../widgets/show_bottom_sheet.dart';
 
+final bottomSheetProvider = Provider((ref) => CustomBottomSheets());
 
 // 주소 검색값
 final selectedAddressProvider = StateProvider<String>((ref) => '');
 
 final mapParamProvider = StateProvider<Map<String, dynamic>>((ref) => {
-  'iconPath': AppConstant.coffeePath,
-  'position': const GeoPoint(37.499889, 126.920056),
-});
+      'iconPath': AppConstant.coffeePath,
+      'position': const GeoPoint(37.499889, 126.920056),
+    });
 
-final mapDataStreamProvider = StreamProvider
-    .autoDispose<List<MapEntity>>((ref) {
+final mapDataStreamProvider =
+    StreamProvider.autoDispose<List<MapEntity>>((ref) {
   final mapUseCase = ref.watch(mapUseCaseProvider);
   final mapParam = ref.watch(mapParamProvider);
   String iconPath = mapParam['iconPath'];
@@ -29,7 +31,6 @@ final mapDataStreamProvider = StreamProvider
     return mapModels.whereType<MapEntity>().toList();
   });
 });
-
 
 // Map Provider & Notifier
 final mapProvider = StateNotifierProvider<MapNotifier, MapState>((ref) {
@@ -50,8 +51,8 @@ class MapNotifier extends StateNotifier<MapState> {
           predictionList: [],
         ));
 
-  Future<void> addMarker(
-      GeoPoint position, String iconPath, String address, String storeName) async {
+  Future<void> addMarker(GeoPoint position, String iconPath, String address,
+      String storeName) async {
     state = state.copyWith(isLoading: true, error: '');
     try {
       await _mapUseCase.addMarker(position, address, iconPath, storeName);
@@ -65,13 +66,23 @@ class MapNotifier extends StateNotifier<MapState> {
 
   Future<List<MapEntity>> searchStore(String inputText) async {
     state = state.copyWith(error: '');
-    try{
+    try {
       final searchStoreDataList = await _mapUseCase.searchStore(inputText);
       return searchStoreDataList;
-    }catch(e){
+    } catch (e) {
       state = state.copyWith(error: e.toString());
     }
     return [];
+  }
+
+  Future<void> getStoreData() async {
+    state = state.copyWith(error: '');
+    try {
+      final dataList = await _mapUseCase.getStoreData();
+      state = state.copyWith(mapDataList: dataList);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
   }
 
   Future<Placemark?> transAddressFromGeo(NLatLng clickPosition) async {
@@ -111,3 +122,18 @@ class MapNotifier extends StateNotifier<MapState> {
     }
   }
 }
+
+class LikeNotifier extends StateNotifier<Map<int, int>> {
+  LikeNotifier() : super({});
+
+  void incrementLike(int index) {
+    state = {
+      ...state,
+      index: (state[index] ?? 0) + 1,
+    };
+  }
+}
+
+// 🔹 Provider 생성
+final likeStarProvider =
+    StateNotifierProvider<LikeNotifier, Map<int, int>>((ref) => LikeNotifier());

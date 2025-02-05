@@ -15,7 +15,9 @@ abstract class MapRepository {
 
   Future<List<MapEntity>> searchStore(String inputText);
 
-  List<Map<String, dynamic>> get getIconDataList;
+  Future<List<MapEntity>> getStoreData();
+
+    List<Map<String, dynamic>> get getIconDataList;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
 }
