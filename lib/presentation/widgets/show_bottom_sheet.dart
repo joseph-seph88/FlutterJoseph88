@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 
+
 final bottomSheetProvider = Provider((ref) => CustomBottomSheets());
 
 class CustomBottomSheets {
@@ -18,6 +19,7 @@ class CustomBottomSheets {
                 children: [
                   TextButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       context.push('/map/likeShop');
                     },
                     style:
@@ -32,6 +34,7 @@ class CustomBottomSheets {
                   ),
                   TextButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       context.push('/map/addShop');
                     },
                     style:

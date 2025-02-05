@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import '../../providers/map_provider.dart';
 
@@ -16,26 +18,43 @@ class AddShopPage extends ConsumerStatefulWidget {
 
 class _AddShopPageState extends ConsumerState<AddShopPage> {
   final _searchController = TextEditingController();
-  final _searchController2 = TextEditingController();
+  final _storeTextController = TextEditingController();
   NaverMapController? _mapController;
+  NCameraPosition position =
+      const NCameraPosition(target: NLatLng(37.499889, 126.920056), zoom: 15);
   Placemark? placeAddress = const Placemark(street: "Default");
   NLatLng centerLatLng = const NLatLng(37.499889, 126.920056);
-  final iconPath = 'assets/icons/coffee.png';
+  LatLng? tranPosition = const LatLng(lat: 37.499889, lng: 126.920056);
+  int? selectedIndex;
+  List<Map<String, dynamic>> iconData = [];
+  String iconPath = AppConstant.coffeePath;
 
-  void _moveCamera() async {
-    final cameraUpdate = NCameraUpdate.fromCameraPosition(
-      const NCameraPosition(
-        target: NLatLng(37.499889, 126.920056),
-        zoom: 16,
-      ),
-    );
-    await _mapController!.updateCamera(cameraUpdate);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_mapController != null) {
+      _moveCamera();
+    }
   }
 
-  void _convertPositionToAddress() async {
-    if (_mapController == null) return;
+  void _moveCamera() async {
+    final mapState = ref.read(mapProvider);
+    if (mapState.positionData != null) {
+      final positionData = mapState.positionData;
+      centerLatLng = NLatLng(positionData!.lat, positionData.lng);
+      final cameraUpdate = NCameraUpdate.fromCameraPosition(
+        NCameraPosition(
+          target: centerLatLng,
+          zoom: 16,
+        ),
+      );
+      await _mapController!.updateCamera(cameraUpdate);
+    }
+  }
+
+  Future<void> _convertPositionToAddress() async {
     final cameraPosition = await _mapController!.getCameraPosition();
-    centerLatLng = cameraPosition.target;
+    centerLatLng = NLatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
     final newPlaceAddress =
         await ref.read(mapProvider.notifier).transAddressFromGeo(centerLatLng);
     setState(() {
@@ -45,6 +64,14 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedAddress = ref.watch(selectedAddressProvider);
+    if (_searchController.text != selectedAddress) {
+      _searchController.text = selectedAddress;
+      ref
+          .read(mapProvider.notifier)
+          .transPositionFromAddress(_searchController.text);
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
@@ -54,7 +81,9 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
             toolbarHeight: 40,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
-              onPressed: () => context.pop(),
+              onPressed: () {
+                context.go('/map');
+              },
             ),
           ),
           body: Column(
@@ -72,6 +101,10 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                 padding: AppStyles.horizontalPadding
                     .copyWith(bottom: AppStyles.verticalPadding.bottom - 5),
                 child: TextField(
+                  onTap: () {
+                    context.go('/map/addShop/searchAddr');
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
                   controller: _searchController,
                   decoration: InputDecoration(
                       hintText: "주변 건물 이름, 주소",
@@ -88,6 +121,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       contentPadding: AppStyles.defaultPadding.copyWith(
                           top: AppStyles.verticalPadding.top - 5,
                           bottom: AppStyles.verticalPadding.bottom - 5)),
+                  style: AppStyles.labelLarge.copyWith(color: Colors.black),
                 ),
               ),
               Expanded(
@@ -107,17 +141,23 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                           setState(() {
                             _mapController = controller;
                           });
+                          if (_mapController != null) {
+                            position =
+                                await _mapController!.getCameraPosition();
+                          }
                         },
-                        onCameraIdle: () {
-                          _convertPositionToAddress();
+                        onCameraIdle: () async {
+                          if (_mapController != null) {
+                            _convertPositionToAddress();
+                          }
                         },
                       ),
                     ),
                     Positioned(
-                      top: MediaQuery.of(context).size.height / 5.8,
-                      left: MediaQuery.of(context).size.width / 2.8,
+                      top: MediaQuery.of(context).size.height / 6.5,
+                      left: MediaQuery.of(context).size.width / 2.5,
                       child: Image.asset(
-                        'assets/icons/location.png',
+                        AppConstant.locationPath,
                         width: 80,
                         height: 80,
                         color: AppColors.primary,
@@ -143,43 +183,102 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: AppStyles.verticalPadding.copyWith(
-                        top: AppStyles.verticalPadding.top - 10,
-                        bottom: AppStyles.verticalPadding.bottom - 10,
-                        left: AppStyles.verticalPadding.left + 5,
-                      ),
-                      child: placeAddress != null
-                          ? Text(
-                              '${placeAddress?.street}',
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.text),
-                            )
-                          : Text(
-                              "Data",
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.text),
+                    Row(
+                      children: [
+                        Container(
+                          padding: AppStyles.verticalPadding.copyWith(
+                            top: AppStyles.verticalPadding.top - 10,
+                            bottom: AppStyles.verticalPadding.bottom - 5,
+                            left: AppStyles.verticalPadding.left + 5,
+                          ),
+                          child: PopupMenuButton(
+                            onSelected: (index) {
+                              setState(() {
+                                selectedIndex = index;
+                              });
+                              iconPath = iconData[selectedIndex!]['icon'];
+                            },
+                            itemBuilder: (context) {
+                              ref.read(mapProvider.notifier).getIconDataList;
+                              iconData = ref.read(mapProvider).iconDataList;
+                              return List.generate(
+                                iconData.length,
+                                (index) {
+                                  return PopupMenuItem(
+                                      value: index,
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            iconData[index]['icon'],
+                                            width: 20,
+                                            height: 20,
+                                            color: iconData[index]['color'],
+                                          ),
+                                        ],
+                                      ));
+                                },
+                              );
+                            },
+                            child: selectedIndex != null
+                                ? ImageIcon(
+                                    AssetImage(
+                                        iconData[selectedIndex!]['icon']),
+                                    color: iconData[selectedIndex!]['color'],
+                                  )
+                                : Text(
+                                    "장르 선택",
+                                    style: AppStyles.labelMedium
+                                        .copyWith(color: Colors.lightGreen),
+                                  ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding: AppStyles.verticalPadding.copyWith(
+                              top: AppStyles.verticalPadding.top,
+                              bottom: AppStyles.verticalPadding.bottom,
+                              left: AppStyles.verticalPadding.left + 20,
                             ),
+                            child: placeAddress != null
+                                ? Text(
+                                    '${placeAddress?.street}',
+                                    style: AppStyles.labelLarge
+                                        .copyWith(color: AppColors.text),
+                                  )
+                                : Text(
+                                    "Data",
+                                    style: AppStyles.labelLarge
+                                        .copyWith(color: AppColors.text),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
                     Container(
                       padding: AppStyles.verticalPadding.copyWith(
                         top: AppStyles.verticalPadding.top - 10,
-                        bottom: AppStyles.verticalPadding.bottom - 5,
+                        bottom: AppStyles.verticalPadding.bottom - 10,
                       ),
                       child: TextField(
-                        controller: _searchController2,
+                        controller: _storeTextController,
                         decoration: InputDecoration(
-                          hintText: "(선택) 상세 주소 입력",
-                          hintStyle:
-                              AppStyles.labelLarge.copyWith(color: AppColors.textSecondary),
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppStyles.defaultRadius),
-                          ),
-                          contentPadding: AppStyles.defaultPadding.copyWith(
-                            top: AppStyles.verticalPadding.top - 10,
-                          ),
-                        ),
+                            labelText: "상호명 입력",
+                            hintText: "상호명 입력",
+                            hintStyle: AppStyles.labelLarge
+                                .copyWith(color: Colors.grey),
+                            prefixIcon: const Icon(
+                              Icons.storefront,
+                              color: AppColors.textSecondary,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppStyles.defaultRadius),
+                            ),
+                            contentPadding: AppStyles.defaultPadding.copyWith(
+                                top: AppStyles.verticalPadding.top - 5,
+                                bottom: AppStyles.verticalPadding.bottom - 5)),
+                        style:
+                            AppStyles.labelLarge.copyWith(color: Colors.black),
                       ),
                     ),
                     Container(
@@ -192,12 +291,15 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                           onPressed: () async {
                             final position = GeoPoint(
                                 centerLatLng.latitude, centerLatLng.longitude);
-                            await ref
-                                .read(mapProvider.notifier)
-                                .addMarker(position, iconPath, centerLatLng);
+                            final address = placeAddress?.street;
+                            final storeName = _storeTextController.text;
+                            await ref.read(mapProvider.notifier).addMarker(
+                                position, iconPath, address!, storeName);
+                            if (context.mounted) {
+                              context.go('/map');
+                            }
                           },
-                          child:
-                              const Text("선택", style: AppStyles.labelLarge)),
+                          child: const Text("선택", style: AppStyles.labelLarge)),
                     ),
                   ],
                 ),

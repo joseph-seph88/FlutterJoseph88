@@ -12,6 +12,7 @@ import 'presentation/screens/product/detail_screen.dart';
 import 'presentation/screens/product/write_screen.dart';
 import 'presentation/screens/search/search_screen.dart';
 
+
 GoRouter get router => _router;
 
 final GoRouter _router = GoRouter(

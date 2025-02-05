@@ -9,16 +9,18 @@ import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/data/repositories/product_repository_impl.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
-
 import 'route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NaverMapSdk.instance.initialize();
-  await PermissionManager().requestLocationPermission();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Future.wait([
+    NaverMapSdk.instance.initialize(),
+    PermissionManager().requestLocationPermission(),
+    Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ),
+  ]);
+
 
   // 더미 데이터 업로드
   // await uploadDummyData();
