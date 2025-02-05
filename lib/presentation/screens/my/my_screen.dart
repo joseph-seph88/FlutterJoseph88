@@ -66,8 +66,7 @@ class MyScreen extends ConsumerWidget {
                       ],
                     ),
                     IconButton(
-                      // TODO : 프로필 수정 화면 이동
-                      onPressed: () {},
+                      onPressed: () => context.push("/my/profile"),
                       icon: const Icon(Icons.arrow_forward),
                     ),
                   ],
