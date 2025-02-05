@@ -43,6 +43,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       );
     }
     final selectedImage = ref.watch(selectedImageProvider);
+    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
+    final otherUserData = getUserDataUseCase(widget.otherUserId);
 
     if (widget.chatRoomId != null) {
       final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
@@ -50,7 +52,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.otherUserId)),
+      appBar: AppBar(
+        title: FutureBuilder(
+          future: otherUserData,
+          builder: (context, snapshot) {
+            return Text(snapshot.data?.name ?? 'null');
+          },
+        ),
+      ),
       body: Column(
         children: [
           Expanded(

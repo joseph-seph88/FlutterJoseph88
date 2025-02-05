@@ -5,8 +5,8 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
-import 'package:o2/domain/entities/product.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
 class ChatRoomTile extends ConsumerWidget {
   final ChatRoom chatRoom;
@@ -16,19 +16,19 @@ class ChatRoomTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final product = chatRoom.productID == null
-        ? null
-        : ref
-            .read(getProductDetailUseCaseProvider)
-            .execute(chatRoom.productID!);
+    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
+    final otherUserID = userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
+    final otherUserData = getUserDataUseCase(otherUserID);
 
     return ListTile(
-      leading: _buildLeadingIcons(product),
+      leading: _buildLeadingIcons(ref),
       title: Row(
         children: [
-          Text(
-            userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
-            maxLines: 1,
+          FutureBuilder(
+            future: otherUserData,
+            builder: (context, snapshot) {
+              return Text(snapshot.data?.name ?? 'null', maxLines: 1);
+            },
           ),
           const SizedBox(width: 12),
           Text(
@@ -54,8 +54,11 @@ class ChatRoomTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildLeadingIcons(Future<Product?>? product) {
+  Widget _buildLeadingIcons(WidgetRef ref) {
     const double iconSize = 40;
+    final product = chatRoom.productID == null
+        ? null
+        : ref.read(getProductDetailUseCaseProvider).execute(chatRoom.productID!);
 
     return SizedBox(
       width: iconSize * 1.5,
