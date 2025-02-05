@@ -5,17 +5,13 @@ import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
 import 'package:o2/presentation/screens/map/like_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
-import 'package:o2/presentation/screens/my/my_favorite_screen.dart';
-import 'package:o2/presentation/screens/my/my_profile_screen.dart';
-import 'package:o2/presentation/screens/my/my_purchase_history_screen.dart';
-import 'package:o2/presentation/screens/my/my_sales_history_screen.dart';
-import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
 import 'presentation/screens/chat/chat_list_screen.dart';
 import 'presentation/screens/chat/chat_room_screen.dart';
 import 'presentation/screens/product/detail_screen.dart';
 import 'presentation/screens/product/write_screen.dart';
 import 'presentation/screens/search/search_screen.dart';
+
 
 GoRouter get router => _router;
 
@@ -53,10 +49,8 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/chat_room',
           builder: (context, state) {
-            final chatRoomId =
-                (state.extra as Map<String, String>)['chatRoomId'];
-            final otherUserId =
-                (state.extra as Map<String, String>)['otherUserId']!;
+            final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
+            final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
 
             return ChatRoomScreen(
               chatRoomId: chatRoomId,
@@ -70,39 +64,15 @@ final GoRouter _router = GoRouter(
       path: "/product",
       builder: (context, state) => const ProductListView(),
     ),
-    GoRoute(
-        path: "/map",
-        builder: (context, state) => const MapScreen(),
-        routes: [
-          GoRoute(
-            path: "/addShop",
-            builder: (context, state) => const AddShopPage(),
-          ),
-          GoRoute(
-            path: "/likeShop",
-            builder: (context, state) => const LikeShopPage(),
-          ),
-        ]),
-    GoRoute(
-        path: "/my",
-        builder: (context, state) => const MyScreen(),
-        routes: [
-          GoRoute(
-            path: "/profile",
-            builder: (context, state) => const MyProfileScreen(),
-          ),
-          GoRoute(
-            path: "/favorite",
-            builder: (context, state) => const MyFavoriteScreen(),
-          ),
-          GoRoute(
-            path: "/salesHistory",
-            builder: (context, state) => const MySalesHistoryScreen(),
-          ),
-          GoRoute(
-            path: "/purchaseHistory",
-            builder: (context, state) => const MyPurchaseHistoryScreen(),
-          )
-        ]),
+    GoRoute(path: "/map", builder: (context, state) => const MapScreen(), routes: [
+      GoRoute(
+        path: "/addShop",
+        builder: (context, state) => const AddShopPage(),
+      ),
+      GoRoute(
+        path: "/likeShop",
+        builder: (context, state) => const LikeShopPage(),
+      ),
+    ]),
   ],
 );
