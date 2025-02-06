@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 
 class ChatMessageList extends ConsumerWidget {
@@ -19,13 +21,13 @@ class ChatMessageList extends ConsumerWidget {
         : const AsyncValue.data(<ChatMessage>[]);
 
     return stream.when(
-      data: (data) => _buildMessageBody(data),
+      data: (data) => _buildMessageBody(ref, data),
       error: (error, stackTrace) => _buildErrorBody(),
       loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
 
-  Widget _buildMessageBody(List<ChatMessage> chatMessages) {
+  Widget _buildMessageBody(WidgetRef ref, List<ChatMessage> chatMessages) {
     return Align(
       alignment: Alignment.topCenter,
       child: ListView.builder(
@@ -48,7 +50,7 @@ class ChatMessageList extends ConsumerWidget {
             children: [
               if (showDateDivider)
                 _buildDateDivider(context, message.sentTime.toDateOnlyString()),
-              _buildMessageItem(context, message, showTimestamp, isMine),
+              _buildMessageItem(ref, context, message, showTimestamp, isMine),
             ],
           );
         },
@@ -84,8 +86,8 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageItem(BuildContext context, ChatMessage message,
-      bool showTimestamp, bool isMine) {
+  Widget _buildMessageItem(WidgetRef ref, BuildContext context,
+      ChatMessage message, bool showTimestamp, bool isMine) {
     return Padding(
       padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
       child: Row(
@@ -104,7 +106,7 @@ class ChatMessageList extends ConsumerWidget {
                 _buildTimestamp(context, message.sentTime),
                 const SizedBox(width: 4),
               ],
-              _buildMessageBubble(context, message, isMine),
+              _buildMessageBubble(ref, context, message, isMine),
               if (!isMine && showTimestamp) ...[
                 const SizedBox(width: 4),
                 _buildTimestamp(context, message.sentTime),
@@ -121,7 +123,7 @@ class ChatMessageList extends ConsumerWidget {
   }
 
   Widget _buildMessageBubble(
-      BuildContext context, ChatMessage message, bool isMine) {
+      WidgetRef ref, BuildContext context, ChatMessage message, bool isMine) {
     final colorScheme = ColorScheme.of(context);
     final messageMaxWidth = MediaQuery.of(context).size.width * 0.6;
     final messageMaxHeight = MediaQuery.of(context).size.height * 0.4;
@@ -138,7 +140,7 @@ class ChatMessageList extends ConsumerWidget {
             isMine ? colorScheme.primary : colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
-      child: _buildMessageContent(message, isMine, isDarkMode),
+      child: _buildMessageContent(ref, message, isMine, isDarkMode),
     );
   }
 
@@ -153,7 +155,7 @@ class ChatMessageList extends ConsumerWidget {
   }
 
   Widget _buildMessageContent(
-      ChatMessage message, bool isMine, bool isDarkMode) {
+      WidgetRef ref, ChatMessage message, bool isMine, bool isDarkMode) {
     return switch (message.type) {
       ChatMessageType.text => Text(
           message.content,
@@ -176,6 +178,37 @@ class ChatMessageList extends ConsumerWidget {
           },
         ),
       ChatMessageType.video => throw UnimplementedError(),
+      ChatMessageType.location => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 200,
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(8)),
+                child: NaverMap(
+                  options: NaverMapViewOptions(
+                    initialCameraPosition: _getCameraPosition(message.content),
+                    rotationGesturesEnable: false,
+                    scrollGesturesEnable: false,
+                    tiltGesturesEnable: false,
+                    zoomGesturesEnable: false,
+                    stopGesturesEnable: false,
+                  ),
+                  onMapReady: (controller) => _addMarker(controller, message.content),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder(
+              future: _getAddress(message.content, ref),
+              builder: (context, snapshot) => Text(
+                snapshot.data ?? '',
+                style: const TextStyle(color: AppColors.text),
+              ),
+            ),
+          ],
+        ),
       ChatMessageType.deleted => const Text(
           '삭제된 메세지입니다.',
           style: TextStyle(
@@ -185,4 +218,35 @@ class ChatMessageList extends ConsumerWidget {
         ),
     };
   }
+}
+
+NCameraPosition _getCameraPosition(String content) {
+  final latLng = content.split(' ').map((e) => double.tryParse(e));
+  if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
+
+  return NCameraPosition(
+      target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
+}
+
+Future<String?> _getAddress(String content, WidgetRef ref) async {
+  final mapUseCase = ref.read(mapUseCaseProvider);
+  var latLng = content.split(' ').map((e) => double.tryParse(e));
+  if (latLng.contains(null)) {
+    final target = NaverMapViewOptions.seoulCityHall.target;
+    latLng = [target.latitude, target.longitude];
+  }
+
+  final place = await mapUseCase
+      .transAddressFromGeo(NLatLng(latLng.first!, latLng.last!));
+  return place?.street;
+}
+
+void _addMarker(NaverMapController controller, String content) {
+  final latLng = content.split(' ').map(double.tryParse);
+  final target = latLng.contains(null)
+      ? NaverMapViewOptions.seoulCityHall.target
+      : NLatLng(latLng.first!, latLng.last!);
+  final marker = NMarker(id: 'location', position: target);
+
+  controller.addOverlay(marker);
 }

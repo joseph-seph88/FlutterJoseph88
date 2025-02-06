@@ -2,6 +2,7 @@ enum ChatMessageType {
   text('text'),
   image('image'),
   video('video'),
+  location('location'),
   deleted('deleted');
 
   final String code;
