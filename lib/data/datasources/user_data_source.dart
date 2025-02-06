@@ -28,4 +28,11 @@ class UserDataSource {
 
     return count.count == 0;
   }
+
+  Future<void> updateProfile(UserModel userModel) async {
+    await _firestore
+        .collection("users")
+        .doc(userModel.id)
+        .update(userModel.toJson());
+  }
 }
