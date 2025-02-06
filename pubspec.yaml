@@ -46,6 +46,7 @@ dependencies:
   image_picker: ^1.1.2
   firebase_storage: ^12.4.1
   flutter_google_places_sdk: ^0.3.10
+  collection:
 
 
 dev_dependencies:

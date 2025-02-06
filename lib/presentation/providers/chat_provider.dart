@@ -3,45 +3,22 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
-final chatRoomProvider =
-    StateNotifierProvider<ChatRoomNotifier, List<ChatRoom>>(
-  (ref) => ChatRoomNotifier(ref),
-);
+final chatRoomStreamProvider = StreamProvider<List<ChatRoom>>((ref) {
+  final userId = ref.read(authProvider)?.id;
+  if (userId == null) return Stream.error('not_logged_in');
 
-class ChatRoomNotifier extends StateNotifier<List<ChatRoom>> {
-  final Ref ref;
+  final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
+  return getChatRoomsUseCase(userId);
+});
 
-  ChatRoomNotifier(this.ref) : super([]) {
-    _fetchChatRooms();
-  }
+final chatMessageStreamProvider = StreamProvider.autoDispose
+    .family<List<ChatMessage>, String>((ref, chatRoomId) {
+  final userId = ref.watch(authProvider)?.id;
+  if (userId == null) return Stream.error('not_logged_in');
 
-  void _fetchChatRooms() {
-    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 수정
-    final getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
-
-    getChatRoomsUseCase(userId).listen((data) {
-      state = data;
-    });
-  }
-}
-
-final chatMessageProvider =
-    StateNotifierProvider.autoDispose<ChatMessageNotifier, List<ChatMessage>>(
-  (ref) => ChatMessageNotifier(ref),
-);
-
-class ChatMessageNotifier extends StateNotifier<List<ChatMessage>> {
-  final Ref ref;
-
-  ChatMessageNotifier(this.ref) : super([]);
-
-  StreamSubscription fetchChatMessages(String chatRoomId) {
-    final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
-
-    return getChatMessagesUseCase(chatRoomId).listen((data) {
-      state = data;
-    });
-  }
-}
+  final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
+  return getChatMessagesUseCase(chatRoomId);
+});

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_room_list.dart';
 
@@ -19,32 +20,35 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 변경
-    final chatRooms = ref
-        .watch(chatRoomProvider)
-        .where(
-            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
-        .toList();
+    final userId = ref.watch(authProvider)?.id;
+    final stream = ref.watch(chatRoomStreamProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('채팅')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: _buildFilterChips(),
-          ),
-          Expanded(
-              child: ChatRoomList(chatRoomList: chatRooms, userId: userId)),
-          // 새 채팅방 테스트용 버튼
-          OutlinedButton(onPressed: () {
-            context.push('/chats/chat_room', extra: {
-              'otherUserId': 'd',
-            });
-          }, child: const Text('new message')),
-        ],
-      ),
+      body: userId == null
+          ? _buildErrorBody()
+          : stream.when(
+              data: (data) => _buildChatListBody(data, userId),
+              error: (error, stackTrace) => _buildErrorBody(),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
+    );
+  }
+
+  Widget _buildChatListBody(List<ChatRoom> data, String userId) {
+    final filtered = data
+        .where(
+            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: _buildFilterChips(),
+        ),
+        Expanded(child: ChatRoomList(chatRoomList: filtered, userId: userId)),
+      ],
     );
   }
 
@@ -65,6 +69,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           },
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildErrorBody() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error),
+          Text(
+            '채팅 내역을 불러오던 중 문제가 발생했습니다!',
+            style: TextStyle(color: AppColors.text),
+          ),
+        ],
+      ),
     );
   }
 

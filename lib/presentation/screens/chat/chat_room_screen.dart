@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
@@ -11,11 +12,13 @@ import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final String productID;
 
   const ChatRoomScreen({
     super.key,
     required this.chatRoomId,
     required this.otherUserId,
+    required this.productID,
   });
 
   @override
@@ -27,7 +30,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = 'a'; // TODO - 실제 유저 아이디를 가져오도록 수정
+    final userId = ref.watch(authProvider)?.id;
+    if (userId == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error),
+            Text('채팅 내역을 불러오던 중 문제가 발생했습니다!'),
+          ],
+        ),
+      );
+    }
     final selectedImage = ref.watch(selectedImageProvider);
 
     if (widget.chatRoomId != null) {
@@ -49,6 +63,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
             otherUserId: widget.otherUserId,
+            productID: widget.productID,
             isAddButtonClicked: _isAddButtonClicked,
             onAddButtonClicked: _onAddButtonClicked,
           ),
@@ -111,9 +126,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             child: Image.file(File(path)),
           ),
         ),
-        IconButton(onPressed: () {
-          ref.read(selectedImageProvider.notifier).clear();
-        }, icon: const Icon(Icons.close)),
+        IconButton(
+            onPressed: () {
+              ref.read(selectedImageProvider.notifier).clear();
+            },
+            icon: const Icon(Icons.close)),
       ],
     );
   }

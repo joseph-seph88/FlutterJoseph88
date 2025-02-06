@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
+  final String productID;
   final bool isAddButtonClicked;
   final Function onAddButtonClicked;
 
@@ -15,6 +17,7 @@ class ChatMessageInput extends ConsumerStatefulWidget {
       {super.key,
       required this.chatRoomId,
       required this.otherUserId,
+      required this.productID,
       required this.isAddButtonClicked,
       required this.onAddButtonClicked});
 
@@ -128,15 +131,21 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   }
 
   Future<void> _sendMessage() async {
-    final senderId = 'a'; // TODO: 실제 이용자 id로 대체
+    final senderId = ref.read(authProvider)?.id;
+    if (senderId == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('메시지를 전송할 수 없습니다')));
+      return;
+    }
 
     if (widget.chatRoomId == null) {
       final chatRoomId = await _createChatRoom(senderId);
       await _sendContent(chatRoomId, senderId);
       if (mounted) {
-        context.go('/chats/chat_room', extra: {
+        context.pushReplacement('/chat_room', extra: {
           'chatRoomId': chatRoomId,
           'otherUserId': widget.otherUserId,
+          'productID': widget.productID,
         });
       }
     } else {
@@ -146,7 +155,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
 
   Future<String> _createChatRoom(String senderId) {
     final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
-    return createChatRoomUseCase(widget.otherUserId, senderId);
+    return createChatRoomUseCase(widget.otherUserId, senderId, widget.productID);
   }
 
   Future<void> _sendContent(String chatRoomId, String senderId) async {

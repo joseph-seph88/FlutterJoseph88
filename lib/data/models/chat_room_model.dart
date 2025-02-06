@@ -11,6 +11,7 @@ class ChatRoomModel {
   final Timestamp lastMessageTime;
   final String lastMessageType;
   final String lastMessageSender;
+  final String productID;
 
   ChatRoomModel({
     required this.id,
@@ -21,6 +22,7 @@ class ChatRoomModel {
     required this.lastMessageTime,
     required this.lastMessageType,
     required this.lastMessageSender,
+    required this.productID,
   });
 
   factory ChatRoomModel.fromJson(String id, Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class ChatRoomModel {
       lastMessageTime: json['lastMessageTime'],
       lastMessageType: json['lastMessageType'],
       lastMessageSender: json['lastMessageSender'],
+      productID: json['productID'],
     );
   }
 
@@ -46,6 +49,7 @@ class ChatRoomModel {
       lastMessageTime: lastMessageTime.toDate(),
       lastMessageType: ChatMessageType.getByCode(lastMessageType),
       lastMessageSender: lastMessageSender,
+      productID: productID,
     );
   }
 }
