@@ -58,6 +58,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       children: FilterType.values.map((filter) {
         return ChoiceChip(
           label: Text(_filterLabel(filter)),
+          backgroundColor: AppColors.background,
           selected: _filterType == filter,
           showCheckmark: false,
           onSelected: (selected) {
