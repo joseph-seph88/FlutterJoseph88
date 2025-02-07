@@ -16,7 +16,9 @@ final authProvider = StateNotifierProvider<AuthNotifier, UserEntity?>(
 class AuthNotifier extends StateNotifier<UserEntity?> {
   final AuthUseCase authUseCase;
 
-  AuthNotifier(this.authUseCase) : super(null);
+  AuthNotifier(this.authUseCase) : super(null) {
+    getCurrentUser();
+  }
 
   Future<bool> signIn(String email, String password) async {
     final user = await authUseCase.signIn(email, password);
@@ -40,6 +42,11 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     }
   }
 
+  Future<void> signOut() async {
+    await authUseCase.signOut();
+    state = null;
+  }
+
   Future<bool> validEmail(String email) async {
     return authUseCase.validEmail(email);
   }
@@ -47,5 +54,17 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
   Future<void> updateProfile(UserEntity userEntity) async {
     await authUseCase.updateProfile(userEntity);
     state = userEntity;
+  }
+
+  Future<void> getCurrentUser() async {
+    final user = await authUseCase.getCurrentUser();
+    if (user != null) {
+      state = user;
+    }
+  }
+
+  Future<void> withdraw(String userId, String password) async {
+    await authUseCase.withdraw(userId, password);
+    state = null;
   }
 }
