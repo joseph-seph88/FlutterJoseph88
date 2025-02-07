@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
@@ -29,7 +32,9 @@ class SendLocationScreen extends ConsumerStatefulWidget {
 class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
   final _searchController = TextEditingController();
   NaverMapController? _mapController;
+  bool _isSearching = false;
   bool _isInfoWindowPressed = false;
+  Timer? _debounce;
 
   @override
   void dispose() {
@@ -41,6 +46,7 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: const Text('지도')),
       body: Column(
         children: [
@@ -69,6 +75,7 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
                   },
                 ),
                 _buildCenterMarker(),
+                if (_isSearching) ...[_buildSearchResult(_searchController.text)],
               ],
             ),
           ),
@@ -97,8 +104,56 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
           filled: true,
           fillColor: ColorScheme.of(context).surfaceContainerHigh,
         ),
+        onChanged: (value) {
+          if (_debounce?.isActive ?? false) _debounce?.cancel();
+          if (value.isEmpty) {
+            setState(() {
+              _isSearching = false;
+            });
+            return;
+          }
+
+          _debounce = Timer(const Duration(seconds: 1), () {
+            setState(() {
+              _isSearching = _searchController.text.isNotEmpty;
+            });
+          });
+        },
         onSubmitted: (_) {},
         onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      ),
+    );
+  }
+
+  Widget _buildSearchResult(String input) {
+    final result = ref.watch(_searchResultProvider(input));
+
+    return Container(
+      color: AppColors.surface,
+      child: result.when(
+        data: (data) {
+          return ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              final item = data[index];
+
+              return ListTile(
+                title: Text(item.primaryText),
+                subtitle: Text(item.secondaryText),
+                trailing: const Icon(Icons.outbond_outlined),
+                onTap: () async {
+
+                },
+              );
+            },
+          );
+        },
+        error: (error, stackTrace) {
+          return const Center(child: Text('검색 중 오류가 발생했습니다.'));
+        },
+        loading: () {
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
@@ -256,6 +311,11 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
         chatRoomId, ChatMessageType.location, content, senderId);
   }
 }
+
+final _searchResultProvider = FutureProvider.family<List<AutocompletePrediction>, String>((ref, input) {
+  final mapUseCase = ref.read(mapUseCaseProvider);
+  return mapUseCase.getPredictions(input);
+});
 
 final _currentTargetProvider = StateProvider.autoDispose<AsyncValue<NLatLng>>((ref) {
   return const AsyncLoading();
