@@ -25,4 +25,8 @@ class AuthUseCase {
   Future<bool> validEmail(String email) async {
     return await _authRepository.validEmail(email);
   }
+
+  Future<void> updateProfile(UserEntity userEntity) async {
+    return await _authRepository.updateProfile(userEntity);
+  }
 }

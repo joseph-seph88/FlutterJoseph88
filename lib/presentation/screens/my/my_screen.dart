@@ -43,7 +43,13 @@ class MyScreen extends ConsumerWidget {
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: Colors.grey[200],
-                          child: const Icon(Icons.person_outline),
+                          backgroundImage:
+                              auth.image != null && auth.image!.isNotEmpty
+                                  ? NetworkImage(auth.image!)
+                                  : null,
+                          child: auth.image == null || auth.image!.isEmpty
+                              ? const Icon(Icons.person_outline)
+                              : null,
                         ),
                         const SizedBox(
                           width: AppStyles.defaultSpacing,

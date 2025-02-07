@@ -47,4 +47,10 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> validEmail(String email) async {
     return await _userDataSource.validEmail(email);
   }
+
+  @override
+  Future<void> updateProfile(UserEntity userEntity) async {
+    final userModel = userEntity.toModel(userEntity.id);
+    await _userDataSource.updateProfile(userModel);
+  }
 }

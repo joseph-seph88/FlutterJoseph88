@@ -33,7 +33,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         );
 
     if (success && mounted) {
-      context.push("/home");
+      context.go("/home");
     }
   }
 

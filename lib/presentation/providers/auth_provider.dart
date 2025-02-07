@@ -43,4 +43,9 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
   Future<bool> validEmail(String email) async {
     return authUseCase.validEmail(email);
   }
+
+  Future<void> updateProfile(UserEntity userEntity) async {
+    await authUseCase.updateProfile(userEntity);
+    state = userEntity;
+  }
 }
