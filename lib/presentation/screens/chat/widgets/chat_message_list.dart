@@ -204,7 +204,9 @@ class ChatMessageList extends ConsumerWidget {
               future: _getAddress(message.content, ref),
               builder: (context, snapshot) => Text(
                 snapshot.data ?? '',
-                style: const TextStyle(color: AppColors.text),
+                style: TextStyle(
+                  color: isMine || isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
             ),
           ],
