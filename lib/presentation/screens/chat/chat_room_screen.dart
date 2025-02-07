@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
@@ -171,7 +172,13 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             text: '사진',
           ),
           _buildIconButtonWithText(
-            onPressed: () {},
+            onPressed: () {
+              context.push('/send_location', extra: {
+                if (widget.chatRoomId != null) ...{'chatRoomId': widget.chatRoomId!},
+                'otherUserId': widget.otherUserId,
+                'productID': widget.productID,
+              });
+            },
             icon: Icons.location_pin,
             text: '장소',
           ),
