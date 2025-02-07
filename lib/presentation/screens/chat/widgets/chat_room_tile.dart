@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
-class ChatRoomTile extends StatelessWidget {
+class ChatRoomTile extends ConsumerWidget {
   final ChatRoom chatRoom;
   final String userId;
 
   const ChatRoomTile({super.key, required this.chatRoom, required this.userId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
+    final otherUserID = userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
+    final otherUserData = getUserDataUseCase(otherUserID);
+
     return ListTile(
-      leading: const CircleAvatar(),
+      leading: _buildLeadingIcons(ref),
       title: Row(
         children: [
-          Text(
-            userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
-            maxLines: 1,
+          FutureBuilder(
+            future: otherUserData,
+            builder: (context, snapshot) {
+              return Text(snapshot.data?.name ?? 'null', maxLines: 1);
+            },
           ),
           const SizedBox(width: 12),
           Text(
@@ -42,6 +51,48 @@ class ChatRoomTile extends StatelessWidget {
             userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer,
         'productID': chatRoom.productID!,
       }),
+    );
+  }
+
+  Widget _buildLeadingIcons(WidgetRef ref) {
+    const double iconSize = 40;
+    final product = chatRoom.productID == null
+        ? null
+        : ref.read(getProductDetailUseCaseProvider).execute(chatRoom.productID!);
+
+    return SizedBox(
+      width: iconSize * 1.5,
+      height: iconSize * 1.5,
+      child: Stack(
+        children: [
+          const Align(
+            alignment: Alignment.topLeft,
+            child: CircleAvatar(),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: FutureBuilder(
+                future: product,
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) return const Icon(Icons.photo);
+
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      snapshot.data!.images[0],
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
@@ -43,6 +44,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       );
     }
     final selectedImage = ref.watch(selectedImageProvider);
+    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
+    final otherUserData = getUserDataUseCase(widget.otherUserId);
 
     if (widget.chatRoomId != null) {
       final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
@@ -50,9 +53,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.otherUserId)),
+      appBar: AppBar(
+        title: FutureBuilder(
+          future: otherUserData,
+          builder: (context, snapshot) {
+            return Text(snapshot.data?.name ?? 'null');
+          },
+        ),
+      ),
       body: Column(
         children: [
+          _buildProductInfo(),
+          const Divider(),
           Expanded(
             child:
                 ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
@@ -79,6 +91,70 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     setState(() {
       _isAddButtonClicked = !_isAddButtonClicked;
     });
+  }
+
+  Widget _buildProductInfo() {
+    const double imageSize = 60;
+    final getProductDetailUseCase = ref.read(getProductDetailUseCaseProvider);
+    final productAsync = getProductDetailUseCase.execute(widget.productID);
+
+    return Padding(
+      padding: AppStyles.defaultPadding,
+      child: FutureBuilder(
+        future: productAsync,
+        builder: (context, snapshot) {
+          final product = snapshot.data;
+          if (product == null) return const SizedBox.shrink();
+
+          return Row(
+            children: [
+              Image.network(
+                product.images.first,
+                width: imageSize,
+                height: imageSize,
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(width: AppStyles.defaultSpacing),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '${product.status} ',
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        product.title,
+                        style: const TextStyle(color: AppColors.text),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${product.price}원 ',
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        product.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildAddItemSelectionField() {
