@@ -18,8 +18,7 @@ class MyScreen extends ConsumerWidget {
         title: const Text("나의 당근"),
         actions: [
           IconButton(
-            //TODO : 셋팅 화면 이동
-            onPressed: () {},
+            onPressed: () => context.push("/my/setting"),
             icon: const Icon(Icons.settings),
           )
         ],
