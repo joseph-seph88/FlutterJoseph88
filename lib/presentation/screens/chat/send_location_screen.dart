@@ -142,7 +142,19 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
                 subtitle: Text(item.secondaryText),
                 trailing: const Icon(Icons.outbond_outlined),
                 onTap: () async {
+                  final mapUseCase = ref.read(mapUseCaseProvider);
+                  final latLng = await mapUseCase.getLatLng(item.placeId);
+                  if (latLng == null) return;
 
+                  final nLatLng = NLatLng(latLng.lat, latLng.lng);
+                  final cameraUpdate = NCameraUpdate.withParams(target: nLatLng)
+                    ..setAnimation(animation: NCameraAnimation.none);
+
+                  _mapController?.updateCamera(cameraUpdate);
+                  _searchController.clear();
+                  setState(() {
+                    _isSearching = false;
+                  });
                 },
               );
             },

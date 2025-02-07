@@ -30,6 +30,8 @@ abstract class MapUseCase {
   List<Map<String, dynamic>> get getIconDataList;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
+
+  Future<LatLng?> getLatLng(String placeId);
 }
 
 class MapUseCaseImpl implements MapUseCase {
@@ -111,5 +113,10 @@ class MapUseCaseImpl implements MapUseCase {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<LatLng?> getLatLng(String placeId) {
+    return _repository.getLatLng(placeId);
   }
 }

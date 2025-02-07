@@ -20,4 +20,6 @@ abstract class MapRepository {
     List<Map<String, dynamic>> get getIconDataList;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
+
+  Future<LatLng?> getLatLng(String placeId);
 }
