@@ -90,6 +90,7 @@ class ProfileEditScreen extends ConsumerStatefulWidget {
 class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   final nameController = TextEditingController();
   File? _selectedImage;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -140,16 +141,28 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           children: [
             GestureDetector(
               onTap: () async {
-                final ImagePicker picker = ImagePicker();
-                final XFile? image = await picker.pickImage(
-                  source: ImageSource.gallery,
-                  maxWidth: 512,
-                  maxHeight: 512,
-                );
+                if (_isLoading) return;
 
-                if (image != null) {
+                try {
                   setState(() {
-                    _selectedImage = File(image.path);
+                    _isLoading = true;
+                  });
+
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    maxWidth: 512,
+                    maxHeight: 512,
+                  );
+
+                  if (image != null) {
+                    setState(() {
+                      _selectedImage = File(image.path);
+                    });
+                  }
+                } finally {
+                  setState(() {
+                    _isLoading = false;
                   });
                 }
               },
