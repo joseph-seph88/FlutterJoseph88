@@ -21,7 +21,6 @@ void main() async {
     ),
   ]);
 
-
   // 더미 데이터 업로드
   // await uploadDummyData();
 
@@ -37,14 +36,16 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     });
+
+    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
