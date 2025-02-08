@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/core/utils/color_trans_util.dart';
 import '../../providers/map_provider.dart';
 
 class AddShopPage extends ConsumerStatefulWidget {
@@ -19,62 +18,106 @@ class AddShopPage extends ConsumerStatefulWidget {
 class _AddShopPageState extends ConsumerState<AddShopPage> {
   final _searchController = TextEditingController();
   final _storeTextController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  final _storeFocusNode = FocusNode();
   NaverMapController? _mapController;
-  NCameraPosition position =
-      const NCameraPosition(target: NLatLng(37.499889, 126.920056), zoom: 15);
-  Placemark? placeAddress = const Placemark(street: "Default");
-  NLatLng centerLatLng = const NLatLng(37.499889, 126.920056);
-  LatLng? tranPosition = const LatLng(lat: 37.499889, lng: 126.920056);
+  NLatLng currentPosition = const NLatLng(37.499889, 126.920056);
+  NLatLng staticLatLng = const NLatLng(37.499889, 126.920056);
+  Map<String, dynamic> category = {};
   int? selectedIndex;
-  List<Map<String, dynamic>> iconData = [];
-  String iconPath = AppConstant.coffeePath;
+  Color? categoryColor;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_mapController != null) {
-      _moveCamera();
+      final position = ref.read(mapProvider).positionData;
+      currentPosition = NLatLng(position.lat, position.lng);
+      _moveCamera(currentPosition);
     }
   }
 
-  void _moveCamera() async {
-    final mapState = ref.read(mapProvider);
-    if (mapState.positionData != null) {
-      final positionData = mapState.positionData;
-      centerLatLng = NLatLng(positionData!.lat, positionData.lng);
-      final cameraUpdate = NCameraUpdate.fromCameraPosition(
-        NCameraPosition(
-          target: centerLatLng,
-          zoom: 16,
-        ),
-      );
-      await _mapController!.updateCamera(cameraUpdate);
-    }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _storeTextController.dispose();
+    _mapController?.dispose();
+    _searchFocusNode.dispose();
+    _storeFocusNode.dispose();
+    super.dispose();
   }
 
-  Future<void> _convertPositionToAddress() async {
-    final cameraPosition = await _mapController!.getCameraPosition();
-    centerLatLng = NLatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
-    final newPlaceAddress =
-        await ref.read(mapProvider.notifier).transAddressFromGeo(centerLatLng);
-    setState(() {
-      placeAddress = newPlaceAddress;
-    });
+  Future<void> _moveCamera(NLatLng nLatLng) async {
+    final cameraUpdate = NCameraUpdate.fromCameraPosition(
+      NCameraPosition(
+        target: nLatLng,
+        zoom: 16,
+      ),
+    );
+    await _mapController?.updateCamera(cameraUpdate);
+  }
+
+  Future<void> _onCameraIdle() async {
+    final cameraPosition = _mapController!.nowCameraPosition;
+    currentPosition = NLatLng(
+        cameraPosition.target.latitude, cameraPosition.target.longitude);
+    await ref
+        .read(mapProvider.notifier)
+        .transPositionToAddress(currentPosition);
+  }
+
+  Future<void> _onMapReady(NaverMapController controller) async {
+    _mapController = controller;
+    await ref
+        .read(mapProvider.notifier)
+        .transPositionToAddress(currentPosition);
+  }
+
+  void _zoomIn() {
+    _searchFocusNode.unfocus();
+    _storeFocusNode.unfocus();
+    _mapController?.updateCamera(NCameraUpdate.zoomIn());
+  }
+
+  void _zoomOut() {
+    _searchFocusNode.unfocus();
+    _storeFocusNode.unfocus();
+    _mapController?.updateCamera(NCameraUpdate.zoomOut());
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedAddress = ref.watch(selectedAddressProvider);
-    if (_searchController.text != selectedAddress) {
-      _searchController.text = selectedAddress;
-      ref
+    final mapState = ref.watch(mapProvider);
+    final categories = mapState.staticCategory;
+
+    Future<void> onPressedBtn() async {
+      final position =
+          GeoPoint(currentPosition.latitude, currentPosition.longitude);
+      final storeName = _storeTextController.text;
+      await ref
           .read(mapProvider.notifier)
-          .transPositionFromAddress(_searchController.text);
+          .addMarker(position, category, mapState.transAddress, storeName);
+      ref.read(isInitProvider.notifier).state = false;
+      if (context.mounted) {
+        context.pop();
+      }
+    }
+
+    void onSelectedBtn(int index) {
+      setState(() {
+        selectedIndex = index;
+      });
+      category = {
+        'category': categories[index]['category'],
+        'iconPath': categories[index]['iconPath'],
+        'iconColor': categories[index]['iconColor'],
+      };
     }
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
+        _searchFocusNode.unfocus();
+        _storeFocusNode.unfocus();
       },
       child: Scaffold(
           appBar: AppBar(
@@ -82,7 +125,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
-                context.go('/map');
+                context.pop();
               },
             ),
           ),
@@ -101,9 +144,10 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                 padding: AppStyles.horizontalPadding
                     .copyWith(bottom: AppStyles.verticalPadding.bottom - 5),
                 child: TextField(
+                  focusNode: _searchFocusNode,
                   onTap: () {
-                    context.go('/map/addShop/searchAddr');
-                    FocusScope.of(context).requestFocus(FocusNode());
+                    _searchFocusNode.unfocus();
+                    context.push('/map/addShop/searchAddr');
                   },
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -138,17 +182,11 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                           ),
                         ),
                         onMapReady: (controller) async {
-                          setState(() {
-                            _mapController = controller;
-                          });
-                          if (_mapController != null) {
-                            position =
-                                await _mapController!.getCameraPosition();
-                          }
+                          await _onMapReady(controller);
                         },
                         onCameraIdle: () async {
                           if (_mapController != null) {
-                            _convertPositionToAddress();
+                            await _onCameraIdle();
                           }
                         },
                       ),
@@ -164,15 +202,40 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       ),
                     ),
                     Positioned(
+                      bottom: 100,
+                      left: 20,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          _zoomOut();
+                        },
+                        child:
+                            const Icon(Icons.remove, color: AppColors.surface),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 40,
+                      left: 20,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          _zoomIn();
+                        },
+                        child: const Icon(Icons.add, color: AppColors.surface),
+                      ),
+                    ),
+                    Positioned(
                       right: 20,
-                      bottom: 80,
+                      bottom: 40,
                       child: FloatingActionButton(
-                        onPressed: () {
+                        backgroundColor: AppColors.primary,
+                        onPressed: () async {
+                          _searchFocusNode.unfocus();
+                          _storeFocusNode.unfocus();
                           if (_mapController != null) {
-                            _moveCamera();
+                            await _moveCamera(staticLatLng);
                           }
                         },
-                        child: const Icon(Icons.my_location),
+                        child: const Icon(Icons.my_location,
+                            color: AppColors.surface),
                       ),
                     )
                   ],
@@ -193,26 +256,25 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                           ),
                           child: PopupMenuButton(
                             onSelected: (index) {
-                              setState(() {
-                                selectedIndex = index;
-                              });
-                              iconPath = iconData[selectedIndex!]['icon'];
+                              onSelectedBtn(index);
                             },
                             itemBuilder: (context) {
-                              ref.read(mapProvider.notifier).getIconDataList;
-                              iconData = ref.read(mapProvider).iconDataList;
                               return List.generate(
-                                iconData.length,
+                                categories.length,
                                 (index) {
+                                  category = categories[index];
+                                  categoryColor =
+                                      ColorTransUtil.transStringToColor(
+                                          category['iconColor']);
                                   return PopupMenuItem(
                                       value: index,
                                       child: Row(
                                         children: [
                                           Image.asset(
-                                            iconData[index]['icon'],
+                                            category['iconPath'],
                                             width: 20,
                                             height: 20,
-                                            color: iconData[index]['color'],
+                                            color: categoryColor,
                                           ),
                                         ],
                                       ));
@@ -222,11 +284,13 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                             child: selectedIndex != null
                                 ? ImageIcon(
                                     AssetImage(
-                                        iconData[selectedIndex!]['icon']),
-                                    color: iconData[selectedIndex!]['color'],
+                                        categories[selectedIndex!]['iconPath']),
+                                    color: ColorTransUtil.transStringToColor(
+                                        categories[selectedIndex!]
+                                            ['iconColor']),
                                   )
                                 : Text(
-                                    "장르 선택",
+                                    "카테고리",
                                     style: AppStyles.labelMedium
                                         .copyWith(color: Colors.lightGreen),
                                   ),
@@ -239,17 +303,11 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                               bottom: AppStyles.verticalPadding.bottom,
                               left: AppStyles.verticalPadding.left + 20,
                             ),
-                            child: placeAddress != null
-                                ? Text(
-                                    '${placeAddress?.street}',
-                                    style: AppStyles.labelLarge
-                                        .copyWith(color: AppColors.text),
-                                  )
-                                : Text(
-                                    "Data",
-                                    style: AppStyles.labelLarge
-                                        .copyWith(color: AppColors.text),
-                                  ),
+                            child: Text(
+                              mapState.transAddress,
+                              style: AppStyles.labelLarge
+                                  .copyWith(color: AppColors.text),
+                            ),
                           ),
                         ),
                       ],
@@ -261,9 +319,15 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       ),
                       child: TextField(
                         controller: _storeTextController,
+                        focusNode: _storeFocusNode,
+                        onTap: () {
+                          if (_storeFocusNode.hasFocus) {
+                            _storeFocusNode.unfocus();
+                          }
+                        },
                         decoration: InputDecoration(
-                            labelText: "상호명 입력",
-                            hintText: "상호명 입력",
+                            labelText: "상세 주소 입력",
+                            hintText: "상수 주소 입력",
                             hintStyle: AppStyles.labelLarge
                                 .copyWith(color: Colors.grey),
                             prefixIcon: const Icon(
@@ -289,14 +353,10 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       width: double.infinity,
                       child: ElevatedButton(
                           onPressed: () async {
-                            final position = GeoPoint(
-                                centerLatLng.latitude, centerLatLng.longitude);
-                            final address = placeAddress?.street;
-                            final storeName = _storeTextController.text;
-                            await ref.read(mapProvider.notifier).addMarker(
-                                position, iconPath, address!, storeName);
-                            if (context.mounted) {
-                              context.go('/map');
+                            _storeFocusNode.unfocus();
+                            _searchFocusNode.unfocus();
+                            if (selectedIndex != null) {
+                              await onPressedBtn();
                             }
                           },
                           child: const Text("선택", style: AppStyles.labelLarge)),

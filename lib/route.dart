@@ -3,8 +3,11 @@ import 'package:o2/presentation/screens/auth/sign_in/sign_in_screen.dart';
 import 'package:o2/presentation/screens/auth/sign_up/sign_up_screen.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
-import 'package:o2/presentation/screens/map/like_shop_page.dart';
+import 'package:o2/presentation/screens/map/recommended_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
+import 'package:o2/presentation/screens/map/search_address_page.dart';
+import 'package:o2/presentation/screens/map/star_rating_page.dart';
+import 'package:o2/presentation/screens/map/transaction_location_page.dart';
 import 'package:o2/presentation/screens/my/my_favorite_screen.dart';
 import 'package:o2/presentation/screens/my/my_profile_screen.dart';
 import 'package:o2/presentation/screens/my/my_purchase_history_screen.dart';
@@ -69,16 +72,31 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ProductListView(),
     ),
     GoRoute(
+      path: "/transactionMap",
+      builder: (context, state) => TransactionLocationPage(),
+    ),
+    GoRoute(
         path: "/map",
         builder: (context, state) => const MapScreen(),
         routes: [
           GoRoute(
-            path: "/addShop",
-            builder: (context, state) => const AddShopPage(),
-          ),
+              path: "/addShop",
+              builder: (context, state) => const AddShopPage(),
+              routes: [
+                GoRoute(
+                  path: "/searchAddr",
+                  builder: (context, state) => const SearchAddressPage(),
+                ),
+              ]),
           GoRoute(
-            path: "/likeShop",
-            builder: (context, state) => const LikeShopPage(),
+            path: "/recommendShop",
+            builder: (context, state) => RecommendedShopPage(),
+            routes: [
+              GoRoute(
+                path: "/starRating",
+                builder: (context, state) => StarRatingPage(),
+              ),
+            ]
           ),
         ]),
     GoRoute(

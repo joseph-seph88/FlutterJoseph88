@@ -85,9 +85,12 @@ class MapDataSource {
     }
   }
 
-  Stream<List<MapModel?>> getMapDataWithIconStream(String iconPath, GeoPoint position) {
-    final CollectionReference<Map<String, dynamic>> collectionReference = _fireStore.collection('maps');
-    final GeoFirePoint center = GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+  Stream<List<MapModel?>> getMapDataWithIconStream(
+      String category, GeoPoint position) {
+    final CollectionReference<Map<String, dynamic>> collectionReference =
+        _fireStore.collection('maps');
+    final GeoFirePoint center =
+        GeoFirePoint(GeoPoint(position.latitude, position.longitude));
 
     GeoPoint geopointFrom(Map<String, dynamic> data) {
       final geo = data['geo'] as Map<String, dynamic>;
@@ -97,26 +100,27 @@ class MapDataSource {
 
     return GeoCollectionReference<Map<String, dynamic>>(collectionReference)
         .subscribeWithin(
-        center: center,
-        radiusInKm: 3 * 0.05,
-        field: 'geo',
-        geopointFrom: geopointFrom
-    )
+            center: center,
+            radiusInKm: 3 * 0.03,
+            field: 'geo',
+            geopointFrom: geopointFrom)
         .map((docs) {
       final filteredDocs = docs.where((doc) {
-        final iconPathDoc = doc['iconPath'];
-        return iconPathDoc == iconPath;
+        final categoryFromDoc = doc['category']['category'];
+        return categoryFromDoc == category;
       }).toList();
 
-      final mapModels = filteredDocs.map((doc) {
-        final data = doc.data();
-        return data != null ? MapModel.fromMap(data) : null;
-      }).where((mapModel) => mapModel != null).toList();
+      final mapModels = filteredDocs
+          .map((doc) {
+            final data = doc.data();
+            return data != null ? MapModel.fromMap(data) : null;
+          })
+          .where((mapModel) => mapModel != null)
+          .toList();
 
       return mapModels;
     });
   }
-
 
   Future<List<MapModel>> searchStore(String queryText) async {
     try {
@@ -126,52 +130,76 @@ class MapDataSource {
           .where('storeName', isLessThan: '$queryText\uf8ff')
           .get();
       print("검색디피 : ${searchData.size}");
-      return searchData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
+      return searchData.docs
+          .map((doc) => MapModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       throw Exception("DB서치에러");
     }
   }
 
-  Future<List<MapModel>> getStoreData() async {
+  Future<List<MapModel>> getAllMapData() async {
     try {
-      final searchData = await _fireStore
-          .collection('maps')
-          .get();
+      final searchData = await _fireStore.collection('maps').get();
 
-      return searchData.docs.map((doc) => MapModel.fromMap(doc.data())).toList();
+      return searchData.docs
+          .map((doc) => MapModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       throw Exception("DB서치에러");
     }
   }
 
+  Future<MapModel> updateStarRating(
+      String mapId, int participant, double starRating) async {
+    try {
+      await _fireStore
+          .collection('maps')
+          .doc(mapId)
+          .update({'participant': participant, 'starRating': starRating});
+      final updateDoc = await _fireStore.collection('maps').doc(mapId).get();
+      return MapModel.fromMap(updateDoc.data()!);
+    } catch (e) {
+      throw Exception("DB서치에러");
+    }
+  }
 
-  final List<Map<String, dynamic>> _selectIconData = [
+  Future<MapModel> getMapData(String mapId) async{
+    try{
+      final mapData = await _fireStore.collection('maps').doc(mapId).get();
+      return MapModel.fromMap(mapData.data()!);
+    }catch(e){
+      throw Exception("DB서치에러");
+    }
+  }
+
+  final List<Map<String, dynamic>> _staticCategoryData = [
     {
-      "icon": AppConstant.coffeePath,
-      "label": AppConstant.coffee,
-      "color": AppConstant.brownColor
+      "category": AppConstant.coffee,
+      "iconPath": AppConstant.coffeePath,
+      "iconColor": AppConstant.brownColor
     },
     {
-      "icon": AppConstant.fishPath,
-      "label": AppConstant.fish,
-      "color": AppConstant.orangeColor
+      "category": AppConstant.fish,
+      "iconPath": AppConstant.fishPath,
+      "iconColor": AppConstant.orangeColor
     },
     {
-      "icon": AppConstant.foodPath,
-      "label": AppConstant.food,
-      "color": AppConstant.indigoColor
+      "category": AppConstant.food,
+      "iconPath": AppConstant.foodPath,
+      "iconColor": AppConstant.indigoColor
     },
     {
-      "icon": AppConstant.icecreamPath,
-      "label": AppConstant.icecream,
-      "color": AppConstant.lightGreenColor
+      "category": AppConstant.icecream,
+      "iconPath": AppConstant.icecreamPath,
+      "iconColor": AppConstant.lightGreenColor
     },
     {
-      "icon": AppConstant.trashPath,
-      "label": AppConstant.trash,
-      "color": AppConstant.deepPurpleColor
+      "category": AppConstant.trash,
+      "iconPath": AppConstant.trashPath,
+      "iconColor": AppConstant.deepPurpleColor
     },
   ];
 
-  List<Map<String, dynamic>> get selectIconData => _selectIconData;
+  List<Map<String, dynamic>> get getStaticCategoryData => _staticCategoryData;
 }

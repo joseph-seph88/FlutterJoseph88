@@ -16,13 +16,21 @@ class AppConstant {
   static const food = "음식";
   static const icecream = "아이스크림";
   static const trash = "쓰레기통";
+  static const location = "내 위치";
+
+  //ColorString
+  static const brownColor = 'brownColor';
+  static const orangeColor = 'orangeColor';
+  static const indigoColor = 'indigoColor';
+  static const lightGreenColor = 'lightGreenColor';
+  static const deepPurpleColor = 'deepPurpleColor';
 
   //Color
-  static const blackColor = Colors.black;
-  static const brownColor = Colors.brown;
-  static const orangeColor = Colors.orange;
-  static const indigoColor = Colors.indigo;
-  static const lightGreenColor = Colors.lightGreen;
-  static const deepPurpleColor = Colors.deepPurple;
-  static const transparentColor = Colors.transparent;
+  static const Color brown = Color(0xFF3E2905);
+  static const Color orange = Color(0xFFE39F2F);
+  static const Color indigo = Color(0xFF12529D);
+  static const Color lightGreen = Color(0xFF78A468);
+  static const Color deepPurple = Color(0xFF501EB3);
+  static const Color amber = Color(0xFFDCAE24);
+
 }

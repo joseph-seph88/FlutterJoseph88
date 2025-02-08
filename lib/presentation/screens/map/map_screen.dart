@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/screens/map/widgets/map_scroll_view.dart';
+import 'package:o2/presentation/screens/map/widgets/map_search_scroll_view.dart';
 import '../../../domain/entities/map_entity.dart';
 import '../../providers/map_provider.dart';
 
@@ -21,30 +21,25 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   late DraggableScrollableController _sheetController;
   final _searchController = TextEditingController();
-  Set<NMarker> markersSet = {};
-  String? shortAddress = "영등포구 보라매역 공원";
-  NCameraPosition position =
-      const NCameraPosition(target: NLatLng(37.499889, 126.920056), zoom: 15);
-  NLatLng selectedLatLng = const NLatLng(37.499889, 126.920056);
-  List<Map<String, dynamic>> iconData = [];
-  List<MapEntity> mapDataList = [];
-  double _buttonOffset = 120;
-  List<MapEntity> searchDataList = [];
+  final _focusNode = FocusNode();
+  NLatLng currentPosition = const NLatLng(37.499889, 126.920056);
+  double _buttonOffset = 100;
   bool toggled = false;
-  String iconDataPath = AppConstant.fishPath;
+  String category = "";
+  bool isMoving = false;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppConstant.transparentColor,
+      statusBarColor: AppColors.backgroundTransparent,
       statusBarIconBrightness: Brightness.dark,
     ));
     _sheetController = DraggableScrollableController();
     _sheetController.addListener(() {
       setState(() {
-        double sheetHeight = MediaQuery.of(context).size.height * 0.8;
-        _buttonOffset = 120 + (_sheetController.size * sheetHeight);
+        double sheetHeight = MediaQuery.of(context).size.height;
+        _buttonOffset = 10 + (_sheetController.size * sheetHeight);
       });
     });
   }
@@ -52,121 +47,28 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppConstant.blackColor,
+      statusBarColor: AppColors.text,
       statusBarIconBrightness: Brightness.light,
     ));
     _searchController.dispose();
     _sheetController.dispose();
+    _mapController?.dispose();
+    _mapController = null;
+    _focusNode.dispose();
     super.dispose();
   }
 
-  void onButtonPressed(String iconPath, GeoPoint geoPosition) {
-    ref.read(mapParamProvider.notifier).state = {
-      'iconPath': iconPath,
-      'position': geoPosition
-    };
-  }
-
   Future<void> updateMapMarkers(List<MapEntity> markers) async {
-    markersSet.clear();
     await _mapController?.clearOverlays(type: NOverlayType.marker);
-
-    for (var marker in markers) {
-      final streamMarker = NMarker(
-          id: marker.mapId ?? '1',
-          position:
-              NLatLng(marker.position.latitude, marker.position.longitude),
-          icon: NOverlayImage.fromAssetImage(marker.iconPath),
-          iconTintColor: Colors.green,
-          size: const NSize(20, 20));
-
-      streamMarker.setOnTapListener((overlay) async {
-        final infoWindow = NInfoWindow.onMarker(
-          id: marker.mapId ?? '1',
-          text: marker.address,
-        );
-
-        bool isOpen = await streamMarker.hasOpenInfoWindow();
-        if (!isOpen) {
-          await streamMarker.openInfoWindow(infoWindow);
-        }
-      });
-      markersSet.add(streamMarker);
-    }
-    await _mapController?.addOverlayAll(markersSet);
-  }
-
-  Future<void> addOverlayMarkers(int index) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-    markersSet.clear();
-
-    if (mapDataList.isNotEmpty) {
-      for (var mapEntity in mapDataList) {
-        final marker = NMarker(
-          id: mapEntity.mapId ?? '1',
-          position: NLatLng(
-              mapEntity.position.latitude, mapEntity.position.longitude),
-          icon: NOverlayImage.fromAssetImage(mapEntity.iconPath),
-          size: const NSize(30, 30),
-          iconTintColor: iconData[index]['color'],
-        );
-
-        marker.setOnTapListener((overlay) async {
-          final infoWindow = NInfoWindow.onMarker(
-            id: mapEntity.mapId ?? '1',
-            text: mapEntity.address,
-          );
-
-          bool isOpen = await marker.hasOpenInfoWindow();
-          if (!isOpen) {
-            await marker.openInfoWindow(infoWindow);
-          }
-        });
-        markersSet.add(marker);
-      }
-      await _mapController?.addOverlayAll(markersSet);
+    ref.read(mapProvider.notifier).clearMapMarkers();
+    await ref.read(mapProvider.notifier).setMapMarkers(markers);
+    final markerSetData = ref.read(mapProvider).markersSet;
+    if (markerSetData.isNotEmpty) {
+      await _mapController?.addOverlayAll(markerSetData);
     }
   }
 
-  Future<void> addOverlayMarker(MapEntity storeData) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-
-    final marker = NMarker(
-      id: storeData.mapId ?? '1',
-      position:
-          NLatLng(storeData.position.latitude, storeData.position.longitude),
-      icon: NOverlayImage.fromAssetImage(storeData.iconPath),
-      size: const NSize(30, 30),
-      iconTintColor: Colors.green,
-    );
-
-    await _mapController?.addOverlay(marker);
-
-    setState(() {
-      toggled = false;
-      _searchController.clear();
-    });
-  }
-
-  String? getFormattedAddress(Placemark? placeAddress) {
-    if (placeAddress?.street == null) return null;
-    String fullAddress = placeAddress!.street!;
-    List<String> parts = fullAddress.split(' ');
-    if (parts.length >= 3) {
-      return parts.sublist(parts.length - 3).join(' ');
-    }
-    return fullAddress;
-  }
-
-  Future<void> searchStore(String inputText) async {
-    List<MapEntity> searchData =
-        await ref.watch(mapProvider.notifier).searchStore(inputText);
-    setState(() {
-      searchDataList = searchData;
-    });
-  }
-
-  void moveCamera(NLatLng nLatLng) async {
+  Future<void> moveCamera(NLatLng nLatLng) async {
     final cameraUpdate = NCameraUpdate.fromCameraPosition(
       NCameraPosition(
         target: nLatLng,
@@ -176,15 +78,123 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await _mapController?.updateCamera(cameraUpdate);
   }
 
+  void _zoomIn() {
+    _mapController?.updateCamera(NCameraUpdate.zoomIn());
+  }
+
+  void _zoomOut() {
+    _mapController?.updateCamera(NCameraUpdate.zoomOut());
+  }
+
+  Future<void> moveMyPosition(NLatLng nLatLng) async {
+    await moveCamera(nLatLng);
+    final param = {
+      'category': category,
+      'position': GeoPoint(nLatLng.latitude, nLatLng.longitude)
+    };
+    ref.read(mapParamProvider.notifier).state = param;
+  }
+
   Future<void> addCircleOverlay(NLatLng latLng) async {
-    const double radius = 190.0;
+    const double radius = 220.0;
     final circleOverlay = NCircleOverlay(
         id: "circle",
         center: latLng,
         radius: radius,
         color: const Color.fromRGBO(169, 169, 169, 0.5));
-
     await _mapController?.addOverlay(circleOverlay);
+  }
+
+  Future<void> moveAndOverlayWithSearchData(MapEntity searchStoreData) async {
+    closeFocus();
+    await _mapController?.clearOverlays();
+    isMoving = true;
+    ref.read(isInitProvider.notifier).state = false;
+
+    final searchLat = searchStoreData.position.latitude;
+    final searchLng = searchStoreData.position.longitude;
+
+    final markerData =
+        await ref.read(mapProvider.notifier).setMapMarker(searchStoreData);
+    if (markerData != null) {
+      await _mapController?.addOverlay(markerData);
+    }
+    await moveCamera(NLatLng(searchLat, searchLng));
+    setState(() {
+      toggled = false;
+      _searchController.clear();
+    });
+
+    await Future.delayed(const Duration(seconds: 1));
+    ref.read(isInitProvider.notifier).state = true;
+  }
+
+  Future<void> onCameraIdle() async {
+    final getPosition = _mapController!.nowCameraPosition;
+    currentPosition = getPosition.target;
+    category = ref.read(categoryProvider);
+
+    if (currentPosition.latitude != 0) {
+      final currentLat = currentPosition.latitude;
+      final currentLng = currentPosition.longitude;
+      final latLng = NLatLng(currentLat, currentLng);
+      final param = {
+        'category': category,
+        'position': GeoPoint(currentLat, currentLng)
+      };
+      ref.read(mapParamProvider.notifier).state = param;
+      await ref.read(mapProvider.notifier).transPositionToAddress(latLng);
+    }
+    await addCircleOverlay(
+        NLatLng(currentPosition.latitude, currentPosition.longitude));
+  }
+
+  Future<void> onMapReady(NaverMapController controller) async {
+    _mapController = controller;
+    await ref.read(mapProvider.notifier).getAllMapData();
+    category = ref.read(categoryProvider);
+    ref.read(mapProvider.notifier).getStaticCategoryData;
+
+    if (_mapController != null) {
+      final overlay = controller.getLocationOverlay();
+      overlay.setIsVisible(true);
+      await _mapController?.clearOverlays(type: NOverlayType.marker);
+      ref.read(mapParamProvider.notifier).state = {};
+      await ref
+          .read(mapProvider.notifier)
+          .transPositionToAddress(currentPosition);
+    }
+  }
+
+  Future<void> setMarker(MapEntity marker) async {
+    final markerData =
+        await ref.read(mapProvider.notifier).setMapMarker(marker);
+    if (markerData != null) {
+      await _mapController?.addOverlay(markerData);
+    }
+  }
+
+  Future<void> onButtonPressed(String category, GeoPoint geoPosition) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    isMoving = false;
+
+    final param = {'category': category, 'position': geoPosition};
+
+    ref.read(isInitProvider.notifier).state = true;
+    ref.read(mapParamProvider.notifier).state = param;
+
+    final nLatLng = NLatLng(geoPosition.latitude, geoPosition.longitude);
+    await addCircleOverlay(nLatLng);
+    setState(() {
+      _sheetController.jumpTo(0);
+    });
+  }
+
+  void closeFocus() {
+    _focusNode.unfocus();
+    setState(() {
+      toggled = false;
+    });
   }
 
   @override
@@ -196,11 +206,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       (previous, next) {
         next.when(
           data: (newData) async {
-            setState(() {
-              mapDataList.clear();
-              mapDataList.addAll(newData);
-            });
-            await updateMapMarkers(newData);
+            if (!isMoving) {
+              await updateMapMarkers(newData);
+            } else {
+              print("스트림 데이터 무시됨 (isMoving = true)");
+            }
           },
           loading: () {
             print("데이터 로딩 중...");
@@ -215,7 +225,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (mapState.isLoading) {
       return const CircularProgressIndicator();
     }
-
     if (mapState.error.isNotEmpty) {
       return Text("Error: ${mapState.error}");
     }
@@ -233,34 +242,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ),
             ),
             onMapReady: (controller) async {
-              setState(() {
-                _mapController = controller;
-              });
-              final overlay = controller.getLocationOverlay();
-              overlay.setIsVisible(true);
-              ref.read(mapProvider.notifier).getIconDataList;
-              iconData = ref.read(mapProvider).iconDataList;
-              if (_mapController != null) {
-                position = await _mapController!.getCameraPosition();
-              }
+              await onMapReady(controller);
             },
             onCameraIdle: () async {
-              if (_mapController != null) {
-                position = await _mapController!.getCameraPosition();
-                print(
-                    "카메라이동시좌표: ${position.target.latitude} / ${position.target.longitude}");
-                if (position.target.latitude != 0) {
-                  final latLng = NLatLng(
-                      position.target.latitude, position.target.longitude);
-                  await addCircleOverlay(latLng);
-                  final param = {
-                    'iconPath': iconDataPath,
-                    'position': GeoPoint(
-                        position.target.latitude, position.target.longitude)
-                  };
-
-                  ref.watch(mapParamProvider.notifier).state = param;
-                }
+              if (_mapController != null &&
+                  ref.read(isInitProvider) == true &&
+                  isMoving == false) {
+                await onCameraIdle();
               }
             },
           ),
@@ -275,19 +263,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   color: AppColors.surface,
                   child: TextField(
                     controller: _searchController,
+                    focusNode: _focusNode,
                     onTap: () async {
                       setState(() {
-                        toggled = true;
+                        toggled = !toggled;
                       });
-                    },
-                    onChanged: (text) async {
-                      if (text.isNotEmpty) {
-                        await searchStore(text);
-                      } else {
-                        setState(() {
-                          searchDataList = [];
-                        });
+                      if (!toggled) {
+                        _focusNode.unfocus();
                       }
+                    },
+                    onChanged: (query) {
+                      ref.read(mapProvider.notifier).searchStoreData(query);
                     },
                     decoration: InputDecoration(
                       hintText: "여기서 업체 검색",
@@ -306,56 +292,65 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ),
                 ),
                 if (toggled)
-                  SingleChildScrollView(
-                    child: Container(
-                      color: AppColors.primary.withAlpha(150).withRed(150),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: searchDataList.length,
-                        itemBuilder: (context, index) {
-                          final store = searchDataList[index];
-                          return ListTile(
-                            title: Text(store.storeName),
-                            subtitle: Text(store.address),
-                            onTap: () async {
-                              selectedLatLng = NLatLng(
-                                  searchDataList[index].position.latitude,
-                                  searchDataList[index].position.longitude);
-                              moveCamera(selectedLatLng);
-                              await addOverlayMarker(store);
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                  MapSearchScrollView(onTap: (data) async {
+                    await moveAndOverlayWithSearchData(data);
+                  })
               ],
             ),
           ),
           Positioned(
-              bottom: _buttonOffset,
-              left: 20,
-              child: ElevatedButton(
-                  onPressed: () {
-                    selectedLatLng = const NLatLng(37.499889, 126.920056);
-                    moveCamera(selectedLatLng);
-                  },
-                  child: const Icon(Icons.my_location))),
+            bottom: _buttonOffset,
+            left: 20,
+            child: ElevatedButton(
+              onPressed: () async {
+                closeFocus();
+                const NLatLng currentMyLatLng = NLatLng(37.499889, 126.920056);
+                await moveMyPosition(currentMyLatLng);
+              },
+              child: const Icon(Icons.my_location, color: AppColors.surface),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 120,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: () {
+                closeFocus();
+                _zoomIn();
+              },
+              child: const Icon(Icons.add, color: AppColors.surface),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 65,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: () {
+                closeFocus();
+                _zoomOut();
+              },
+              child: const Icon(Icons.remove, color: AppColors.surface),
+            ),
+          ),
           Positioned(
             bottom: _buttonOffset,
             right: 20,
             child: FloatingActionButton.extended(
-                onPressed: () async{
-                  await ref.read(mapProvider.notifier).getStoreData();
-                  final customBottomSheet = ref.read(bottomSheetProvider);
-                  if(context.mounted){
-                    customBottomSheet.bottomSheetWithTwoBtn(context);
-                  }
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  closeFocus();
+                  final mapBottomSheet = ref.read(bottomSheetProvider);
+                  mapBottomSheet.mapBottomSheetWithTwoBtn(context, ref);
                 },
-                label: const Row(
+                label: Row(
                   children: [
-                    Icon(Icons.add),
-                    Text("추가하기", style: AppStyles.labelMedium)
+                    const Icon(
+                      Icons.add,
+                      color: AppColors.surface,
+                    ),
+                    Text("추가하기",
+                        style: AppStyles.labelMedium
+                            .copyWith(color: AppColors.surface))
                   ],
                 )),
           ),
@@ -365,92 +360,34 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             minChildSize: 0.1,
             maxChildSize: 0.45,
             builder: (context, scrollController) {
-              return SingleChildScrollView(
-                controller: scrollController,
-                child: Container(
+              final geoLatLng =
+                  GeoPoint(currentPosition.latitude, currentPosition.longitude);
+              return Container(
+                decoration: const BoxDecoration(
                   color: AppColors.surface,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: AppStyles.defaultPadding.copyWith(
-                          top: AppStyles.verticalPadding.top + 10,
-                          bottom: AppStyles.verticalPadding.bottom + 10,
-                        ),
-                        color: AppColors.surface,
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on),
-                            const SizedBox(width: 5),
-                            shortAddress != null
-                                ? Text(
-                                    '$shortAddress',
-                                    style: AppStyles.labelLarge
-                                        .copyWith(color: AppColors.text),
-                                  )
-                                : Text(
-                                    '보라매역',
-                                    style: AppStyles.labelLarge
-                                        .copyWith(color: AppColors.text),
-                                  ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: GridView.builder(
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 10.0,
-                              mainAxisSpacing: 10.0,
-                              childAspectRatio: 1.0,
-                            ),
-                            itemCount: iconData.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                width: 60,
-                                height: 60,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.textSecondary,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final geoPosition = GeoPoint(
-                                        position.target.latitude,
-                                        position.target.longitude);
-                                    iconDataPath = iconData[index]['icon'];
-                                    final param = {
-                                      'iconPath': iconDataPath,
-                                      'position': geoPosition
-                                    };
-                                    ref.watch(mapParamProvider.notifier).state =
-                                        param;
-                                    onButtonPressed(
-                                        iconData[index]['icon'], geoPosition);
-                                  },
-                                  child: Column(
-                                    children: [
-                                      ImageIcon(
-                                        AssetImage(iconData[index]['icon']),
-                                        size: 30,
-                                        color: iconData[index]['color'],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        iconData[index]['label'],
-                                        style: AppStyles.labelMedium,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                      ),
-                    ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 10,
+                      width: 50,
+                      margin: const EdgeInsets.only(top: 5, bottom: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.green[200],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    Expanded(
+                      child: MapScrollView(scrollController, geoLatLng,
+                          onButtonPressed: (category, geoPosition) async {
+                        await onButtonPressed(category, geoLatLng);
+                      }),
+                    ),
+                  ],
                 ),
               );
             },
