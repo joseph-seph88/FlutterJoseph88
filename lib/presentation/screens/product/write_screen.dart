@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:image_picker/image_picker.dart';
 
 class WriteScreen extends StatefulWidget {
   const WriteScreen({super.key});
@@ -11,6 +13,29 @@ class WriteScreen extends StatefulWidget {
 class _WriteScreenState extends State<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
+  final List<File> _selectedImages = [];
+  final _imagePicker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFiles = await _imagePicker.pickMultiImage();
+      setState(() {
+        for (var file in pickedFiles) {
+          if (_selectedImages.length < 10) {
+            _selectedImages.add(File(file.path));
+          }
+        }
+      });
+        } catch (e) {
+      debugPrint('이미지 선택 오류: $e');
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,30 +63,75 @@ class _WriteScreenState extends State<WriteScreen> {
             Container(
               height: 120,
               padding: AppStyles.defaultPadding,
-              child: Row(
-                children: [
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.camera_alt_outlined),
-                        const SizedBox(height: 4),
-                        Text(
-                          '0/10',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _selectedImages.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return GestureDetector(
+                      onTap: _selectedImages.length < 10 ? _pickImage : null,
+                      child: Container(
+                        width: 88,
+                        height: 88,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.camera_alt_outlined),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_selectedImages.length}/10',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  final imageIndex = index - 1;
+                  return Stack(
+                    children: [
+                      Container(
+                        width: 88,
+                        height: 88,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                          image: DecorationImage(
+                            image: FileImage(_selectedImages[imageIndex]),
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 12,
+                        child: GestureDetector(
+                          onTap: () => _removeImage(imageIndex),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const Divider(height: 1),
