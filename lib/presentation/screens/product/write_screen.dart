@@ -1,45 +1,38 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:o2/presentation/providers/image_picker_provider.dart';
 
-class WriteScreen extends StatefulWidget {
+class WriteScreen extends ConsumerStatefulWidget {
   const WriteScreen({super.key});
 
   @override
-  State<WriteScreen> createState() => _WriteScreenState();
+  ConsumerState<WriteScreen> createState() => _WriteScreenState();
 }
 
-class _WriteScreenState extends State<WriteScreen> {
+class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
-  final List<File> _selectedImages = [];
-  final _imagePicker = ImagePicker();
 
   Future<void> _pickImage() async {
     try {
-      final pickedFiles = await _imagePicker.pickMultiImage();
-      setState(() {
-        for (var file in pickedFiles) {
-          if (_selectedImages.length < 10) {
-            _selectedImages.add(File(file.path));
-          }
-        }
-      });
-        } catch (e) {
-      debugPrint('이미지 선택 오류: $e');
+      await ref.read(multiImageProvider.notifier).pickImages();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이미지를 선택하는 중 오류가 발생했습니다.')),
+      );
     }
   }
 
   void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
+    ref.read(multiImageProvider.notifier).removeImage(index);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final selectedImages = ref.watch(multiImageProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,18 +58,19 @@ class _WriteScreenState extends State<WriteScreen> {
               padding: AppStyles.defaultPadding,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: _selectedImages.length + 1,
+                itemCount: selectedImages.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return GestureDetector(
-                      onTap: _selectedImages.length < 10 ? _pickImage : null,
+                      onTap: selectedImages.length < 10 ? _pickImage : null,
                       child: Container(
                         width: 88,
                         height: 88,
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                          borderRadius:
+                              BorderRadius.circular(AppStyles.defaultRadius),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +78,7 @@ class _WriteScreenState extends State<WriteScreen> {
                             const Icon(Icons.camera_alt_outlined),
                             const SizedBox(height: 4),
                             Text(
-                              '${_selectedImages.length}/10',
+                              '${selectedImages.length}/10',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -96,6 +90,8 @@ class _WriteScreenState extends State<WriteScreen> {
                   }
 
                   final imageIndex = index - 1;
+                  final image = selectedImages[imageIndex];
+
                   return Stack(
                     children: [
                       Container(
@@ -103,10 +99,21 @@ class _WriteScreenState extends State<WriteScreen> {
                         height: 88,
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
-                          image: DecorationImage(
-                            image: FileImage(_selectedImages[imageIndex]),
+                          borderRadius:
+                              BorderRadius.circular(AppStyles.defaultRadius),
+                        ),
+                        child: ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(AppStyles.defaultRadius),
+                          child: Image.file(
+                            image,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.error),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -184,13 +191,17 @@ class _WriteScreenState extends State<WriteScreen> {
                           },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
-                              color: _isSellingMode ? theme.colorScheme.primary : AppColors.divider,
+                              color: _isSellingMode
+                                  ? theme.colorScheme.primary
+                                  : AppColors.divider,
                             ),
                           ),
                           child: Text(
                             '판매하기',
                             style: TextStyle(
-                              color: _isSellingMode ? theme.colorScheme.primary : AppColors.textSecondary,
+                              color: _isSellingMode
+                                  ? theme.colorScheme.primary
+                                  : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -205,13 +216,17 @@ class _WriteScreenState extends State<WriteScreen> {
                           },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
-                              color: !_isSellingMode ? theme.colorScheme.primary : AppColors.divider,
+                              color: !_isSellingMode
+                                  ? theme.colorScheme.primary
+                                  : AppColors.divider,
                             ),
                           ),
                           child: Text(
                             '나눔하기',
                             style: TextStyle(
-                              color: !_isSellingMode ? theme.colorScheme.primary : AppColors.textSecondary,
+                              color: !_isSellingMode
+                                  ? theme.colorScheme.primary
+                                  : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -290,7 +305,8 @@ class _WriteScreenState extends State<WriteScreen> {
                       color: AppColors.text,
                     ),
                     decoration: const InputDecoration(
-                      hintText: '인창동에 올릴 게시글 내용을 작성해 주세요.\n(판매 금지 물품은 게시가 제한될 수 있어요.)',
+                      hintText:
+                          '인창동에 올릴 게시글 내용을 작성해 주세요.\n(판매 금지 물품은 게시가 제한될 수 있어요.)',
                     ),
                   ),
                 ],
