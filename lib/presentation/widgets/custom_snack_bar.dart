@@ -5,7 +5,7 @@ class CustomSnackBar {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 850),
       ),
     );
   }

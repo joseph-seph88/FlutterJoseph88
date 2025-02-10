@@ -19,7 +19,7 @@ class StarRatingPage extends ConsumerWidget {
     Future<void> onPressedBtn(int index, String mapId) async {
       ref.read(starRatingProvider.notifier).state = index + 1.0;
       await ref.read(mapProvider.notifier).updateStarRating(mapId, starIndex);
-      if(context.mounted){
+      if (context.mounted) {
         context.pop();
       }
     }

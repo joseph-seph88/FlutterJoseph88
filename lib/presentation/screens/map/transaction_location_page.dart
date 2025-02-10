@@ -86,7 +86,6 @@ class _TransactionLocationPageState
   @override
   Widget build(BuildContext context) {
     final mapState = ref.watch(mapProvider);
-
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: 40,
