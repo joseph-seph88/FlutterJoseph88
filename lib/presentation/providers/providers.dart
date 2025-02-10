@@ -48,5 +48,8 @@ final sendChatImageUseCaseProvider = Provider<SendChatImageUseCase>((ref) =>
 final markChatAsReadUseCaseProvider = Provider<MarkChatAsReadUseCase>(
     (ref) => MarkChatAsReadUseCase(ref.read(chatRepositoryProvider)));
 
+final deleteChatMessageUseCaseProvider = Provider<DeleteChatMessageUseCase>(
+    (ref) => DeleteChatMessageUseCase(ref.read(chatRepositoryProvider)));
+
 final getUserDataUseCaseProvider = Provider<GetUserDataUseCase>(
     (ref) => GetUserDataUseCase(ref.read(userRepositoryProvider)));

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
+import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
@@ -50,7 +52,7 @@ class ChatMessageList extends ConsumerWidget {
             children: [
               if (showDateDivider)
                 _buildDateDivider(context, message.sentTime.toDateOnlyString()),
-              _buildMessageItem(ref, context, message, showTimestamp, isMine),
+              _buildMessageItem(context, ref, message, showTimestamp, isMine),
             ],
           );
         },
@@ -86,13 +88,13 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageItem(WidgetRef ref, BuildContext context,
+  Widget _buildMessageItem(BuildContext context, WidgetRef ref,
       ChatMessage message, bool showTimestamp, bool isMine) {
     return Padding(
       padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
       child: Row(
         mainAxisAlignment:
-            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMine) ...[
@@ -122,25 +124,58 @@ class ChatMessageList extends ConsumerWidget {
     return const CircleAvatar();
   }
 
-  Widget _buildMessageBubble(
-      WidgetRef ref, BuildContext context, ChatMessage message, bool isMine) {
+  Widget _buildMessageBubble(WidgetRef ref, BuildContext context,
+      ChatMessage message, bool isMine) {
     final colorScheme = ColorScheme.of(context);
     final messageMaxWidth = MediaQuery.of(context).size.width * 0.6;
     final messageMaxHeight = MediaQuery.of(context).size.height * 0.4;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      constraints: BoxConstraints(
-        maxWidth: messageMaxWidth,
-        maxHeight: messageMaxHeight,
+    return GestureDetector(
+      onLongPress: () => _showMessagePopupMenu(context, ref, message.id),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        constraints: BoxConstraints(
+          maxWidth: messageMaxWidth,
+          maxHeight: messageMaxHeight,
+        ),
+        decoration: BoxDecoration(
+          color: isMine
+              ? colorScheme.primary
+              : colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
+        ),
+        child: _buildMessageContent(ref, message, isMine, isDarkMode),
       ),
-      decoration: BoxDecoration(
-        color:
-            isMine ? colorScheme.primary : colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-      ),
-      child: _buildMessageContent(ref, message, isMine, isDarkMode),
+    );
+  }
+
+  void _showMessagePopupMenu(
+      BuildContext context, WidgetRef ref, String messageId) {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return SimpleDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            SimpleDialogOption(
+              onPressed: () {
+                if (chatRoomId == null) return;
+                final deleteChatMessage =
+                    ref.read(deleteChatMessageUseCaseProvider);
+                deleteChatMessage(chatRoomId!, messageId);
+                context.pop();
+              },
+              child: const Text(
+                '삭제',
+                style: TextStyle(color: AppColors.text),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -154,8 +189,8 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageContent(
-      WidgetRef ref, ChatMessage message, bool isMine, bool isDarkMode) {
+  Widget _buildMessageContent(WidgetRef ref, ChatMessage message, bool isMine,
+      bool isDarkMode) {
     return switch (message.type) {
       ChatMessageType.text => Text(
           message.content,
