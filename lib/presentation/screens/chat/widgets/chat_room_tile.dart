@@ -130,7 +130,7 @@ class ChatRoomTile extends ConsumerWidget {
             Icon(Icons.delete),
             SizedBox(width: 8),
             Text(
-              '삭제된 메시지입니다.',
+              '삭제된 메시지',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],
