@@ -132,7 +132,7 @@ class ChatMessageList extends ConsumerWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onLongPress: () => _showMessagePopupMenu(context, ref, message.id),
+      onLongPress: () => _showMessagePopupMenu(context, ref, message.id, isMine),
       child: Container(
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(
@@ -151,28 +151,32 @@ class ChatMessageList extends ConsumerWidget {
   }
 
   void _showMessagePopupMenu(
-      BuildContext context, WidgetRef ref, String messageId) {
+      BuildContext context, WidgetRef ref, String messageId, bool isMine) {
     showGeneralDialog(
       context: context,
+      barrierDismissible: true,
+      barrierLabel: 'chat_message_menu',
       pageBuilder: (context, animation, secondaryAnimation) {
         return SimpleDialog(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8)),
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           children: [
-            SimpleDialogOption(
-              onPressed: () {
-                if (chatRoomId == null) return;
-                final deleteChatMessage =
-                    ref.read(deleteChatMessageUseCaseProvider);
-                deleteChatMessage(chatRoomId!, messageId);
-                context.pop();
-              },
-              child: const Text(
-                '삭제',
-                style: TextStyle(color: AppColors.text),
-              ),
-            ),
+            if (isMine) ...[
+              SimpleDialogOption(
+                onPressed: () {
+                  if (chatRoomId == null) return;
+                  final deleteChatMessage =
+                      ref.read(deleteChatMessageUseCaseProvider);
+                  deleteChatMessage(chatRoomId!, messageId);
+                  context.pop();
+                },
+                child: const Text(
+                  '삭제',
+                  style: TextStyle(color: AppColors.text),
+                ),
+              )
+            ],
           ],
         );
       },
