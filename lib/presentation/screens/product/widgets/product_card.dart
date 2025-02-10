@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
+import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/domain/entities/product.dart';
 
 class ProductCard extends StatelessWidget {
@@ -88,7 +89,7 @@ class ProductCard extends StatelessWidget {
                     const Spacer(),
                     // 가격
                     Text(
-                      '${product.price}원',
+                      product.price.toPrice(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.text,
