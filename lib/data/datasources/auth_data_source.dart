@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthDataSource {
   final _firebaseAuth = FirebaseAuth.instance;
@@ -31,6 +32,11 @@ class AuthDataSource {
 
   // 로그아웃
   Future<void> signOut() async {
+    final isGoogleLoggedIn = await GoogleSignIn().isSignedIn();
+    if (isGoogleLoggedIn) {
+      await GoogleSignIn().signOut();
+    }
+
     await _firebaseAuth.signOut();
   }
 
@@ -54,6 +60,29 @@ class AuthDataSource {
       await user.delete();
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // 구글 로그인
+  Future<User?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "구글 로그인 오류";
+    } catch (e) {
+      throw "구글 로그인 중 오류가 발생했습니다";
     }
   }
 }

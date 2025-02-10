@@ -37,6 +37,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
+  void _onClickedGoogleButton() async {
+    final success = await ref.read(authProvider.notifier).signInWithGoogle();
+    if (success && mounted) {
+      context.go("/home");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +71,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ),
             const SizedBox(height: AppStyles.defaultSpacing),
             AuthButton(
-              onPressed: () {},
+              onPressed: _onClickedGoogleButton,
               text: "구글",
             ),
             const Spacer(),

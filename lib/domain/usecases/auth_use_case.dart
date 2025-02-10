@@ -37,4 +37,8 @@ class AuthUseCase {
   Future<void> withdraw(String userId, String password) async {
     return await _authRepository.withdraw(userId, password);
   }
+
+  Future<UserEntity?> signInWithGoogle() async {
+    return await _authRepository.signInWithGoogle();
+  }
 }
