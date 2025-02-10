@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:o2/presentation/screens/auth/sign_in/sign_in_screen.dart';
 import 'package:o2/presentation/screens/auth/sign_up/sign_up_screen.dart';
+import 'package:o2/presentation/screens/chat/send_location_screen.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
 import 'package:o2/presentation/screens/map/recommended_shop_page.dart';
@@ -82,6 +83,20 @@ final routerProvider = Provider<GoRouter>(
                 (state.extra as Map<String, String>)['productID']!;
 
             return ChatRoomScreen(
+              chatRoomId: chatRoomId,
+              otherUserId: otherUserId,
+              productID: productID,
+            );
+          },
+        ),
+        GoRoute(
+          path: "/send_location",
+          builder: (context, state) {
+            final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
+            final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
+            final productID = (state.extra as Map<String, String>)['productID']!;
+
+            return SendLocationScreen(
               chatRoomId: chatRoomId,
               otherUserId: otherUserId,
               productID: productID,

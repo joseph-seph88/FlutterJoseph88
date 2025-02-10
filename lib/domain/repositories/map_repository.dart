@@ -33,4 +33,5 @@ abstract class MapRepository {
 
   Future<MapEntity> getMapData(String mapId);
 
+  Future<LatLng?> getLatLng(String placeId);
 }

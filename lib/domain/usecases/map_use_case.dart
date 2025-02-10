@@ -42,6 +42,8 @@ abstract class MapUseCase {
   Future<MapEntity> getMapData(String mapId);
 
 // Future<List<MapEntity>> execute(String query);
+
+  Future<LatLng?> getLatLng(String placeId);
 }
 
 class MapUseCaseImpl implements MapUseCase {
@@ -152,5 +154,10 @@ class MapUseCaseImpl implements MapUseCase {
     } catch (e) {
       throw Exception("유스에러 $e");
     }
+  }
+
+  @override
+  Future<LatLng?> getLatLng(String placeId) {
+    return _repository.getLatLng(placeId);
   }
 }

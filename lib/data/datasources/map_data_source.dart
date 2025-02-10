@@ -59,6 +59,16 @@ class MapDataSource {
     }
   }
 
+  Future<LatLng?> getLatLng(String placeId) async {
+    try {
+      final result =
+          await _places.fetchPlace(placeId, fields: [PlaceField.Location]);
+      return result.place?.latLng;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<String> addMarker(MapModel mapData) async {
     try {
       final mapDoc = await _fireStore.collection('maps').add(mapData.toMap());

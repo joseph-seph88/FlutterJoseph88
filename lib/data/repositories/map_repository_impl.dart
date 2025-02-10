@@ -228,4 +228,8 @@ class MapRepositoryImpl implements MapRepository {
     }
   }
 
+  @override
+  Future<LatLng?> getLatLng(String placeId) async {
+    return _mapDataSource.getLatLng(placeId);
+  }
 }

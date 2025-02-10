@@ -17,7 +17,8 @@ class ChatRoomTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
-    final otherUserID = userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
+    final otherUserID =
+        userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
     final otherUserData = getUserDataUseCase(otherUserID);
 
     return ListTile(
@@ -58,7 +59,9 @@ class ChatRoomTile extends ConsumerWidget {
     const double iconSize = 40;
     final product = chatRoom.productID == null
         ? null
-        : ref.read(getProductDetailUseCaseProvider).execute(chatRoom.productID!);
+        : ref
+            .read(getProductDetailUseCaseProvider)
+            .execute(chatRoom.productID!);
 
     return SizedBox(
       width: iconSize * 1.5,
@@ -112,6 +115,16 @@ class ChatRoomTile extends ConsumerWidget {
           ],
         ),
       ChatMessageType.video => throw UnimplementedError(),
+      ChatMessageType.location => const Row(
+          children: [
+            Icon(Icons.location_pin),
+            SizedBox(width: 8),
+            Text(
+              '장소',
+              style: TextStyle(color: AppColors.textSecondary),
+            )
+          ],
+        ),
       ChatMessageType.deleted => const Row(
           children: [
             Icon(Icons.delete),
