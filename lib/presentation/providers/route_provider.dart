@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import 'package:o2/presentation/screens/auth/sign_in/sign_in_screen.dart';
-import 'package:o2/presentation/screens/auth/sign_up/sign_up_screen.dart';
+import 'package:o2/presentation/screens/auth/sign_in_screen.dart';
+import 'package:o2/presentation/screens/auth/sign_up_screen.dart';
 import 'package:o2/presentation/screens/chat/send_location_screen.dart';
 import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
@@ -16,11 +16,11 @@ import 'package:o2/presentation/screens/my/my_sales_history_screen.dart';
 import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/my/my_setting_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
-import 'presentation/screens/chat/chat_list_screen.dart';
-import 'presentation/screens/chat/chat_room_screen.dart';
-import 'presentation/screens/product/detail_screen.dart';
-import 'presentation/screens/product/write_screen.dart';
-import 'presentation/screens/search/search_screen.dart';
+import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
+import 'package:o2/presentation/screens/chat/chat_room_screen.dart';
+import 'package:o2/presentation/screens/product/detail_screen.dart';
+import 'package:o2/presentation/screens/product/write_screen.dart';
+import 'package:o2/presentation/screens/search/search_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 
@@ -92,9 +92,12 @@ final routerProvider = Provider<GoRouter>(
         GoRoute(
           path: "/send_location",
           builder: (context, state) {
-            final chatRoomId = (state.extra as Map<String, String>)['chatRoomId'];
-            final otherUserId = (state.extra as Map<String, String>)['otherUserId']!;
-            final productID = (state.extra as Map<String, String>)['productID']!;
+            final chatRoomId =
+                (state.extra as Map<String, String>)['chatRoomId'];
+            final otherUserId =
+                (state.extra as Map<String, String>)['otherUserId']!;
+            final productID =
+                (state.extra as Map<String, String>)['productID']!;
 
             return SendLocationScreen(
               chatRoomId: chatRoomId,

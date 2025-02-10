@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 
-import '../widgets/auth_button.dart';
-import '../widgets/auth_text_field.dart';
+import 'widgets/auth_button.dart';
+import 'widgets/auth_text_field.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
