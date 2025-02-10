@@ -18,8 +18,7 @@ class MyScreen extends ConsumerWidget {
         title: const Text("나의 당근"),
         actions: [
           IconButton(
-            //TODO : 셋팅 화면 이동
-            onPressed: () {},
+            onPressed: () => context.push("/my/setting"),
             icon: const Icon(Icons.settings),
           )
         ],
@@ -43,7 +42,13 @@ class MyScreen extends ConsumerWidget {
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: Colors.grey[200],
-                          child: const Icon(Icons.person_outline),
+                          backgroundImage:
+                              auth.image != null && auth.image!.isNotEmpty
+                                  ? NetworkImage(auth.image!)
+                                  : null,
+                          child: auth.image == null || auth.image!.isEmpty
+                              ? const Icon(Icons.person_outline)
+                              : null,
                         ),
                         const SizedBox(
                           width: AppStyles.defaultSpacing,

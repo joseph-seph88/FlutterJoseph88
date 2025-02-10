@@ -25,4 +25,16 @@ class AuthUseCase {
   Future<bool> validEmail(String email) async {
     return await _authRepository.validEmail(email);
   }
+
+  Future<void> updateProfile(UserEntity userEntity) async {
+    return await _authRepository.updateProfile(userEntity);
+  }
+
+  Future<UserEntity?> getCurrentUser() async {
+    return await _authRepository.getCurrentUser();
+  }
+
+  Future<void> withdraw(String userId, String password) async {
+    return await _authRepository.withdraw(userId, password);
+  }
 }

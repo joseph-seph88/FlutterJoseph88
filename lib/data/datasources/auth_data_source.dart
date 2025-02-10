@@ -38,4 +38,22 @@ class AuthDataSource {
   User? getCurrentUser() {
     return _firebaseAuth.currentUser;
   }
+
+  // 회원 탈퇴
+  Future<void> withdraw(String password) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      await user.delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -14,7 +14,8 @@ class SearchAddressPage extends ConsumerStatefulWidget {
 }
 
 class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
-  final TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller;
+  late FocusNode _focusNode;
   List<AutocompletePrediction> _predictions = [];
   late FlutterGooglePlacesSdk _places;
 
@@ -26,11 +27,14 @@ class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
     _places.isInitialized().then((value) {
       debugPrint('Places Initialized: $value');
     });
+    _focusNode = FocusNode();
+    _controller = TextEditingController();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -43,15 +47,22 @@ class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
     });
   }
 
-  void _selectAddress(AutocompletePrediction prediction) {
-    ref.read(selectedAddressProvider.notifier).state = prediction.fullText;
+  Future<void> _selectAddress(AutocompletePrediction prediction) async {
+    _focusNode.unfocus();
+
+    ref.read(mapProvider.notifier).setAddress(prediction.fullText);
+    final selectedAddress = ref.read(mapProvider).transAddress;
+    await ref
+        .read(mapProvider.notifier)
+        .transAddressToPosition(selectedAddress);
+
     setState(() {
       _predictions = [];
     });
-    context.go('/map/addShop');
+    if (mounted) {
+      context.pop();
+    }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +76,8 @@ class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
         ),
         leading: IconButton(
             onPressed: () {
-              context.go('/map/addShop');
+              _focusNode.unfocus();
+              context.pop();
             },
             icon: const Icon(Icons.close)),
       ),
@@ -75,7 +87,13 @@ class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
           children: [
             TextField(
               controller: _controller,
-              onChanged: (input){
+              focusNode: _focusNode,
+              onTap: (){
+                if(_focusNode.hasFocus){
+                  _focusNode.unfocus();
+                }
+              },
+              onChanged: (input) {
                 _getPredictions(input, mapState);
               },
               decoration: InputDecoration(
@@ -105,9 +123,10 @@ class _SearchAddressPageState extends ConsumerState<SearchAddressPage> {
                 itemBuilder: (context, index) {
                   final prediction = _predictions[index];
                   return ListTile(
-                    title: Text(prediction.fullText),
-                    onTap: () => _selectAddress(prediction),
-                  );
+                      title: Text(prediction.fullText),
+                      onTap: () async {
+                        await _selectAddress(prediction);
+                      });
                 },
               ),
             ),
