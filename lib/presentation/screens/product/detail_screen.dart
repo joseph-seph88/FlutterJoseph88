@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
+import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/domain/entities/product.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
@@ -253,6 +254,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                     ),
                     const SizedBox(height: 80),
+                    // 가격
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        product.price.toPrice(),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.text,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
                   ],
                 ),
               ),
