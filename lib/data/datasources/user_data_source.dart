@@ -35,4 +35,8 @@ class UserDataSource {
         .doc(userModel.id)
         .update(userModel.toJson());
   }
+
+  Future<void> deleteUser(String userId) async {
+    await _firestore.collection("users").doc(userId).delete();
+  }
 }

@@ -6,4 +6,6 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<bool> validEmail(String email);
   Future<void> updateProfile(UserEntity userEntity);
+  Future<UserEntity?> getCurrentUser();
+  Future<void> withdraw(String userId, String password);
 }
