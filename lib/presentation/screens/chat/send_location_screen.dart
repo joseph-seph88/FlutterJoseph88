@@ -313,10 +313,12 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
 
   Future<String> _createChatRoom(String senderId) {
     final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
-    return createChatRoomUseCase(widget.otherUserId, senderId, widget.productID);
+    return createChatRoomUseCase(
+        widget.otherUserId, senderId, widget.productID);
   }
 
-  Future<void> _sendContent(String chatRoomId, String senderId, String content) async {
+  Future<void> _sendContent(
+      String chatRoomId, String senderId, String content) async {
     final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
 
     await sendChatMessageUseCase(
@@ -324,12 +326,14 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
   }
 }
 
-final _searchResultProvider = FutureProvider.family<List<AutocompletePrediction>, String>((ref, input) {
+final _searchResultProvider =
+    FutureProvider.family<List<AutocompletePrediction>, String>((ref, input) {
   final mapUseCase = ref.read(mapUseCaseProvider);
   return mapUseCase.getPredictions(input);
 });
 
-final _currentTargetProvider = StateProvider.autoDispose<AsyncValue<NLatLng>>((ref) {
+final _currentTargetProvider =
+    StateProvider.autoDispose<AsyncValue<NLatLng>>((ref) {
   return const AsyncLoading();
 });
 

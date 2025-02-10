@@ -195,7 +195,8 @@ class ChatMessageList extends ConsumerWidget {
                     zoomGesturesEnable: false,
                     stopGesturesEnable: false,
                   ),
-                  onMapReady: (controller) => _addMarker(controller, message.content),
+                  onMapReady: (controller) =>
+                      _addMarker(controller, message.content),
                 ),
               ),
             ),

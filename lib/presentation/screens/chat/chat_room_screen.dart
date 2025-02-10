@@ -174,7 +174,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           _buildIconButtonWithText(
             onPressed: () {
               context.push('/send_location', extra: {
-                if (widget.chatRoomId != null) ...{'chatRoomId': widget.chatRoomId!},
+                if (widget.chatRoomId != null) ...{
+                  'chatRoomId': widget.chatRoomId!
+                },
                 'otherUserId': widget.otherUserId,
                 'productID': widget.productID,
               });
