@@ -6,8 +6,8 @@ import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/screens/auth/widgets/auth_text.dart';
 import 'package:o2/presentation/screens/auth/widgets/text_field_data.dart';
 
-import '../widgets/auth_button.dart';
-import '../widgets/auth_text_field.dart';
+import 'widgets/auth_button.dart';
+import 'widgets/auth_text_field.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});

@@ -25,11 +25,6 @@ class BottomNavBar extends StatelessWidget {
           label: '홈',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.article_outlined),
-          activeIcon: Icon(Icons.article),
-          label: '동네생활',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.location_on_outlined),
           activeIcon: Icon(Icons.location_on),
           label: '내 근처',
@@ -42,7 +37,7 @@ class BottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
-          label: '나의 당근',
+          label: '나의 오이',
         ),
       ],
     );
