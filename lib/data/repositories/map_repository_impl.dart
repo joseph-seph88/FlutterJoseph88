@@ -4,10 +4,12 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
+import 'package:o2/core/utils/color_trans_util.dart';
 import 'package:o2/data/datasources/map_data_source.dart';
 import '../../domain/entities/map_entity.dart';
 import '../../domain/repositories/map_repository.dart';
 import '../models/map_model.dart';
+import 'package:flutter/material.dart';
 
 final mapRepositoryProvider = Provider<MapRepositoryImpl>((ref) {
   final mapDataSource = ref.read(mapDataSourceProvider);
@@ -20,8 +22,13 @@ class MapRepositoryImpl implements MapRepository {
   MapRepositoryImpl(this._mapDataSource);
 
   @override
-  Future<void> addMarker(GeoPoint position, String address, String iconPath,
-      String storeName) async {
+  Future<void> addMarker(
+      GeoPoint position,
+      String address,
+      Map<String, dynamic> category,
+      String storeName,
+      double starRating,
+      int participant) async {
     final geoFirePoint = GeoFirePoint(position);
     final Map<String, dynamic> geo = {
       'geohash': geoFirePoint.geohash,
@@ -30,7 +37,13 @@ class MapRepositoryImpl implements MapRepository {
 
     try {
       final mapData = MapModel(
-          geo: geo, address: address, iconPath: iconPath, storeName: storeName);
+        geo: geo,
+        address: address,
+        storeName: storeName,
+        category: category,
+        starRating: starRating,
+        participant: participant,
+      );
       final mapId = await _mapDataSource.addMarker(mapData);
       final mapDataWithId = mapData.copyWith(mapId: mapId);
       await _mapDataSource.updateMarker(mapId, mapDataWithId);
@@ -41,17 +54,26 @@ class MapRepositoryImpl implements MapRepository {
 
   @override
   Stream<List<MapEntity?>> getMapDataWithIconStream(
-      String iconPath, GeoPoint position) {
+      String category, GeoPoint position) {
     try {
-      return _mapDataSource.getMapDataWithIconStream(iconPath, position).map((mapModels) {
+      return _mapDataSource
+          .getMapDataWithIconStream(category, position)
+          .map((mapModels) {
         return mapModels.map((model) {
+          final String colorString = model?.category['iconColor'];
+          final Color iconColor = ColorTransUtil.transStringToColor(colorString);
+
           return MapEntity(
-            mapId: model?.mapId,
-            position: model?.geo['geopoint'],
-            address: model!.address,
-            iconPath: model.iconPath,
-            storeName: model.storeName,
-          );
+              mapId: model?.mapId,
+              position: model?.geo['geopoint'],
+              address: model!.address,
+              storeName: model.storeName,
+              category: {
+                ...model.category,
+                'iconColor':iconColor,
+              },
+              starRating: model.starRating,
+              participant: model.participant);
         }).toList();
       });
     } catch (e) {
@@ -66,13 +88,20 @@ class MapRepositoryImpl implements MapRepository {
 
       if (mapList.isNotEmpty) {
         return mapList.map((model) {
+          final String colorString = model.category['iconColor'];
+          final Color iconColor = ColorTransUtil.transStringToColor(colorString);
+
           return MapEntity(
-            mapId: model.mapId,
-            position: model.geo['geopoint'],
-            address: model.address,
-            iconPath: model.iconPath,
-            storeName: model.storeName,
-          );
+              mapId: model.mapId,
+              position: model.geo['geopoint'],
+              address: model.address,
+              storeName: model.storeName,
+              category: {
+                ...model.category,
+                'iconColor': iconColor,
+              },
+              starRating: model.starRating,
+              participant: model.participant);
         }).toList();
       }
     } catch (e) {
@@ -82,19 +111,27 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  Future<List<MapEntity>> getStoreData() async {
+  Future<List<MapEntity>> getAllMapData() async {
     try {
-      final mapList = await _mapDataSource.getStoreData();
+      final mapList = await _mapDataSource.getAllMapData();
 
       if (mapList.isNotEmpty) {
         return mapList.map((model) {
+          final String colorString = model.category['iconColor'];
+          final Color iconColor =
+              ColorTransUtil.transStringToColor(colorString);
+
           return MapEntity(
-            mapId: model.mapId,
-            position: model.geo['geopoint'],
-            address: model.address,
-            iconPath: model.iconPath,
-            storeName: model.storeName,
-          );
+              mapId: model.mapId,
+              position: model.geo['geopoint'],
+              address: model.address,
+              storeName: model.storeName,
+              category: {
+                ...model.category,
+                'iconColor': iconColor,
+              },
+              starRating: model.starRating,
+              participant: model.participant);
         }).toList();
       }
     } catch (e) {
@@ -104,10 +141,10 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng clickPosition) async {
+  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
     try {
       final mapAddress = _mapDataSource.transAddressFromGeo(
-          clickPosition.latitude, clickPosition.longitude);
+          currentPosition.latitude, currentPosition.longitude);
       return mapAddress;
     } catch (e) {
       rethrow;
@@ -129,8 +166,8 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  List<Map<String, dynamic>> get getIconDataList {
-    return _mapDataSource.selectIconData;
+  List<Map<String, dynamic>> get getStaticCategoryData {
+    return _mapDataSource.getStaticCategoryData;
   }
 
   @override
@@ -142,4 +179,53 @@ class MapRepositoryImpl implements MapRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<MapEntity> updateStarRating(
+      String mapId, int participant, double starRating) async {
+    try {
+      final updateMapData =
+          await _mapDataSource.updateStarRating(mapId, participant, starRating);
+      final String colorString = updateMapData.category['iconColor'];
+      final Color iconColor = ColorTransUtil.transStringToColor(colorString);
+
+      return MapEntity(
+          mapId: updateMapData.mapId,
+          position: updateMapData.geo['geopoint'],
+          address: updateMapData.address,
+          storeName: updateMapData.storeName,
+          category: {
+            ...updateMapData.category,
+            'iconColor':iconColor,
+          },
+          starRating: updateMapData.starRating,
+          participant: updateMapData.participant);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<MapEntity> getMapData(String mapId) async {
+    try {
+      final mapData = await _mapDataSource.getMapData(mapId);
+      final String colorString = mapData.category['iconColor'];
+      final Color iconColor = ColorTransUtil.transStringToColor(colorString);
+
+      return MapEntity(
+          mapId: mapData.mapId,
+          position: mapData.geo['geopoint'],
+          address: mapData.address,
+          storeName: mapData.storeName,
+          category: {
+            ...mapData.category,
+            'iconColor': iconColor,
+          },
+          starRating: mapData.starRating,
+          participant: mapData.participant);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

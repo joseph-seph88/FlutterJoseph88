@@ -14,22 +14,34 @@ final mapUseCaseProvider = Provider((ref) {
 
 abstract class MapUseCase {
   Future<void> addMarker(
-      GeoPoint position, String address, String iconPath, String storeName);
+      GeoPoint position,
+      String address,
+      Map<String, dynamic> category,
+      String storeName,
+      double starRating,
+      int participant);
 
-  Future<Placemark?> transAddressFromGeo(NLatLng clickPosition);
+  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition);
 
   Future<LatLng?> transPositionFromAddress(String address);
 
   Stream<List<MapEntity?>> getMapDataWithIcon(
-      String iconPath, GeoPoint position);
+      String category, GeoPoint position);
 
   Future<List<MapEntity>> searchStore(String inputText);
 
-  Future<List<MapEntity>> getStoreData();
+  Future<List<MapEntity>> getAllMapData();
 
-  List<Map<String, dynamic>> get getIconDataList;
+  List<Map<String, dynamic>> get getStaticCategoryData;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
+
+  Future<MapEntity> updateStarRating(
+      String mapId, int participant, double starRating);
+
+  Future<MapEntity> getMapData(String mapId);
+
+// Future<List<MapEntity>> execute(String query);
 }
 
 class MapUseCaseImpl implements MapUseCase {
@@ -38,10 +50,11 @@ class MapUseCaseImpl implements MapUseCase {
   MapUseCaseImpl(this._repository);
 
   @override
-  Stream<List<MapEntity?>> getMapDataWithIcon(String iconPath, GeoPoint position) {
-    try{
-      return _repository.getMapDataWithIconStream(iconPath, position);
-    }catch(e){
+  Stream<List<MapEntity?>> getMapDataWithIcon(
+      String category, GeoPoint position) {
+    try {
+      return _repository.getMapDataWithIconStream(category, position);
+    } catch (e) {
       throw Exception("맵유스에러 $e");
     }
   }
@@ -57,29 +70,35 @@ class MapUseCaseImpl implements MapUseCase {
   }
 
   @override
-  Future<List<MapEntity>> getStoreData() async {
-    try{
-      final dataList = await _repository.getStoreData();
+  Future<List<MapEntity>> getAllMapData() async {
+    try {
+      final dataList = await _repository.getAllMapData();
       return dataList;
-    }catch(e){
+    } catch (e) {
       throw Exception("유스에러 $e");
     }
   }
 
   @override
-  Future<void> addMarker(GeoPoint position, String address, String iconPath,
-      String storeName) async {
+  Future<void> addMarker(
+      GeoPoint position,
+      String address,
+      Map<String, dynamic> category,
+      String storeName,
+      double starRating,
+      int participant) async {
     try {
-      await _repository.addMarker(position, address, iconPath, storeName);
+      await _repository.addMarker(
+          position, address, category, storeName, starRating, participant);
     } catch (e) {
       rethrow;
     }
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng clickPosition) async {
+  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
     try {
-      return await _repository.transAddressFromGeo(clickPosition);
+      return await _repository.transAddressFromGeo(currentPosition);
     } catch (e) {
       rethrow;
     }
@@ -99,8 +118,8 @@ class MapUseCaseImpl implements MapUseCase {
   }
 
   @override
-  List<Map<String, dynamic>> get getIconDataList {
-    return _repository.getIconDataList;
+  List<Map<String, dynamic>> get getStaticCategoryData {
+    return _repository.getStaticCategoryData;
   }
 
   @override
@@ -110,6 +129,28 @@ class MapUseCaseImpl implements MapUseCase {
       return result;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  @override
+  Future<MapEntity> updateStarRating(
+      String mapId, int participant, double starRating) async {
+    try {
+      final result =
+          await _repository.updateStarRating(mapId, participant, starRating);
+      return result;
+    } catch (e) {
+      throw Exception("유스에러 $e");
+    }
+  }
+
+  @override
+  Future<MapEntity> getMapData(String mapId) async{
+    try {
+      final mapData = await _repository.getMapData(mapId);
+      return mapData;
+    } catch (e) {
+      throw Exception("유스에러 $e");
     }
   }
 }

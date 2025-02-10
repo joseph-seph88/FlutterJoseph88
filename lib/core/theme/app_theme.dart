@@ -7,6 +7,7 @@ abstract class AppColors {
   static const text = Color(0xFF212529);
   static const textSecondary = Color(0xFF868E96);
   static const divider = Color(0xFFE9ECEF);
+  static const backgroundTransparent = Color(0x00000000);
 }
 
 abstract class AppStyles {
@@ -35,6 +36,12 @@ abstract class AppStyles {
     fontSize: 16,
     fontWeight: FontWeight.bold,
     height: 1.4,
+  );
+
+  static const bodySuper = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.w500,
+    height: 1.6,
   );
 
   static const bodyLarge = TextStyle(

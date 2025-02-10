@@ -2,30 +2,38 @@ class MapModel {
   final String? mapId;
   final Map<String, dynamic> geo;
   final String address;
-  final String iconPath;
   final String storeName;
+  final Map<String, dynamic> category;
+  final double starRating;
+  final int participant;
 
   MapModel({
     this.mapId,
     required this.geo,
     required this.address,
-    required this.iconPath,
     required this.storeName,
+    required this.category,
+    required this.starRating,
+    required this.participant,
   });
 
   MapModel copyWith({
     String? mapId,
     Map<String, dynamic>? geo,
     String? address,
-    String? iconPath,
     String? storeName,
+    Map<String, dynamic>? category,
+    double? starRating,
+    int? participant,
   }) {
     return MapModel(
-        mapId: mapId ?? this.mapId,
-        geo: geo ?? this.geo,
-        address: address ?? this.address,
-        iconPath: iconPath ?? this.iconPath,
-        storeName: storeName ?? this.storeName,
+      mapId: mapId ?? this.mapId,
+      geo: geo ?? this.geo,
+      address: address ?? this.address,
+      storeName: storeName ?? this.storeName,
+      category: category ?? this.category,
+      starRating: starRating ?? this.starRating,
+      participant: participant ?? this.participant,
     );
   }
 
@@ -34,8 +42,10 @@ class MapModel {
       'mapId': mapId,
       'geo': geo,
       'address': address,
-      'iconPath': iconPath,
       'storeName': storeName,
+      'category': category,
+      'starRating': starRating,
+      'participant': participant,
     };
   }
 
@@ -44,8 +54,10 @@ class MapModel {
       mapId: mapData['mapId'],
       geo: mapData['geo'],
       address: mapData['address'],
-      iconPath: mapData['iconPath'],
       storeName: mapData['storeName'],
+      category: mapData['category'],
+      starRating: mapData['starRating'],
+      participant: mapData['participant'],
     );
   }
 }

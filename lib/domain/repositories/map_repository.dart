@@ -5,19 +5,32 @@ import 'package:geocoding/geocoding.dart';
 import '../entities/map_entity.dart';
 
 abstract class MapRepository {
-  Future<Placemark?> transAddressFromGeo(NLatLng clickPosition);
+  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition);
 
   Future<LatLng?> transPositionFromAddress(String address);
 
-  Future<void> addMarker(GeoPoint position, String address, String iconPath, String storeName);
+  Future<void> addMarker(
+      GeoPoint position,
+      String address,
+      Map<String, dynamic> category,
+      String storeName,
+      double starRating,
+      int participant);
 
-  Stream<List<MapEntity?>> getMapDataWithIconStream(String iconPath, GeoPoint position);
+  Stream<List<MapEntity?>> getMapDataWithIconStream(
+      String category, GeoPoint position);
 
   Future<List<MapEntity>> searchStore(String inputText);
 
-  Future<List<MapEntity>> getStoreData();
+  Future<List<MapEntity>> getAllMapData();
 
-    List<Map<String, dynamic>> get getIconDataList;
+  List<Map<String, dynamic>> get getStaticCategoryData;
 
   Future<List<AutocompletePrediction>> getPredictions(String input);
+
+  Future<MapEntity> updateStarRating(String mapId, int participant,
+      double starRating);
+
+  Future<MapEntity> getMapData(String mapId);
+
 }
