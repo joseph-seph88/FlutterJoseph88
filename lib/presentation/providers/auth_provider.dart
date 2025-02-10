@@ -67,4 +67,13 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     await authUseCase.withdraw(userId, password);
     state = null;
   }
+
+  Future<bool> signInWithGoogle() async {
+    final user = await authUseCase.signInWithGoogle();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
 }
