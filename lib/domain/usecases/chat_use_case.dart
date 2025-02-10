@@ -66,3 +66,13 @@ class MarkChatAsReadUseCase {
     await _repository.markChatAsRead(chatRoomId, userId);
   }
 }
+
+class DeleteChatMessageUseCase {
+  final ChatRepository _repository;
+
+  DeleteChatMessageUseCase(this._repository);
+
+  Future<void> call(String chatRoomId, String messageId) async {
+    await _repository.deleteMessage(chatRoomId, messageId);
+  }
+}

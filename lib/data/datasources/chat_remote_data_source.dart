@@ -13,6 +13,8 @@ abstract interface class ChatRemoteDataSource {
       String chatRoomId, String type, String content, String senderId);
 
   Future<void> markChatAsRead(String chatRoomId, String userId);
+
+  Future<void> deleteMessage(String chatRoomId, String messageId);
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -90,5 +92,16 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         'unreadMessageCount': 0,
       });
     }
+  }
+
+  @override
+  Future<void> deleteMessage(String chatRoomId, String messageId) async {
+    await _firestore.collection('chats')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+      'type': 'deleted',
+    });
   }
 }
