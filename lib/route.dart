@@ -108,19 +108,32 @@ final routerProvider = Provider<GoRouter>(
           builder: (context, state) => const ProductListView(),
         ),
         GoRoute(
-          path: "/map",
-          builder: (context, state) => const MapScreen(),
-          routes: [
-            GoRoute(
-              path: "/addShop",
-              builder: (context, state) => const AddShopPage(),
-            ),
-            GoRoute(
-              path: "/likeShop",
-              builder: (context, state) => const LikeShopPage(),
-            ),
-          ],
+          path: "/transactionMap",
+          builder: (context, state) => const TransactionLocationPage(),
         ),
+        GoRoute(
+            path: "/map",
+            builder: (context, state) => const MapScreen(),
+            routes: [
+              GoRoute(
+                  path: "/addShop",
+                  builder: (context, state) => const AddShopPage(),
+                  routes: [
+                    GoRoute(
+                      path: "/searchAddr",
+                      builder: (context, state) => const SearchAddressPage(),
+                    ),
+                  ]),
+              GoRoute(
+                  path: "/recommendShop",
+                  builder: (context, state) => RecommendedShopPage(),
+                  routes: [
+                    GoRoute(
+                      path: "/starRating",
+                      builder: (context, state) => StarRatingPage(),
+                    ),
+                  ]),
+            ]),
         GoRoute(
           path: "/my",
           builder: (context, state) => const MyScreen(),
