@@ -53,4 +53,22 @@ class AuthRepositoryImpl implements AuthRepository {
     final userModel = userEntity.toModel(userEntity.id);
     await _userDataSource.updateProfile(userModel);
   }
+
+  @override
+  Future<UserEntity?> getCurrentUser() async {
+    final currentUser = _authDataSource.getCurrentUser();
+    if (currentUser != null) {
+      final userData = await _userDataSource.getUser(currentUser.uid);
+      if (userData != null) {
+        return userData.toEntity();
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<void> withdraw(String userId, String password) async {
+    await _userDataSource.deleteUser(userId);
+    await _authDataSource.withdraw(password);
+  }
 }
