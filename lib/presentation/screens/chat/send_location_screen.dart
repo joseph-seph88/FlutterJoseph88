@@ -8,9 +8,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/domain/entities/chat_message.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
+
+import '../../providers/map_provider.dart';
 
 class SendLocationScreen extends ConsumerStatefulWidget {
   final String? chatRoomId;
@@ -19,9 +20,9 @@ class SendLocationScreen extends ConsumerStatefulWidget {
 
   const SendLocationScreen(
       {super.key,
-      required this.chatRoomId,
-      required this.otherUserId,
-      required this.productID});
+        required this.chatRoomId,
+        required this.otherUserId,
+        required this.productID});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
@@ -67,7 +68,7 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
                   },
                   onCameraChange: (reason, animated) {
                     ref.read(_currentTargetProvider.notifier).state =
-                        const AsyncLoading();
+                    const AsyncLoading();
                   },
                   onCameraIdle: () {
                     ref.read(_currentTargetProvider.notifier).state =
@@ -327,13 +328,13 @@ class _SendLocationScreenState extends ConsumerState<SendLocationScreen> {
 }
 
 final _searchResultProvider =
-    FutureProvider.family<List<AutocompletePrediction>, String>((ref, input) {
+FutureProvider.family<List<AutocompletePrediction>, String>((ref, input) {
   final mapUseCase = ref.read(mapUseCaseProvider);
   return mapUseCase.getPredictions(input);
 });
 
 final _currentTargetProvider =
-    StateProvider.autoDispose<AsyncValue<NLatLng>>((ref) {
+StateProvider.autoDispose<AsyncValue<NLatLng>>((ref) {
   return const AsyncLoading();
 });
 
@@ -342,7 +343,7 @@ final _currentAddressProvider = FutureProvider.autoDispose<Placemark?>((ref) {
   final mapUseCase = ref.read(mapUseCaseProvider);
 
   return target.when(
-    data: (data) => mapUseCase.transAddressFromGeo(data),
+    data: (data) => mapUseCase.transPositionToAddress(data),
     error: (error, stackTrace) => Future.error(error),
     loading: () => Future.delayed(const Duration(days: 365)),
   );

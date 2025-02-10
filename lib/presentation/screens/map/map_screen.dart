@@ -20,9 +20,10 @@ class MapScreen extends ConsumerStatefulWidget {
 class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   late DraggableScrollableController _sheetController;
-  final _searchController = TextEditingController();
   final _focusNode = FocusNode();
+  final _searchController = TextEditingController();
   NLatLng currentPosition = const NLatLng(37.499889, 126.920056);
+  NLatLng myPosition = const NLatLng(37.499889, 126.920056);
   double _buttonOffset = 100;
   bool toggled = false;
   String category = "";
@@ -46,14 +47,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppColors.text,
-      statusBarIconBrightness: Brightness.light,
-    ));
     _searchController.dispose();
     _sheetController.dispose();
     _mapController?.dispose();
-    _mapController = null;
     _focusNode.dispose();
     super.dispose();
   }
@@ -106,7 +102,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Future<void> moveAndOverlayWithSearchData(MapEntity searchStoreData) async {
-    closeFocus();
     await _mapController?.clearOverlays();
     isMoving = true;
     ref.read(isInitProvider.notifier).state = false;
@@ -151,7 +146,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> onMapReady(NaverMapController controller) async {
     _mapController = controller;
-    await ref.read(mapProvider.notifier).getAllMapData();
     category = ref.read(categoryProvider);
     ref.read(mapProvider.notifier).getStaticCategoryData;
 
@@ -163,6 +157,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       await ref
           .read(mapProvider.notifier)
           .transPositionToAddress(currentPosition);
+      await ref.read(mapProvider.notifier).getAllMapData(myPosition);
     }
   }
 
@@ -187,13 +182,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await addCircleOverlay(nLatLng);
     setState(() {
       _sheetController.jumpTo(0);
-    });
-  }
-
-  void closeFocus() {
-    _focusNode.unfocus();
-    setState(() {
-      toggled = false;
     });
   }
 
@@ -260,37 +248,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: Column(
               children: [
                 Container(
-                  color: AppColors.surface,
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _focusNode,
-                    onTap: () async {
-                      setState(() {
-                        toggled = !toggled;
-                      });
-                      if (!toggled) {
-                        _focusNode.unfocus();
-                      }
-                    },
-                    onChanged: (query) {
-                      ref.read(mapProvider.notifier).searchStoreData(query);
-                    },
-                    decoration: InputDecoration(
-                      hintText: "여기서 업체 검색",
-                      hintStyle: AppStyles.labelLarge
-                          .copyWith(color: AppColors.textSecondary),
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppStyles.defaultRadius),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    style: AppStyles.labelLarge.copyWith(color: Colors.black),
-                  ),
-                ),
+                    color: AppColors.surface,
+                    child: TextField(
+                        controller: _searchController,
+                        focusNode: _focusNode,
+                        onChanged: (query) {
+                          if (query.isEmpty) {
+                            setState(() {
+                              toggled = false;
+                            });
+                            return;
+                          }
+                          setState(() {
+                            toggled = _searchController.text.isNotEmpty;
+                          });
+                          ref.read(mapProvider.notifier).searchStoreData(query);
+                        },
+                        decoration: InputDecoration(
+                          hintText: "여기서 업체 검색",
+                          hintStyle: AppStyles.labelLarge
+                              .copyWith(color: AppColors.textSecondary),
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppStyles.defaultRadius),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        style: AppStyles.labelLarge
+                            .copyWith(color: AppColors.text),
+                        onTapOutside: (_) => _focusNode.unfocus())),
                 if (toggled)
                   MapSearchScrollView(onTap: (data) async {
                     await moveAndOverlayWithSearchData(data);
@@ -299,58 +288,69 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
           Positioned(
-            bottom: _buttonOffset,
+            bottom: _buttonOffset + 320,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: _zoomIn,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundTransparent),
+              child: const Icon(
+                Icons.add,
+                color: AppColors.primary,
+                size: 25,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 250,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: _zoomOut,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundTransparent),
+              child: const Icon(
+                Icons.remove,
+                color: AppColors.primary,
+                size: 25,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 10,
             left: 20,
             child: ElevatedButton(
               onPressed: () async {
-                closeFocus();
-                const NLatLng currentMyLatLng = NLatLng(37.499889, 126.920056);
-                await moveMyPosition(currentMyLatLng);
+                await moveMyPosition(myPosition);
               },
-              child: const Icon(Icons.my_location, color: AppColors.surface),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundTransparent),
+              child: const Icon(
+                Icons.my_location,
+                color: AppColors.primary,
+                size: 25,
+              ),
             ),
           ),
           Positioned(
-            bottom: _buttonOffset + 120,
+            bottom: _buttonOffset + 10,
             right: 20,
             child: ElevatedButton(
-              onPressed: () {
-                closeFocus();
-                _zoomIn();
-              },
-              child: const Icon(Icons.add, color: AppColors.surface),
-            ),
-          ),
-          Positioned(
-            bottom: _buttonOffset + 65,
-            right: 20,
-            child: ElevatedButton(
-              onPressed: () {
-                closeFocus();
-                _zoomOut();
-              },
-              child: const Icon(Icons.remove, color: AppColors.surface),
-            ),
-          ),
-          Positioned(
-            bottom: _buttonOffset,
-            right: 20,
-            child: FloatingActionButton.extended(
-                backgroundColor: AppColors.primary,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundTransparent),
                 onPressed: () {
-                  closeFocus();
                   final mapBottomSheet = ref.read(bottomSheetProvider);
                   mapBottomSheet.mapBottomSheetWithTwoBtn(context, ref);
                 },
-                label: Row(
+                child: Row(
                   children: [
                     const Icon(
                       Icons.add,
-                      color: AppColors.surface,
+                      color: AppColors.primary,
+                      size: 25,
                     ),
                     Text("추가하기",
                         style: AppStyles.labelMedium
-                            .copyWith(color: AppColors.surface))
+                            .copyWith(color: AppColors.primary)),
                   ],
                 )),
           ),
