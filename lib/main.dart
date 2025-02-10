@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
@@ -13,6 +14,10 @@ import 'route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // flutter_image_compress 초기화
+  FlutterImageCompress.validator.ignoreCheckExtName = true;
+
   await Future.wait([
     NaverMapSdk.instance.initialize(),
     PermissionManager().requestLocationPermission(),
@@ -20,7 +25,6 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     ),
   ]);
-
 
   // 더미 데이터 업로드
   // await uploadDummyData();
