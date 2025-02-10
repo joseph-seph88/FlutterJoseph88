@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
@@ -137,7 +138,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${product.price}원 ',
+                        '${product.price.toPrice()} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,
