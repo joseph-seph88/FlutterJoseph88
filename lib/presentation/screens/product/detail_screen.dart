@@ -15,7 +15,8 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key});
 
   @override
-  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
@@ -32,6 +33,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final id = GoRouterState.of(context).pathParameters['id'] ?? '';
     final productAsync = ref.watch(productDetailProvider(id));
+    final user = ref.watch(authProvider);
+    final isFavoriteAsync = user != null
+        ? ref.watch(isFavoriteProductProvider((userId: user.id, productId: id)))
+        : const AsyncValue.data(false);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -96,14 +101,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               children: [
                                 Text(
                                   product.sellerId,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.text,
                                       ),
                                 ),
                                 Text(
                                   product.locationName,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
                                 ),
@@ -117,7 +128,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 children: [
                                   Text(
                                     '36.5°C',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
                                           color: Colors.orange,
                                         ),
                                   ),
@@ -130,7 +144,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                               Text(
                                 '매너온도',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
@@ -148,7 +165,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         children: [
                           Text(
                             product.title,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.text,
                                 ),
@@ -156,14 +176,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           const SizedBox(height: 4),
                           Text(
                             '${product.category} · ${product.createdAt.toElapsedTimeString()}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             product.description,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: AppColors.text,
                                 ),
                           ),
@@ -172,21 +196,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             children: [
                               Text(
                                 '조회 ${product.viewCount}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
                               const SizedBox(width: 16),
                               Text(
                                 '관심 ${product.likeCount}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
                               const SizedBox(width: 16),
                               Text(
                                 '채팅 ${product.chatCount}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
@@ -207,7 +240,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             children: [
                               Text(
                                 '거래희망장소',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.text,
                                     ),
@@ -218,7 +254,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   children: [
                                     Text(
                                       product.locationName,
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
                                             color: AppColors.textSecondary,
                                           ),
                                     ),
@@ -243,7 +282,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               child: NaverMap(
                                 options: NaverMapViewOptions(
                                   initialCameraPosition: NCameraPosition(
-                                    target: NLatLng(product.latitude, product.longitude),
+                                    target: NLatLng(
+                                        product.latitude, product.longitude),
                                     zoom: 15,
                                   ),
                                 ),
@@ -285,11 +325,34 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          ref.read(productNotifierProvider(id).notifier).toggleLike(id, true);
+                          if (user != null) {
+                            ref
+                                .read(productNotifierProvider(id).notifier)
+                                .toggleFavorite(user.id, id);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('로그인이 필요한 기능입니다.'),
+                              ),
+                            );
+                          }
                         },
-                        icon: Icon(
-                          product.likeCount > 0 ? Icons.favorite : Icons.favorite_border,
-                          color: product.likeCount > 0 ? Colors.red : AppColors.textSecondary,
+                        icon: isFavoriteAsync.when(
+                          data: (isFavorite) => Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite
+                                ? Colors.red
+                                : AppColors.textSecondary,
+                          ),
+                          loading: () => const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          error: (_, __) => const Icon(
+                            Icons.favorite_border,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -300,7 +363,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           children: [
                             Text(
                               '${product.price}원',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.text,
                                   ),
@@ -308,7 +374,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             if (product.isOfferEnabled)
                               Text(
                                 '가격 제안 가능',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
@@ -347,7 +416,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (userID == null) return;
 
     final chatRooms = ref.read(chatRoomStreamProvider).value;
-    final chatRoom = chatRooms?.firstWhereOrNull((element) => element.productID == product.id);
+    final chatRoom = chatRooms
+        ?.firstWhereOrNull((element) => element.productID == product.id);
 
     if (mounted) {
       context.push('/chat_room', extra: {
