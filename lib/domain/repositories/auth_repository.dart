@@ -9,4 +9,5 @@ abstract class AuthRepository {
   Future<UserEntity?> getCurrentUser();
   Future<void> withdraw(String userId, String password);
   Future<UserEntity?> signInWithGoogle();
+  Future<UserEntity?> signInWithFacebook();
 }

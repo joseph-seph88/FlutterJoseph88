@@ -41,4 +41,8 @@ class AuthUseCase {
   Future<UserEntity?> signInWithGoogle() async {
     return await _authRepository.signInWithGoogle();
   }
+
+  Future<UserEntity?> signInWithFacebook() async {
+    return await _authRepository.signInWithFacebook();
+  }
 }

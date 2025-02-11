@@ -44,6 +44,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
+  void _onClickedFacebookButton() async {
+    final success = await ref.read(authProvider.notifier).signInWithFacebook();
+    if (success && mounted) {
+      context.go("/home");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +80,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             AuthButton(
               onPressed: _onClickedGoogleButton,
               text: "구글",
+            ),
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthButton(
+              onPressed: _onClickedFacebookButton,
+              text: "페이스북",
             ),
             const Spacer(),
             AuthButton(

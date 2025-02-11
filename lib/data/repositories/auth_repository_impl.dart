@@ -1,3 +1,4 @@
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 
 import '../../domain/repositories/auth_repository.dart';
@@ -87,6 +88,37 @@ class AuthRepositoryImpl implements AuthRepository {
         name: user.displayName ?? '',
       );
       await _userDataSource.saveUser(newUser.toModel(user.uid));
+      return newUser;
+    }
+    return null;
+  }
+
+  @override
+  Future<UserEntity?> signInWithFacebook() async {
+    final user = await _authDataSource.signInWithFacebook();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      String email = '';
+
+      if (user.email == null) {
+        final userData = await FacebookAuth.instance.getUserData();
+
+        if (userData['email'] != null) {
+          email = userData['email'];
+        }
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: email,
+        name: user.displayName ?? '',
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+
       return newUser;
     }
     return null;
