@@ -11,9 +11,6 @@ class SelectLocationView extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<SelectLocationView> createState() => SelectLocationViewState();
-
-  static SelectLocationViewState? of(BuildContext context) =>
-      context.findAncestorStateOfType<SelectLocationViewState>();
 }
 
 class SelectLocationViewState extends ConsumerState<SelectLocationView> {
