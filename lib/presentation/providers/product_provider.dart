@@ -16,7 +16,8 @@ final getProductsUseCaseProvider = Provider<GetProductsUseCase>((ref) {
   return GetProductsUseCase(ref.watch(productRepositoryProvider));
 });
 
-final getProductDetailUseCaseProvider = Provider<GetProductDetailUseCase>((ref) {
+final getProductDetailUseCaseProvider =
+    Provider<GetProductDetailUseCase>((ref) {
   return GetProductDetailUseCase(ref.watch(productRepositoryProvider));
 });
 
@@ -34,17 +35,20 @@ final productsProvider = FutureProvider<List<Product>>((ref) async {
   return useCase.execute();
 });
 
-final productsByCategoryProvider = FutureProvider.family<List<Product>, String>((ref, category) async {
+final productsByCategoryProvider =
+    FutureProvider.family<List<Product>, String>((ref, category) async {
   final useCase = ref.watch(getProductsUseCaseProvider);
   return useCase.execute(); // TODO: 카테고리 필터링 로직 추가 필요
 });
 
-final productDetailProvider = FutureProvider.family<Product?, String>((ref, id) async {
+final productDetailProvider =
+    FutureProvider.family<Product?, String>((ref, id) async {
   final useCase = ref.watch(getProductDetailUseCaseProvider);
   return useCase.execute(id);
 });
 
-final searchProductsProvider = FutureProvider.family<List<Product>, String>((ref, query) async {
+final searchProductsProvider =
+    FutureProvider.family<List<Product>, String>((ref, query) async {
   final useCase = ref.watch(searchProductsUseCaseProvider);
   return useCase.execute(query);
 });
@@ -53,7 +57,8 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
   final ManageProductUseCase _manageUseCase;
   final GetProductDetailUseCase _detailUseCase;
 
-  ProductNotifier(this._manageUseCase, this._detailUseCase) : super(const AsyncValue.loading());
+  ProductNotifier(this._manageUseCase, this._detailUseCase)
+      : super(const AsyncValue.loading());
 
   Future<void> incrementViewCount(String id) async {
     await _manageUseCase.incrementViewCount(id);
@@ -66,9 +71,23 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
     final updatedProduct = await _detailUseCase.execute(id);
     state = AsyncValue.data(updatedProduct);
   }
+
+  Future<void> toggleFavorite(String userId, String productId) async {
+    final isFavorite =
+        await _manageUseCase.isFavoriteProduct(userId, productId);
+    if (isFavorite) {
+      await _manageUseCase.removeFromFavorites(userId, productId);
+    } else {
+      await _manageUseCase.addToFavorites(userId, productId);
+    }
+    final updatedProduct = await _detailUseCase.execute(productId);
+    state = AsyncValue.data(updatedProduct);
+  }
 }
 
-final productNotifierProvider = StateNotifierProvider.family<ProductNotifier, AsyncValue<Product?>, String>((ref, id) {
+final productNotifierProvider =
+    StateNotifierProvider.family<ProductNotifier, AsyncValue<Product?>, String>(
+        (ref, id) {
   final manageUseCase = ref.watch(manageProductUseCaseProvider);
   final detailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(manageUseCase, detailUseCase);
@@ -80,25 +99,29 @@ final productDataSourceProvider = Provider<ProductDataSource>((ref) {
 });
 
 // 최근 검색어 Provider
-final recentSearchesProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, userId) async {
+final recentSearchesProvider = FutureProvider.autoDispose
+    .family<List<String>, String>((ref, userId) async {
   final dataSource = ref.watch(productDataSourceProvider);
   return await dataSource.getRecentSearches(userId);
 });
 
 // 최근 검색어 저장 Provider
-final saveRecentSearchProvider = Provider.family<Future<void> Function(String), String>((ref, userId) {
+final saveRecentSearchProvider =
+    Provider.family<Future<void> Function(String), String>((ref, userId) {
   final dataSource = ref.watch(productDataSourceProvider);
   return (String keyword) => dataSource.saveRecentSearch(userId, keyword);
 });
 
 // 최근 검색어 삭제 Provider
-final removeRecentSearchProvider = Provider.family<Future<void> Function(String), String>((ref, userId) {
+final removeRecentSearchProvider =
+    Provider.family<Future<void> Function(String), String>((ref, userId) {
   final dataSource = ref.watch(productDataSourceProvider);
   return (String keyword) => dataSource.removeRecentSearch(userId, keyword);
 });
 
 // 최근 검색어 전체 삭제 Provider
-final clearRecentSearchesProvider = Provider.family<Future<void> Function(), String>((ref, userId) {
+final clearRecentSearchesProvider =
+    Provider.family<Future<void> Function(), String>((ref, userId) {
   final dataSource = ref.watch(productDataSourceProvider);
   return () => dataSource.clearRecentSearches(userId);
 });
@@ -110,7 +133,23 @@ final popularSearchesProvider = FutureProvider<List<String>>((ref) async {
 });
 
 // 검색어 카운트 증가 Provider
-final incrementSearchCountProvider = Provider<Future<void> Function(String)>((ref) {
+final incrementSearchCountProvider =
+    Provider<Future<void> Function(String)>((ref) {
   final dataSource = ref.watch(productDataSourceProvider);
   return (String keyword) => dataSource.incrementSearchCount(keyword);
+});
+
+// 관심 상품 목록 Provider
+final favoriteProductsProvider =
+    FutureProvider.family<List<Product>, String>((ref, userId) async {
+  final repository = ref.watch(productRepositoryProvider);
+  return repository.getFavoriteProducts(userId);
+});
+
+// 관심 상품 여부 확인 Provider
+final isFavoriteProductProvider =
+    FutureProvider.family<bool, ({String userId, String productId})>(
+        (ref, params) async {
+  final repository = ref.watch(productRepositoryProvider);
+  return repository.isFavoriteProduct(params.userId, params.productId);
 });
