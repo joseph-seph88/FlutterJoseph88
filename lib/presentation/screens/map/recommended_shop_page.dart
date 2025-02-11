@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/constants/app_constant.dart';
+import 'package:o2/presentation/providers/review_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/map_entity.dart';
 import '../../providers/map_provider.dart';
@@ -17,8 +18,9 @@ class RecommendedShopPage extends ConsumerWidget {
     final mapState = ref.watch(mapProvider);
 
     void onTap(MapEntity searchData) {
-      ref.read(mapProvider.notifier).clearStateSearchData();
+      // ref.read(mapProvider.notifier).clearStateSearchData();
       ref.read(selectedMapDataProvider.notifier).state = searchData;
+      ref.read(reviewProvider.notifier).getReviewAboutStore(searchData.mapId);
       _textController.clear();
       context.push('/map/recommendShop/starRating');
     }

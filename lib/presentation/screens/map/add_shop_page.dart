@@ -91,7 +91,6 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         toolbarHeight: 40,
         leading: IconButton(onPressed: () {
           context.pop();
@@ -419,7 +418,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
     final mapState = ref.watch(mapProvider);
 
     return Container(
-      height: 300,
+      height: 200,
       color: AppColors.surface,
       child: mapState.asyncPredictionList.when(
         data: (data) {
