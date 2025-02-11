@@ -8,6 +8,8 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/data/repositories/product_repository_impl.dart';
+import 'package:o2/data/repositories/user_repository_impl.dart';
+import 'package:o2/data/datasources/user_data_source.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'presentation/providers/route_provider.dart';
@@ -34,6 +36,9 @@ void main() async {
       overrides: [
         productRepositoryProvider.overrideWithValue(
           ProductRepositoryImpl(ProductDataSource()),
+        ),
+        userRepositoryProvider.overrideWithValue(
+          UserRepositoryImpl(UserDataSource()),
         ),
       ],
       child: const MyApp(),
