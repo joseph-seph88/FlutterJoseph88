@@ -65,24 +65,27 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Text(
                           product.locationName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 13,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                         ),
                         Text(
                           ' · ',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 13,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                         ),
                         Text(
                           product.createdAt.toElapsedTimeString(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 13,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                         ),
                       ],
                     ),
@@ -109,14 +112,15 @@ class ProductCard extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             '${product.chatCount}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
                           ),
                           const SizedBox(width: 6),
                         ],
-                        if (product.likeCount > 0) ...[
+                        if (product.favoriteCount > 0) ...[
                           const Icon(
                             Icons.favorite_border,
                             size: 13,
@@ -124,11 +128,12 @@ class ProductCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 3),
                           Text(
-                            '${product.likeCount}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
+                            '${product.favoriteCount}',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
                           ),
                         ],
                       ],
