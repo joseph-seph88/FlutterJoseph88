@@ -22,3 +22,22 @@ final chatMessageStreamProvider = StreamProvider.autoDispose
   final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
   return getChatMessagesUseCase(chatRoomId);
 });
+
+final readChatProvider = Provider((ref) {
+  final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
+  return (String chatRoomId, String userId) =>
+      markChatAsReadUseCase(chatRoomId, userId);
+});
+
+final createChatRoomProvider = Provider((ref) {
+  final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
+  return (String otherUserId, String senderId, String productId) =>
+      createChatRoomUseCase(otherUserId, senderId, productId);
+});
+
+final sendContentProvider = Provider((ref) {
+  final sendContentUseCase = ref.read(sendChatMessageUseCaseProvider);
+  return (String chatRoomId, ChatMessageType type, String content,
+      String senderId) =>
+      sendContentUseCase(chatRoomId, type, content, senderId);
+});
