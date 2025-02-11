@@ -176,3 +176,16 @@ final sellerProvider = Provider((ref) {
   final repository = ref.read(userRepositoryProvider);
   return (String sellerId) => repository.getUserData(sellerId);
 });
+
+// 자동완성 검색을 위한 Provider
+final autoCompleteProvider =
+    FutureProvider.family<List<String>, String>((ref, query) async {
+  if (query.isEmpty) return [];
+
+  final lowercaseQuery = query.toLowerCase();
+  final useCase = ref.watch(searchProductsUseCaseProvider);
+  final products = await useCase.execute(lowercaseQuery);
+
+  // 검색 결과에서 제목만 추출하여 반환
+  return products.map((product) => product.title).take(5).toList();
+});

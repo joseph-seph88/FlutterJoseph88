@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:o2/data/models/product_model.dart';
+import 'package:o2/core/utils/search_utils.dart';
 
 class ProductDataSource {
   final _firestore = FirebaseFirestore.instance;
@@ -23,23 +23,47 @@ class ProductDataSource {
     final lowercaseQuery = query.toLowerCase();
 
     try {
-      // 1. searchKeywords 배열에 검색어가 포함된 상품을 찾음
-      final snapshot = await _firestore
+      // 1. 제목 기반 검색 (startsWith)
+      final titleStartsWithSnapshot = await _firestore
+          .collection(_collection)
+          .where('titleLower', isGreaterThanOrEqualTo: lowercaseQuery)
+          .where('titleLower', isLessThan: '$lowercaseQuery\uf8ff')
+          .orderBy('titleLower')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      // 2. 키워드 기반 검색
+      final keywordSnapshot = await _firestore
           .collection(_collection)
           .where('searchKeywords', arrayContains: lowercaseQuery)
-          .orderBy('createdAt', descending: true) // 최신순 정렬
+          .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs;
+      // 결과 합치기 (중복 제거)
+      final results =
+          {...titleStartsWithSnapshot.docs, ...keywordSnapshot.docs}.toList();
+
+      // 최신순 정렬
+      results.sort((a, b) => (b.data()['createdAt'] as Timestamp)
+          .compareTo(a.data()['createdAt'] as Timestamp));
+
+      return results;
     } catch (e) {
-      // Firestore 인덱스 오류 등이 발생할 경우 기본 검색으로 폴백
-      final fallbackSnapshot = await _firestore
-          .collection(_collection)
-          .where('title', isGreaterThanOrEqualTo: lowercaseQuery)
-          .where('title', isLessThan: '$lowercaseQuery\uf8ff')
-          .get();
+      debugPrint('검색 오류: $e');
+      // 인덱스 오류 등이 발생할 경우 부분 문자열 검색으로 폴백
+      final snapshot = await _firestore.collection(_collection).get();
+      final fallbackResults = snapshot.docs.where((doc) {
+        final data = doc.data();
+        final title = (data['title'] as String).toLowerCase();
+        final keywords = List<String>.from(data['searchKeywords'] ?? []);
+        return title.contains(lowercaseQuery) ||
+            keywords.any((keyword) => keyword.contains(lowercaseQuery));
+      }).toList();
 
-      return fallbackSnapshot.docs;
+      fallbackResults.sort((a, b) => (b.data()['createdAt'] as Timestamp)
+          .compareTo(a.data()['createdAt'] as Timestamp));
+
+      return fallbackResults;
     }
   }
 
@@ -80,11 +104,12 @@ class ProductDataSource {
 
         // 검색 키워드 생성
         final searchKeywords =
-            ProductModel.generateSearchKeywords(title, description);
+            SearchUtils.generateSearchKeywords(title, description);
 
         // Firestore 문서 업데이트
         await doc.reference.update({
           'searchKeywords': searchKeywords,
+          'titleLower': title.toLowerCase(), // 소문자 제목 필드 추가
         });
       }
     } catch (e) {
