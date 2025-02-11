@@ -56,8 +56,9 @@ final searchProductsProvider =
 class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
   final ManageProductUseCase _manageUseCase;
   final GetProductDetailUseCase _detailUseCase;
+  final Ref ref;
 
-  ProductNotifier(this._manageUseCase, this._detailUseCase)
+  ProductNotifier(this._manageUseCase, this._detailUseCase, this.ref)
       : super(const AsyncValue.loading());
 
   Future<void> incrementViewCount(String id) async {
@@ -73,15 +74,25 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
   }
 
   Future<void> toggleFavorite(String userId, String productId) async {
-    final isFavorite =
-        await _manageUseCase.isFavoriteProduct(userId, productId);
-    if (isFavorite) {
-      await _manageUseCase.removeFromFavorites(userId, productId);
-    } else {
-      await _manageUseCase.addToFavorites(userId, productId);
+    try {
+      final isFavorite =
+          await _manageUseCase.isFavoriteProduct(userId, productId);
+      if (isFavorite) {
+        await _manageUseCase.removeFromFavorites(userId, productId);
+      } else {
+        await _manageUseCase.addToFavorites(userId, productId);
+      }
+      final updatedProduct = await _detailUseCase.execute(productId);
+      state = AsyncValue.data(updatedProduct);
+
+      // 관련 Provider들 갱신
+      ref.invalidate(productDetailProvider(productId));
+      ref.invalidate(
+          isFavoriteProductProvider((userId: userId, productId: productId)));
+      ref.invalidate(favoriteProductsProvider(userId));
+    } catch (e) {
+      rethrow; // 에러를 상위로 전파하여 UI에서 처리하도록 함
     }
-    final updatedProduct = await _detailUseCase.execute(productId);
-    state = AsyncValue.data(updatedProduct);
   }
 }
 
@@ -90,7 +101,7 @@ final productNotifierProvider =
         (ref, id) {
   final manageUseCase = ref.watch(manageProductUseCaseProvider);
   final detailUseCase = ref.watch(getProductDetailUseCaseProvider);
-  return ProductNotifier(manageUseCase, detailUseCase);
+  return ProductNotifier(manageUseCase, detailUseCase, ref);
 });
 
 // ProductDataSource Provider
@@ -140,16 +151,21 @@ final incrementSearchCountProvider =
 });
 
 // 관심 상품 목록 Provider
-final favoriteProductsProvider =
-    FutureProvider.family<List<Product>, String>((ref, userId) async {
+final favoriteProductsProvider = FutureProvider.autoDispose
+    .family<List<Product>, String>((ref, userId) async {
+  // 상품 상태 변경 감지를 위해 productsProvider 구독
+  ref.watch(productsProvider);
+
   final repository = ref.watch(productRepositoryProvider);
   return repository.getFavoriteProducts(userId);
 });
 
 // 관심 상품 여부 확인 Provider
-final isFavoriteProductProvider =
-    FutureProvider.family<bool, ({String userId, String productId})>(
-        (ref, params) async {
+final isFavoriteProductProvider = FutureProvider.autoDispose
+    .family<bool, ({String userId, String productId})>((ref, params) async {
+  // 상품 상태 변경 감지를 위해 productDetailProvider 구독
+  ref.watch(productDetailProvider(params.productId));
+
   final repository = ref.watch(productRepositoryProvider);
   return repository.isFavoriteProduct(params.userId, params.productId);
 });

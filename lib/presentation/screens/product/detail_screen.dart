@@ -29,6 +29,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     });
   }
 
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final id = GoRouterState.of(context).pathParameters['id'] ?? '';
@@ -324,17 +331,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: () {
-                          if (user != null) {
-                            ref
+                        onPressed: () async {
+                          try {
+                            await ref
                                 .read(productNotifierProvider(id).notifier)
-                                .toggleFavorite(user.id, id);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('로그인이 필요한 기능입니다.'),
-                              ),
-                            );
+                                .toggleFavorite(user!.id, id);
+                          } catch (e) {
+                            if (!mounted) return;
+                            _showSnackBar('관심상품 등록에 실패했습니다.');
                           }
                         },
                         icon: isFavoriteAsync.when(
@@ -344,10 +348,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 ? Colors.red
                                 : AppColors.textSecondary,
                           ),
-                          loading: () => const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          loading: () => const Icon(
+                            Icons.favorite_border,
+                            color: AppColors.textSecondary,
                           ),
                           error: (_, __) => const Icon(
                             Icons.favorite_border,
