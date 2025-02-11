@@ -1,13 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/domain/entities/product.dart';
+import 'package:o2/domain/entities/user_entity.dart';
 import 'package:o2/domain/repositories/product_repository.dart';
+import 'package:o2/domain/repositories/user_repository.dart';
 import 'package:o2/domain/usecases/product/get_products_usecase.dart';
 import 'package:o2/domain/usecases/product/get_product_detail_usecase.dart';
 import 'package:o2/domain/usecases/product/search_products_usecase.dart';
 import 'package:o2/domain/usecases/product/manage_product_usecase.dart';
 
+// Repository providers
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
+  throw UnimplementedError(); // DI 설정에서 실제 구현체를 주입해야 합니다.
+});
+
+final userRepositoryProvider = Provider<UserRepository>((ref) {
   throw UnimplementedError(); // DI 설정에서 실제 구현체를 주입해야 합니다.
 });
 
@@ -162,4 +169,10 @@ final isFavoriteProductProvider = FutureProvider.autoDispose
 
   final repository = ref.watch(productRepositoryProvider);
   return repository.isFavoriteProduct(params.userId, params.productId);
+});
+
+// 판매자 정보를 가져오는 Provider
+final sellerProvider = Provider((ref) {
+  final repository = ref.read(userRepositoryProvider);
+  return (String sellerId) => repository.getUserData(sellerId);
 });
