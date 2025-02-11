@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
-import 'package:o2/presentation/screens/chat/widgets/search_place_view.dart';
-import 'package:o2/presentation/screens/chat/widgets/select_location_view.dart';
+import 'package:o2/presentation/widgets/search_place_view.dart';
+import 'package:o2/presentation/widgets/select_location_view.dart';
 
 class SendLocationScreen extends ConsumerStatefulWidget {
   final String? chatRoomId;
