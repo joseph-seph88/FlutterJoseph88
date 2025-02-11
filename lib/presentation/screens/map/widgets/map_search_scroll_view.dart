@@ -15,8 +15,8 @@ class MapSearchScrollView extends ConsumerWidget {
 
     return SingleChildScrollView(
       child: Container(
-        height: 300,
-        color: AppColors.surface,
+        height: 250,
+        color: AppColors.surface.withAlpha(200),
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: mapState.searchStoreDataList.length,

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/data/models/review_model.dart';
 
 class ReviewDataSource {
@@ -9,7 +10,7 @@ class ReviewDataSource {
   Future<void> addStoreReview(ReviewModel reviewData) async {
     try {
       await _fireStore
-          .collection('reviews')
+          .collection(AppConstant.reviewCollection)
           .add(reviewData.toMap());
     } catch (e) {
       throw Exception('[RE:DS_업체 리뷰 등록 에러]');
@@ -19,7 +20,7 @@ class ReviewDataSource {
   Future<List<ReviewModel>> getReviewAboutStore(mapId) async {
     try {
       final reviewSnapshot = await _fireStore
-          .collection('reviews')
+          .collection(AppConstant.reviewCollection)
           .where('storeReview.mapId', isEqualTo: mapId)
           .get();
 
@@ -34,7 +35,7 @@ class ReviewDataSource {
   Future<bool> isDuplicateStoreReview(userId, mapId) async {
     try {
       final reviewSnapshot = await _fireStore
-          .collection('reviews')
+          .collection(AppConstant.reviewCollection)
           .where('userId', isEqualTo: userId)
           .where('storeReview.mapId', isEqualTo: mapId)
           .get();

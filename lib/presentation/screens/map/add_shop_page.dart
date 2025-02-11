@@ -136,7 +136,8 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       _mapController?.updateCamera(cameraUpdate);
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.backgroundTransparent),
+                        backgroundColor: AppColors.surface.withAlpha(150)
+                    ),
                     child: const Icon(
                       Icons.my_location,
                       color: AppColors.primary,
@@ -150,7 +151,8 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                   child: ElevatedButton(
                     onPressed: _zoomIn,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.backgroundTransparent),
+                        backgroundColor: AppColors.surface.withAlpha(150)
+                    ),
                     child: const Icon(
                       Icons.add,
                       color: AppColors.primary,
@@ -166,7 +168,8 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       _zoomOut();
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.backgroundTransparent),
+                        backgroundColor: AppColors.surface.withAlpha(150)
+                    ),
                     child: const Icon(
                       Icons.remove,
                       color: AppColors.primary,
@@ -226,11 +229,14 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                                 color: ColorTransUtil.transStringToColor(
                                     categories[selectedIndex!]['iconColor']),
                               )
-                            : Text(
-                                "카테고리",
-                                style: AppStyles.labelMedium
-                                    .copyWith(color: Colors.lightGreen),
-                              ),
+                            : Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                  "카테고리",
+                                  style: AppStyles.labelMedium
+                                      .copyWith(color: AppColors.primary.withAlpha(200)),
+                                ),
+                            ),
                       ),
                     ),
                     Expanded(
@@ -240,7 +246,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                           controller: _storeTextController,
                           decoration: InputDecoration(
                             labelText: "상세 주소 입력",
-                            hintText: "상수 주소 입력",
+                            hintText: "상세 주소 입력",
                             hintStyle: AppStyles.labelLarge
                                 .copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
@@ -249,7 +255,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                             ),
                           ),
                           style: AppStyles.labelLarge
-                              .copyWith(color: Colors.black),
+                              .copyWith(color: AppColors.text),
                           onTapOutside: (_) => FocusScope.of(context).unfocus(),
                         ),
                       ),
@@ -292,7 +298,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstant.lightGreen),
+                          backgroundColor: AppColors.primary.withAlpha(150)),
                       child: Text("업체 등록",
                           style: AppStyles.labelLarge
                               .copyWith(color: AppColors.surface))),
@@ -419,7 +425,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
 
     return Container(
       height: 200,
-      color: AppColors.surface,
+      color: AppColors.surface.withAlpha(200),
       child: mapState.asyncPredictionList.when(
         data: (data) {
           return ListView.builder(
