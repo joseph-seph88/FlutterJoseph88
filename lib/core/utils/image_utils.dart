@@ -96,7 +96,7 @@ class ImageUtils {
       final dir = await getTemporaryDirectory();
       final targetPath = path.join(
         dir.path,
-        '${compressedPrefix}${DateTime.now().millisecondsSinceEpoch}.jpg',
+        '$compressedPrefix${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
 
       final compressedFile = File(targetPath);
