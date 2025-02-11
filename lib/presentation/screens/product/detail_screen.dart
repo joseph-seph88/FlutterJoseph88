@@ -212,7 +212,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                               const SizedBox(width: 16),
                               Text(
-                                '관심 ${product.likeCount}',
+                                '관심 ${product.favoriteCount}',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall

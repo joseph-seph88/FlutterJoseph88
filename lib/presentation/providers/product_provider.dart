@@ -67,12 +67,6 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
     state = AsyncValue.data(updatedProduct);
   }
 
-  Future<void> toggleLike(String id, bool isLiked) async {
-    await _manageUseCase.toggleLike(id, isLiked);
-    final updatedProduct = await _detailUseCase.execute(id);
-    state = AsyncValue.data(updatedProduct);
-  }
-
   Future<void> toggleFavorite(String userId, String productId) async {
     try {
       final isFavorite =

@@ -11,7 +11,6 @@ class Product {
   final String category;
   final List<String> images;
   final int viewCount;
-  final int likeCount;
   final int favoriteCount;
   final DateTime createdAt;
   final String sellerId;
@@ -32,7 +31,6 @@ class Product {
     required this.category,
     required this.images,
     required this.viewCount,
-    required this.likeCount,
     required this.favoriteCount,
     required this.createdAt,
     required this.sellerId,
@@ -55,7 +53,6 @@ class Product {
       category: model.category,
       images: model.images,
       viewCount: model.viewCount,
-      likeCount: model.likeCount,
       favoriteCount: model.favoriteCount,
       createdAt: model.createdAt.toDate(),
       sellerId: model.sellerId,
@@ -78,7 +75,6 @@ class Product {
     String? category,
     List<String>? images,
     int? viewCount,
-    int? likeCount,
     int? favoriteCount,
     DateTime? createdAt,
     String? sellerId,
@@ -99,7 +95,6 @@ class Product {
       category: category ?? this.category,
       images: images ?? this.images,
       viewCount: viewCount ?? this.viewCount,
-      likeCount: likeCount ?? this.likeCount,
       favoriteCount: favoriteCount ?? this.favoriteCount,
       createdAt: createdAt ?? this.createdAt,
       sellerId: sellerId ?? this.sellerId,

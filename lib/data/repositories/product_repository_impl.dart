@@ -45,11 +45,6 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<void> toggleLike(String id, bool isLiked) async {
-    await _dataSource.toggleLike(id, isLiked);
-  }
-
-  @override
   Future<void> addToFavorites(String userId, String productId) async {
     await _dataSource.addToFavorites(userId, productId);
   }

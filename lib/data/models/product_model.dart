@@ -10,7 +10,6 @@ class ProductModel {
   final String category;
   final List<String> images;
   final int viewCount;
-  final int likeCount;
   final int favoriteCount;
   final Timestamp createdAt;
   final String sellerId;
@@ -29,7 +28,6 @@ class ProductModel {
     required this.category,
     required this.images,
     required this.viewCount,
-    required this.likeCount,
     required this.favoriteCount,
     required this.createdAt,
     required this.sellerId,
@@ -52,7 +50,6 @@ class ProductModel {
       category: data['category'] as String,
       images: List<String>.from(data['images']),
       viewCount: data['viewCount'] as int,
-      likeCount: data['likeCount'] as int,
       favoriteCount: data['favoriteCount'] as int? ?? 0,
       createdAt: data['createdAt'] as Timestamp,
       sellerId: data['sellerId'] as String,
@@ -73,7 +70,6 @@ class ProductModel {
       'category': category,
       'images': images,
       'viewCount': viewCount,
-      'likeCount': likeCount,
       'favoriteCount': favoriteCount,
       'createdAt': createdAt,
       'sellerId': sellerId,
