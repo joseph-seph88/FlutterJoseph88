@@ -85,4 +85,13 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     }
     return false;
   }
+
+  Future<bool> signInWithNaver() async {
+    final user = await authUseCase.signInWithNaver();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
 }

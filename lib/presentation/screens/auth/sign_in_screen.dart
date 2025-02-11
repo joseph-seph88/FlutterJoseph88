@@ -51,6 +51,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
+  void _onClickedNaverButton() async {
+    final success = await ref.read(authProvider.notifier).signInWithNaver();
+    if (success && mounted) {
+      context.go("/home");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +92,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             AuthButton(
               onPressed: _onClickedFacebookButton,
               text: "페이스북",
+            ),
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthButton(
+              onPressed: _onClickedNaverButton,
+              text: "네이버",
             ),
             const Spacer(),
             AuthButton(

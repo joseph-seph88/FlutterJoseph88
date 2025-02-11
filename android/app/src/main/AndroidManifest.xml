@@ -15,6 +15,9 @@
                     
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
         <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+        <meta-data android:name="com.naver.sdk.clientId" android:value="@string/client_id"/>
+        <meta-data android:name="com.naver.sdk.clientSecret" android:value="@string/client_secret"/>
+        <meta-data android:name="com.naver.sdk.clientName" android:value="@string/client_name"/>
 
         <activity
             android:name=".MainActivity"
@@ -48,7 +51,26 @@
             android:value="upjgr3km4l" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk"/>        
+            android:value="AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk"/> 
+        <activity
+            android:name="com.navercorp.nid.oauth.NidOAuthBridgeActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data 
+                    android:scheme="neverA8ZlcgGYpe2dXuq8AOlQ"
+                    android:host="oauth"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.navercorp.nid.oauth.NidOAuthCustomTabActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
