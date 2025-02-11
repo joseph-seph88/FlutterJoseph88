@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
@@ -46,12 +47,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       );
     }
     final selectedImage = ref.watch(selectedImageProvider);
-    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
-    final otherUserData = getUserDataUseCase(widget.otherUserId);
+    final otherUserData = ref.watch(otherUserProvider)(widget.otherUserId);
 
     if (widget.chatRoomId != null) {
-      final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
-      markChatAsReadUseCase(widget.chatRoomId!, userId);
+      ref.read(readChatProvider)(widget.chatRoomId!, userId);
     }
 
     return Scaffold(
@@ -59,7 +58,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         title: FutureBuilder(
           future: otherUserData,
           builder: (context, snapshot) {
-            return Text(snapshot.data?.name ?? 'null');
+            return Text(snapshot.data?.name ?? '');
           },
         ),
       ),
@@ -97,21 +96,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildProductInfo() {
     const double imageSize = 60;
-    final getProductDetailUseCase = ref.read(getProductDetailUseCaseProvider);
-    final productAsync = getProductDetailUseCase.execute(widget.productID);
+    final productAsync = ref.watch(productDetailProvider(widget.productID));
 
     return Padding(
       padding: AppStyles.defaultPadding,
-      child: FutureBuilder(
-        future: productAsync,
-        builder: (context, snapshot) {
-          final product = snapshot.data;
-          if (product == null) return const SizedBox.shrink();
+      child: productAsync.when(
+        data: (data) {
+          if (data == null) return const SizedBox.shrink();
 
           return Row(
             children: [
               Image.network(
-                product.images.first,
+                data.images.first,
                 width: imageSize,
                 height: imageSize,
                 fit: BoxFit.cover,
@@ -123,14 +119,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${product.status} ',
+                        '${data.status} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        product.title,
+                        data.title,
                         style: const TextStyle(color: AppColors.text),
                       ),
                     ],
@@ -138,14 +134,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${product.price.toPrice()} ',
+                        '${data.price.toPrice()} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        product.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
+                        data.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
                         style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ],
@@ -155,6 +151,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             ],
           );
         },
+        error: (error, stackTrace) => const SizedBox.shrink(),
+        loading: () => const SizedBox.shrink(),
       ),
     );
   }

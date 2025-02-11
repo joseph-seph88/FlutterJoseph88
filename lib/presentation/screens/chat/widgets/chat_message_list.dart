@@ -5,9 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
-import 'package:o2/presentation/providers/chat_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 
 class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
@@ -18,11 +16,9 @@ class ChatMessageList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stream = chatRoomId != null
-        ? ref.watch(chatMessageStreamProvider(chatRoomId!))
-        : const AsyncValue.data(<ChatMessage>[]);
+    final messages = ref.watch(chatMessageListViewModelProvider(chatRoomId));
 
-    return stream.when(
+    return messages.when(
       data: (data) => _buildMessageBody(ref, data),
       error: (error, stackTrace) => _buildErrorBody(),
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -94,7 +90,7 @@ class ChatMessageList extends ConsumerWidget {
       padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
       child: Row(
         mainAxisAlignment:
-        isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMine) ...[
@@ -124,15 +120,16 @@ class ChatMessageList extends ConsumerWidget {
     return const CircleAvatar();
   }
 
-  Widget _buildMessageBubble(WidgetRef ref, BuildContext context,
-      ChatMessage message, bool isMine) {
+  Widget _buildMessageBubble(
+      WidgetRef ref, BuildContext context, ChatMessage message, bool isMine) {
     final colorScheme = ColorScheme.of(context);
     final messageMaxWidth = MediaQuery.of(context).size.width * 0.6;
     final messageMaxHeight = MediaQuery.of(context).size.height * 0.4;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onLongPress: () => _showMessagePopupMenu(context, ref, message.id, isMine),
+      onLongPress: () =>
+          _showMessagePopupMenu(context, ref, message.id, isMine),
       child: Container(
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(
@@ -158,17 +155,16 @@ class ChatMessageList extends ConsumerWidget {
       barrierLabel: 'chat_message_menu',
       pageBuilder: (context, animation, secondaryAnimation) {
         return SimpleDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           children: [
             if (isMine) ...[
               SimpleDialogOption(
                 onPressed: () {
-                  if (chatRoomId == null) return;
-                  final deleteChatMessage =
-                      ref.read(deleteChatMessageUseCaseProvider);
-                  deleteChatMessage(chatRoomId!, messageId);
+                  ref
+                      .read(
+                          chatMessageListViewModelProvider(chatRoomId).notifier)
+                      .deleteMessage(messageId);
                   context.pop();
                 },
                 child: const Text(
@@ -193,8 +189,8 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageContent(WidgetRef ref, ChatMessage message, bool isMine,
-      bool isDarkMode) {
+  Widget _buildMessageContent(
+      WidgetRef ref, ChatMessage message, bool isMine, bool isDarkMode) {
     return switch (message.type) {
       ChatMessageType.text => Text(
           message.content,
@@ -260,35 +256,28 @@ class ChatMessageList extends ConsumerWidget {
         ),
     };
   }
-}
 
-NCameraPosition _getCameraPosition(String content) {
-  final latLng = content.split(' ').map((e) => double.tryParse(e));
-  if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
+  NCameraPosition _getCameraPosition(String content) {
+    final latLng = content.split(' ').map((e) => double.tryParse(e));
+    if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
 
-  return NCameraPosition(
-      target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
-}
-
-Future<String?> _getAddress(String content, WidgetRef ref) async {
-  final mapUseCase = ref.read(mapUseCaseProvider);
-  var latLng = content.split(' ').map((e) => double.tryParse(e));
-  if (latLng.contains(null)) {
-    final target = NaverMapViewOptions.seoulCityHall.target;
-    latLng = [target.latitude, target.longitude];
+    return NCameraPosition(
+        target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
   }
 
-  final place = await mapUseCase
-      .transAddressFromGeo(NLatLng(latLng.first!, latLng.last!));
-  return place?.street;
-}
+  Future<String?> _getAddress(String content, WidgetRef ref) {
+    return ref
+        .read(chatMessageListViewModelProvider(chatRoomId).notifier)
+        .getAddress(content);
+  }
 
-void _addMarker(NaverMapController controller, String content) {
-  final latLng = content.split(' ').map(double.tryParse);
-  final target = latLng.contains(null)
-      ? NaverMapViewOptions.seoulCityHall.target
-      : NLatLng(latLng.first!, latLng.last!);
-  final marker = NMarker(id: 'location', position: target);
+  void _addMarker(NaverMapController controller, String content) {
+    final latLng = content.split(' ').map(double.tryParse);
+    final target = latLng.contains(null)
+        ? NaverMapViewOptions.seoulCityHall.target
+        : NLatLng(latLng.first!, latLng.last!);
+    final marker = NMarker(id: 'location', position: target);
 
-  controller.addOverlay(marker);
+    controller.addOverlay(marker);
+  }
 }
