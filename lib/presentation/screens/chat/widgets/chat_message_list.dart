@@ -142,7 +142,7 @@ class ChatMessageList extends ConsumerWidget {
               : colorScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.all(Radius.circular(16)),
         ),
-        child: _buildMessageContent(ref, message, isMine, isDarkMode),
+        child: _buildMessageContent(context, ref, message, isMine, isDarkMode),
       ),
     );
   }
@@ -189,7 +189,7 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageContent(
+  Widget _buildMessageContent(BuildContext context,
       WidgetRef ref, ChatMessage message, bool isMine, bool isDarkMode) {
     return switch (message.type) {
       ChatMessageType.text => Text(
@@ -199,18 +199,25 @@ class ChatMessageList extends ConsumerWidget {
             fontSize: 16,
           ),
         ),
-      ChatMessageType.image => Image.network(
-          message.content,
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            if (frame != null) return child;
+      ChatMessageType.image => GestureDetector(
+        onTap: () {
+          context.push('/image_view', extra: {
+            'url': message.content,
+          });
+        },
+        child: Image.network(
+            message.content,
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (frame != null) return child;
 
-            return Container(
-              color: Colors.grey,
-              width: 200,
-              height: 200,
-              child: const Center(child: Icon(Icons.photo)),
-            );
-          },
+              return Container(
+                color: Colors.grey,
+                width: 200,
+                height: 200,
+                child: const Center(child: Icon(Icons.photo)),
+              );
+            },
+          ),
         ),
       ChatMessageType.video => throw UnimplementedError(),
       ChatMessageType.location => Column(

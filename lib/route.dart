@@ -16,6 +16,7 @@ import 'package:o2/presentation/screens/my/my_sales_history_screen.dart';
 import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/my/my_setting_screen.dart';
 import 'package:o2/presentation/screens/product/widgets/product_list_view.dart';
+import 'package:o2/presentation/widgets/image_view.dart';
 import 'presentation/screens/chat/chat_list_screen.dart';
 import 'presentation/screens/chat/chat_room_screen.dart';
 import 'presentation/screens/product/detail_screen.dart';
@@ -159,6 +160,10 @@ final routerProvider = Provider<GoRouter>(
               builder: (context, state) => const MyPurchaseHistoryScreen(),
             )
           ],
+        ),
+        GoRoute(
+          path: '/image_view',
+          builder: (context, state) => const ImageViewWidget(),
         ),
       ],
     );
