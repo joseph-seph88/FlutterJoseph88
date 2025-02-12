@@ -1,4 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:o2/data/datasources/auth_kakao_data_source.dart';
 
 class AuthDataSource {
   final _firebaseAuth = FirebaseAuth.instance;
@@ -31,6 +35,23 @@ class AuthDataSource {
 
   // 로그아웃
   Future<void> signOut() async {
+    final isGoogleLoggedIn = await GoogleSignIn().isSignedIn();
+    if (isGoogleLoggedIn) {
+      await GoogleSignIn().signOut();
+    }
+
+    final isFacebookLoggedIn = await FacebookAuth.instance.accessToken != null;
+    if (isFacebookLoggedIn) {
+      await FacebookAuth.instance.logOut();
+    }
+
+    final isNaverLoggedIn = await FlutterNaverLogin.isLoggedIn;
+    if (isNaverLoggedIn) {
+      await FlutterNaverLogin.logOut();
+    }
+
+    await AuthKakaoDataSource().logOut();
+
     await _firebaseAuth.signOut();
   }
 
@@ -54,6 +75,102 @@ class AuthDataSource {
       await user.delete();
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // 구글 로그인
+  Future<User?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "구글 로그인 오류";
+    } catch (e) {
+      throw "구글 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  // 페이스북 로그인
+  Future<User?> signInWithFacebook() async {
+    try {
+      final result = await FacebookAuth.instance.login(
+        permissions: ['email'],
+      );
+
+      if (result.accessToken != null) {
+        final credential =
+            FacebookAuthProvider.credential(result.accessToken!.token);
+        final userCredential =
+            await _firebaseAuth.signInWithCredential(credential);
+
+        return userCredential.user;
+      }
+      return null;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "페이스북 로그인 오류";
+    } catch (e) {
+      throw "페이스북 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  Future<User?> signInWithNaver() async {
+    try {
+      final result = await FlutterNaverLogin.logIn();
+      if (result.status == NaverLoginStatus.loggedIn) {
+        final naverUser = result.account;
+
+        try {
+          final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+            email: naverUser.email,
+            password: "Naver_${naverUser.id}",
+          );
+          return userCredential.user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == "user-not-found" || e.code == "invalid-credential") {
+            final userCredential =
+                await _firebaseAuth.createUserWithEmailAndPassword(
+              email: naverUser.email,
+              password: "Naver_${naverUser.id}",
+            );
+
+            await userCredential.user?.updateDisplayName(naverUser.name);
+            await userCredential.user?.reload();
+
+            return FirebaseAuth.instance.currentUser;
+          }
+        } catch (e) {
+          rethrow;
+        }
+      }
+      return null;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "네이버 로그인 오류";
+    } catch (e) {
+      throw "네이버 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  Future<User?> signInWithKakao() async {
+    try {
+      final credential = await AuthKakaoDataSource().signInWithKakao();
+      final userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "카카오 로그인 오류";
+    } catch (e) {
+      throw "카카오 로그인 중 오류가 발생했습니다";
     }
   }
 }

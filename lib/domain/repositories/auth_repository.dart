@@ -8,4 +8,8 @@ abstract class AuthRepository {
   Future<void> updateProfile(UserEntity userEntity);
   Future<UserEntity?> getCurrentUser();
   Future<void> withdraw(String userId, String password);
+  Future<UserEntity?> signInWithGoogle();
+  Future<UserEntity?> signInWithFacebook();
+  Future<UserEntity?> signInWithNaver();
+  Future<UserEntity?> signInWithKakao();
 }

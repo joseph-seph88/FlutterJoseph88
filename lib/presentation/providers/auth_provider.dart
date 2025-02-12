@@ -67,4 +67,40 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     await authUseCase.withdraw(userId, password);
     state = null;
   }
+
+  Future<bool> signInWithGoogle() async {
+    final user = await authUseCase.signInWithGoogle();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> signInWithFacebook() async {
+    final user = await authUseCase.signInWithFacebook();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> signInWithNaver() async {
+    final user = await authUseCase.signInWithNaver();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> signInWithKakao() async {
+    final user = await authUseCase.signInWithKakao();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
 }
