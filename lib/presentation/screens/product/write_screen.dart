@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/widgets/select_location_modal.dart';
@@ -16,7 +15,6 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
   String? _selectedLocationName;
-  NLatLng? _selectedPosition;
 
   Future<void> _pickImage() async {
     try {
@@ -313,7 +311,6 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                           onLocationSelected: (locationName, position) {
                             setState(() {
                               _selectedLocationName = locationName;
-                              _selectedPosition = position;
                             });
                             Navigator.pop(context);
                           },
@@ -322,7 +319,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.all(12),
-                      side: BorderSide(color: AppColors.divider),
+                      side: const BorderSide(color: AppColors.divider),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -346,27 +343,6 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                       ],
                     ),
                   ),
-                  if (_selectedLocationName != null) ...[
-                    const SizedBox(height: AppStyles.smallSpacing),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            '선택하신 장소 주변 500m 이내의 사용자들에게 상품이 노출됩니다.',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
             ),
