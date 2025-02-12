@@ -13,6 +13,7 @@ class WriteScreen extends ConsumerStatefulWidget {
 class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
+  String? _selectedLocationName;
 
   Future<void> _pickImage() async {
     try {
@@ -286,6 +287,74 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
               ),
               const Divider(height: 1),
             ],
+            // 거래 희망 장소 섹션
+            Padding(
+              padding: AppStyles.defaultPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '거래 희망 장소',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.text,
+                    ),
+                  ),
+                  const SizedBox(height: AppStyles.smallSpacing),
+                  OutlinedButton(
+                    onPressed: () {
+                      // TODO: 장소 선택 모달 표시
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.all(12),
+                      side: BorderSide(color: AppColors.divider),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedLocationName ?? '장소를 선택해주세요',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: _selectedLocationName != null
+                                  ? AppColors.text
+                                  : AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: AppStyles.smallSpacing),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_selectedLocationName != null) ...[
+                    const SizedBox(height: AppStyles.smallSpacing),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '선택하신 장소 주변 500m 이내의 사용자들에게 상품이 노출됩니다.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const Divider(height: 1),
             // 설명 입력
             Padding(
               padding: AppStyles.defaultPadding,
