@@ -189,23 +189,25 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageContent(BuildContext context,
-      WidgetRef ref, ChatMessage message, bool isMine, bool isDarkMode) {
-    return switch (message.type) {
-      ChatMessageType.text => Text(
+  Widget _buildMessageContent(BuildContext context, WidgetRef ref,
+      ChatMessage message, bool isMine, bool isDarkMode) {
+    switch (message.type) {
+      case ChatMessageType.text:
+        return Text(
           message.content,
           style: TextStyle(
             color: isMine || isDarkMode ? Colors.white : Colors.black,
             fontSize: 16,
           ),
-        ),
-      ChatMessageType.image => GestureDetector(
-        onTap: () {
-          context.push('/image_view', extra: {
-            'url': message.content,
-          });
-        },
-        child: Image.network(
+        );
+      case ChatMessageType.image:
+        return GestureDetector(
+          onTap: () {
+            context.push('/image_view', extra: {
+              'url': message.content,
+            });
+          },
+          child: Image.network(
             message.content,
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
               if (frame != null) return child;
@@ -218,58 +220,66 @@ class ChatMessageList extends ConsumerWidget {
               );
             },
           ),
-        ),
-      ChatMessageType.video => throw UnimplementedError(),
-      ChatMessageType.location => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 200,
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(8)),
-                child: NaverMap(
-                  options: NaverMapViewOptions(
-                    initialCameraPosition: _getCameraPosition(message.content),
-                    rotationGesturesEnable: false,
-                    scrollGesturesEnable: false,
-                    tiltGesturesEnable: false,
-                    zoomGesturesEnable: false,
-                    stopGesturesEnable: false,
+        );
+      case ChatMessageType.video:
+        throw UnimplementedError();
+      case ChatMessageType.location:
+        final split = message.content.split(' ').map(double.tryParse);
+        final target = split.contains(null)
+            ? NaverMapViewOptions.seoulCityHall.target
+            : NLatLng(split.first!, split.last!);
+
+        return GestureDetector(
+          onTap: () {
+            context.push('/map_view', extra: target);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 200,
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(8)),
+                  child: AbsorbPointer(
+                    child: NaverMap(
+                      options: NaverMapViewOptions(
+                        initialCameraPosition:
+                            NCameraPosition(target: target, zoom: 14),
+                        rotationGesturesEnable: false,
+                        scrollGesturesEnable: false,
+                        tiltGesturesEnable: false,
+                        zoomGesturesEnable: false,
+                        stopGesturesEnable: false,
+                      ),
+                      onMapReady: (controller) =>
+                          _addMarker(controller, target),
+                    ),
                   ),
-                  onMapReady: (controller) =>
-                      _addMarker(controller, message.content),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            FutureBuilder(
-              future: _getAddress(message.content, ref),
-              builder: (context, snapshot) => Text(
-                snapshot.data ?? '',
-                style: TextStyle(
-                  color: isMine || isDarkMode ? Colors.white : Colors.black,
+              const SizedBox(height: 8),
+              FutureBuilder(
+                future: _getAddress(message.content, ref),
+                builder: (context, snapshot) => Text(
+                  snapshot.data ?? '',
+                  style: TextStyle(
+                    color: isMine || isDarkMode ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ChatMessageType.deleted => const Text(
+            ],
+          ),
+        );
+      case ChatMessageType.deleted:
+        return const Text(
           '삭제된 메세지입니다.',
           style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 16,
           ),
-        ),
-    };
-  }
-
-  NCameraPosition _getCameraPosition(String content) {
-    final latLng = content.split(' ').map((e) => double.tryParse(e));
-    if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
-
-    return NCameraPosition(
-        target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
+        );
+    }
   }
 
   Future<String?> _getAddress(String content, WidgetRef ref) {
@@ -278,11 +288,7 @@ class ChatMessageList extends ConsumerWidget {
         .getAddress(content);
   }
 
-  void _addMarker(NaverMapController controller, String content) {
-    final latLng = content.split(' ').map(double.tryParse);
-    final target = latLng.contains(null)
-        ? NaverMapViewOptions.seoulCityHall.target
-        : NLatLng(latLng.first!, latLng.last!);
+  void _addMarker(NaverMapController controller, NLatLng target) {
     final marker = NMarker(id: 'location', position: target);
 
     controller.addOverlay(marker);

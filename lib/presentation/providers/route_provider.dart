@@ -21,13 +21,9 @@ import 'package:o2/presentation/screens/product/detail_screen.dart';
 import 'package:o2/presentation/screens/product/write_screen.dart';
 import 'package:o2/presentation/screens/search/search_screen.dart';
 import 'package:o2/presentation/widgets/image_view.dart';
-import 'presentation/screens/chat/chat_list_screen.dart';
-import 'presentation/screens/chat/chat_room_screen.dart';
-import 'presentation/screens/product/detail_screen.dart';
-import 'presentation/screens/product/write_screen.dart';
-import 'presentation/screens/search/search_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/widgets/map_view.dart';
 
 final routerProvider = Provider<GoRouter>(
   (ref) {
@@ -180,6 +176,10 @@ final routerProvider = Provider<GoRouter>(
           path: '/image_view',
           builder: (context, state) => const ImageViewWidget(),
         ),
+        GoRoute(
+          path: '/map_view',
+          builder: (context, state) => const MapViewWidget(),
+        )
       ],
     );
   },
