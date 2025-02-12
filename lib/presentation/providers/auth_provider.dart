@@ -76,4 +76,13 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     }
     return false;
   }
+
+  Future<bool> signInWithFacebook() async {
+    final user = await authUseCase.signInWithFacebook();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
 }
