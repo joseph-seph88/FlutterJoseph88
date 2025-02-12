@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/screens/auth/widgets/auth_icon_button.dart';
 
 import 'widgets/auth_button.dart';
 import 'widgets/auth_text_field.dart';
@@ -91,24 +92,36 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               text: "로그인",
             ),
             const SizedBox(height: AppStyles.defaultSpacing),
-            AuthButton(
-              onPressed: _onClickedGoogleButton,
-              text: "구글",
-            ),
-            const SizedBox(height: AppStyles.defaultSpacing),
-            AuthButton(
-              onPressed: _onClickedFacebookButton,
-              text: "페이스북",
-            ),
-            const SizedBox(height: AppStyles.defaultSpacing),
-            AuthButton(
-              onPressed: _onClickedNaverButton,
-              text: "네이버",
-            ),
-            const SizedBox(height: AppStyles.defaultSpacing),
-            AuthButton(
-              onPressed: _onClickedKakaoButton,
-              text: "카카오",
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: AppStyles.defaultSpacing),
+                  const Text("소셜 계정으로 로그인", style: AppStyles.labelLarge),
+                  const SizedBox(height: AppStyles.smallSpacing),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      AuthIconButton(
+                          onPressed: _onClickedGoogleButton,
+                          iconPath: "assets/icons/google_logo.svg"),
+                      AuthIconButton(
+                          onPressed: _onClickedFacebookButton,
+                          iconPath: "assets/icons/facebook_logo.svg"),
+                      AuthIconButton(
+                          onPressed: _onClickedNaverButton,
+                          iconPath: "assets/icons/naver_logo.svg"),
+                      AuthIconButton(
+                          onPressed: _onClickedKakaoButton,
+                          iconPath: "assets/icons/kakao_logo.svg"),
+                    ],
+                  ),
+                  const SizedBox(height: AppStyles.smallSpacing),
+                ],
+              ),
             ),
             const Spacer(),
             AuthButton(
