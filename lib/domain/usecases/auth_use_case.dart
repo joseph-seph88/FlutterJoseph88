@@ -37,4 +37,20 @@ class AuthUseCase {
   Future<void> withdraw(String userId, String password) async {
     return await _authRepository.withdraw(userId, password);
   }
+
+  Future<UserEntity?> signInWithGoogle() async {
+    return await _authRepository.signInWithGoogle();
+  }
+
+  Future<UserEntity?> signInWithFacebook() async {
+    return await _authRepository.signInWithFacebook();
+  }
+
+  Future<UserEntity?> signInWithNaver() async {
+    return await _authRepository.signInWithNaver();
+  }
+
+  Future<UserEntity?> signInWithKakao() async {
+    return await _authRepository.signInWithKakao();
+  }
 }

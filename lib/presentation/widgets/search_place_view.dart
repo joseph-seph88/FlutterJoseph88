@@ -5,7 +5,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
+import 'package:o2/presentation/providers/map_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class SearchPlaceTextField extends ConsumerStatefulWidget {

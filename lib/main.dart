@@ -4,16 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/data/repositories/product_repository_impl.dart';
+import 'package:o2/data/repositories/user_repository_impl.dart';
+import 'package:o2/data/datasources/user_data_source.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
-import 'route.dart';
+import 'presentation/providers/route_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  KakaoSdk.init(
+    nativeAppKey: 'fd8bc2a5195423426dd1f4d504378a9b',
+  );
 
   // flutter_image_compress 초기화
   FlutterImageCompress.validator.ignoreCheckExtName = true;
@@ -34,6 +41,9 @@ void main() async {
       overrides: [
         productRepositoryProvider.overrideWithValue(
           ProductRepositoryImpl(ProductDataSource()),
+        ),
+        userRepositoryProvider.overrideWithValue(
+          UserRepositoryImpl(UserDataSource()),
         ),
       ],
       child: const MyApp(),

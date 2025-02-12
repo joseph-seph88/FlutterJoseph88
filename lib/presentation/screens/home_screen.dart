@@ -5,7 +5,6 @@ import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
 import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/product/product_list_screen.dart';
-import 'package:o2/presentation/screens/search/search_screen.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 final currentIndexProvider = StateProvider<int>((ref) => 0);
@@ -19,7 +18,6 @@ class HomeScreen extends ConsumerWidget {
 
     final List<Widget> pages = [
       const ProductListScreen(),
-      const SearchScreen(),
       const MapScreen(),
       const ChatListScreen(),
       const MyScreen(),

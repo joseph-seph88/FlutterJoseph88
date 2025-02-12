@@ -8,7 +8,8 @@ import '../../../providers/map_provider.dart';
 class MapScrollView extends ConsumerWidget {
   final ScrollController scrollController;
   final GeoPoint geoPosition;
-  final Future<void> Function(String category, GeoPoint geoPosition) onButtonPressed;
+  final Future<void> Function(String category, GeoPoint geoPosition)
+      onButtonPressed;
 
   const MapScrollView(this.scrollController, this.geoPosition,
       {required this.onButtonPressed, super.key});
@@ -36,11 +37,13 @@ class MapScrollView extends ConsumerWidget {
                     Icons.location_on,
                     color: AppColors.primary,
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    currentAddress,
-                    style:
-                        AppStyles.labelLarge.copyWith(color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      currentAddress,
+                      style: AppStyles.labelLarge
+                          .copyWith(color: AppColors.primary),
+                    ),
                   )
                 ],
               ),
@@ -63,7 +66,15 @@ class MapScrollView extends ConsumerWidget {
                         categoryData['iconColor']);
                     return Container(
                       decoration: BoxDecoration(
-                        color: Colors.green[100],
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow:  [
+                          BoxShadow(
+                            color: AppColors.primary.withAlpha(200),
+                            offset: const Offset(-5, 7),
+                            blurRadius: 7,
+                          ),
+                        ],
                       ),
                       child: ElevatedButton(
                         onPressed: () {
@@ -76,21 +87,37 @@ class MapScrollView extends ConsumerWidget {
                           backgroundColor: Colors.transparent,
                           elevation: 0,
                           side: const BorderSide(
-                              color: AppColors.primary, width: 3),
+                              color: AppColors.primary, width: 0.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            ImageIcon(
-                              AssetImage(categoryData['iconPath']),
-                              size: 50,
-                              color: categoryColor,
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: categoryColor.withAlpha(50),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: ImageIcon(
+                                  AssetImage(categoryData['iconPath']),
+                                  size: 50,
+                                  color: categoryColor,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 10),
                             Text(
                               categoryData['category'],
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.primary),
+                              style: AppStyles.labelLarge.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),

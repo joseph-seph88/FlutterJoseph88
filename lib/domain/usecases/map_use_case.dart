@@ -1,16 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:o2/domain/entities/map_entity.dart';
-import '../../data/repositories/map_repository_impl.dart';
 import '../repositories/map_repository.dart';
-
-final mapUseCaseProvider = Provider((ref) {
-  final mapRepository = ref.read(mapRepositoryProvider);
-  return MapUseCaseImpl(mapRepository);
-});
 
 abstract class MapUseCase {
   Future<void> addMarker(
@@ -21,7 +14,7 @@ abstract class MapUseCase {
       double starRating,
       int participant);
 
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition);
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition);
 
   Future<LatLng?> transPositionFromAddress(String address);
 
@@ -40,8 +33,6 @@ abstract class MapUseCase {
       String mapId, int participant, double starRating);
 
   Future<MapEntity> getMapData(String mapId);
-
-// Future<List<MapEntity>> execute(String query);
 
   Future<LatLng?> getLatLng(String placeId);
 }
@@ -98,9 +89,9 @@ class MapUseCaseImpl implements MapUseCase {
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition) async {
     try {
-      return await _repository.transAddressFromGeo(currentPosition);
+      return await _repository.transPositionToAddress(currentPosition);
     } catch (e) {
       rethrow;
     }

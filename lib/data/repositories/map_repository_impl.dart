@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:o2/core/utils/color_trans_util.dart';
@@ -10,11 +9,6 @@ import '../../domain/entities/map_entity.dart';
 import '../../domain/repositories/map_repository.dart';
 import '../models/map_model.dart';
 import 'package:flutter/material.dart';
-
-final mapRepositoryProvider = Provider<MapRepositoryImpl>((ref) {
-  final mapDataSource = ref.read(mapDataSourceProvider);
-  return MapRepositoryImpl(mapDataSource);
-});
 
 class MapRepositoryImpl implements MapRepository {
   final MapDataSource _mapDataSource;
@@ -61,7 +55,8 @@ class MapRepositoryImpl implements MapRepository {
           .map((mapModels) {
         return mapModels.map((model) {
           final String colorString = model?.category['iconColor'];
-          final Color iconColor = ColorTransUtil.transStringToColor(colorString);
+          final Color iconColor =
+              ColorTransUtil.transStringToColor(colorString);
 
           return MapEntity(
               mapId: model?.mapId,
@@ -70,7 +65,7 @@ class MapRepositoryImpl implements MapRepository {
               storeName: model.storeName,
               category: {
                 ...model.category,
-                'iconColor':iconColor,
+                'iconColor': iconColor,
               },
               starRating: model.starRating,
               participant: model.participant);
@@ -89,19 +84,9 @@ class MapRepositoryImpl implements MapRepository {
       if (mapList.isNotEmpty) {
         return mapList.map((model) {
           final String colorString = model.category['iconColor'];
-          final Color iconColor = ColorTransUtil.transStringToColor(colorString);
-
-          return MapEntity(
-              mapId: model.mapId,
-              position: model.geo['geopoint'],
-              address: model.address,
-              storeName: model.storeName,
-              category: {
-                ...model.category,
-                'iconColor': iconColor,
-              },
-              starRating: model.starRating,
-              participant: model.participant);
+          final Color iconColor =
+              ColorTransUtil.transStringToColor(colorString);
+          return model.toEntity(iconColor);
         }).toList();
       }
     } catch (e) {
@@ -120,18 +105,7 @@ class MapRepositoryImpl implements MapRepository {
           final String colorString = model.category['iconColor'];
           final Color iconColor =
               ColorTransUtil.transStringToColor(colorString);
-
-          return MapEntity(
-              mapId: model.mapId,
-              position: model.geo['geopoint'],
-              address: model.address,
-              storeName: model.storeName,
-              category: {
-                ...model.category,
-                'iconColor': iconColor,
-              },
-              starRating: model.starRating,
-              participant: model.participant);
+          return model.toEntity(iconColor);
         }).toList();
       }
     } catch (e) {
@@ -141,9 +115,9 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition) async {
     try {
-      final mapAddress = _mapDataSource.transAddressFromGeo(
+      final mapAddress = _mapDataSource.transPositionToAddress(
           currentPosition.latitude, currentPosition.longitude);
       return mapAddress;
     } catch (e) {
@@ -196,7 +170,7 @@ class MapRepositoryImpl implements MapRepository {
           storeName: updateMapData.storeName,
           category: {
             ...updateMapData.category,
-            'iconColor':iconColor,
+            'iconColor': iconColor,
           },
           starRating: updateMapData.starRating,
           participant: updateMapData.participant);

@@ -1,3 +1,4 @@
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 
 import '../../domain/repositories/auth_repository.dart';
@@ -70,5 +71,104 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> withdraw(String userId, String password) async {
     await _userDataSource.deleteUser(userId);
     await _authDataSource.withdraw(password);
+  }
+
+  @override
+  Future<UserEntity?> signInWithGoogle() async {
+    final user = await _authDataSource.signInWithGoogle();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+      return newUser;
+    }
+    return null;
+  }
+
+  @override
+  Future<UserEntity?> signInWithFacebook() async {
+    final user = await _authDataSource.signInWithFacebook();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      String email = '';
+
+      if (user.email == null) {
+        final userData = await FacebookAuth.instance.getUserData();
+
+        if (userData['email'] != null) {
+          email = userData['email'];
+        }
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: email,
+        name: user.displayName ?? '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+
+      return newUser;
+    }
+    return null;
+  }
+
+  @override
+  Future<UserEntity?> signInWithNaver() async {
+    final user = await _authDataSource.signInWithNaver();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+      return newUser;
+    }
+    return null;
+  }
+
+  @override
+  Future<UserEntity?> signInWithKakao() async {
+    final user = await _authDataSource.signInWithKakao();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+      return newUser;
+    }
+    return null;
   }
 }

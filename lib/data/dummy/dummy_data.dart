@@ -4,6 +4,21 @@ Future<void> uploadDummyData() async {
   final firestore = FirebaseFirestore.instance;
   final batch = firestore.batch();
   final productsRef = firestore.collection('products');
+  final usersRef = firestore.collection('users');
+
+  // 사용자 더미 데이터
+  const String userId = 'L8IM3YPhZYeQO9oZQnWJeHGKL5u2';
+  final dummyUser = {
+    'id': userId,
+    'email': 'test@naver.com',
+    'name': 'jin',
+    'favoriteProductIds': [],
+    'createdAt': Timestamp.now(),
+    'updatedAt': Timestamp.now(),
+  };
+
+  // 사용자 데이터 추가
+  batch.set(usersRef.doc(userId), dummyUser);
 
   // 더미 데이터 정의
   final dummyProducts = [
@@ -20,11 +35,13 @@ Future<void> uploadDummyData() async {
       ],
       'viewCount': 45,
       'likeCount': 3,
+      'favoriteCount': 0,
       'createdAt': Timestamp.now(),
-      'sellerId': 'user123',
+      'sellerId': userId,
       'isOfferEnabled': true,
       'status': 'active',
       'chatCount': 2,
+      'searchKeywords': ['아이폰', '15', '프로', '256gb', '실버', '애플', '중고폰'],
     },
     {
       'title': '자전거 팝니다',
@@ -39,11 +56,14 @@ Future<void> uploadDummyData() async {
       ],
       'viewCount': 128,
       'likeCount': 8,
-      'createdAt': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 2))),
-      'sellerId': 'user456',
+      'favoriteCount': 0,
+      'createdAt':
+          Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 2))),
+      'sellerId': userId,
       'isOfferEnabled': true,
       'status': 'active',
       'chatCount': 4,
+      'searchKeywords': ['자전거', '알톤', '로드바이크', '스포츠', '레저'],
     },
     {
       'title': '캣타워 무료나눔',
@@ -57,11 +77,14 @@ Future<void> uploadDummyData() async {
       ],
       'viewCount': 67,
       'likeCount': 5,
-      'createdAt': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
-      'sellerId': 'user789',
+      'favoriteCount': 0,
+      'createdAt':
+          Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+      'sellerId': userId,
       'isOfferEnabled': false,
       'status': 'active',
       'chatCount': 3,
+      'searchKeywords': ['캣타워', '고양이', '반려동물', '무료나눔', '나눔'],
     },
     {
       'title': '에어팟 프로 2세대',
@@ -76,11 +99,14 @@ Future<void> uploadDummyData() async {
       ],
       'viewCount': 89,
       'likeCount': 6,
-      'createdAt': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 5))),
-      'sellerId': 'user101',
+      'favoriteCount': 0,
+      'createdAt':
+          Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 5))),
+      'sellerId': userId,
       'isOfferEnabled': true,
       'status': 'active',
       'chatCount': 1,
+      'searchKeywords': ['에어팟', '프로', '2세대', '애플', '이어폰'],
     },
     {
       'title': '퀸 사이즈 침대 프레임',
@@ -95,11 +121,125 @@ Future<void> uploadDummyData() async {
       ],
       'viewCount': 156,
       'likeCount': 12,
-      'createdAt': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 8))),
-      'sellerId': 'user202',
+      'favoriteCount': 0,
+      'createdAt':
+          Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 8))),
+      'sellerId': userId,
       'isOfferEnabled': true,
       'status': 'active',
       'chatCount': 6,
+      'searchKeywords': ['침대', '프레임', '퀸사이즈', '가구', '인테리어'],
+    },
+    {
+      'title': '닌텐도 스위치 OLED + 젤다의 전설',
+      'description': '닌텐도 스위치 OLED 모델과 젤다의 전설 티어스 오브 더 킹덤 게임팩입니다. 구성품 모두 있어요.',
+      'price': 420000,
+      'locationName': '인창동',
+      'location': const GeoPoint(37.5642135, 127.0016985),
+      'category': '디지털기기',
+      'images': [
+        'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?q=80&w=1000',
+        'https://images.unsplash.com/photo-1617096200347-cb04ae810b1d?q=80&w=1000'
+      ],
+      'viewCount': 234,
+      'likeCount': 15,
+      'favoriteCount': 0,
+      'createdAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 12))),
+      'sellerId': userId,
+      'isOfferEnabled': true,
+      'status': 'active',
+      'chatCount': 8,
+      'searchKeywords': ['닌텐도', '스위치', 'OLED', '젤다', '게임기', '게임'],
+    },
+    {
+      'title': '캠핑 테이블 세트',
+      'description': '1년 사용한 캠핑 테이블 세트입니다. 접이식이라 보관이 편하고 야외 활동에 최적화되어 있어요.',
+      'price': 85000,
+      'locationName': '방이동',
+      'location': const GeoPoint(37.5132612, 127.1001336),
+      'category': '스포츠/레저',
+      'images': [
+        'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?q=80&w=1000',
+        'https://images.unsplash.com/photo-1475518845976-0fd87b7e4e5d?q=80&w=1000'
+      ],
+      'viewCount': 178,
+      'likeCount': 9,
+      'favoriteCount': 0,
+      'createdAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 15))),
+      'sellerId': userId,
+      'isOfferEnabled': true,
+      'status': 'active',
+      'chatCount': 5,
+      'searchKeywords': ['캠핑', '테이블', '야외', '레저', '접이식'],
+    },
+    {
+      'title': '맥북 프로 M2 16인치',
+      'description':
+          '맥북 프로 M2 16인치 스페이스 그레이입니다. 배터리 사이클 50회 미만이고 애케어플러스 적용 중입니다.',
+      'price': 2800000,
+      'locationName': '잠실동',
+      'location': const GeoPoint(37.5132612, 127.1001336),
+      'category': '디지털기기',
+      'images': [
+        'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000',
+        'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=1000'
+      ],
+      'viewCount': 312,
+      'likeCount': 24,
+      'favoriteCount': 0,
+      'createdAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 18))),
+      'sellerId': userId,
+      'isOfferEnabled': true,
+      'status': 'active',
+      'chatCount': 12,
+      'searchKeywords': ['맥북', '프로', 'M2', '애플', '노트북'],
+    },
+    {
+      'title': '무선 청소기 다이슨 V12',
+      'description': '다이슨 V12 무선청소기입니다. 6개월 사용했고 필터 교체한지 1개월 됐어요. 구성품 모두 있습니다.',
+      'price': 580000,
+      'locationName': '서초동',
+      'location': const GeoPoint(37.4923615, 127.0292881),
+      'category': '디지털기기',
+      'images': [
+        'https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=1000',
+        'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=1000'
+      ],
+      'viewCount': 245,
+      'likeCount': 18,
+      'favoriteCount': 0,
+      'createdAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 22))),
+      'sellerId': userId,
+      'isOfferEnabled': true,
+      'status': 'active',
+      'chatCount': 7,
+      'searchKeywords': ['다이슨', '청소기', '무선청소기', 'V12', '가전제품'],
+    },
+    {
+      'title': '골프 풀세트 초급자용',
+      'description': '6개월 사용한 초급자용 골프 풀세트입니다. 캘러웨이 세트이고 가방도 포함입니다.',
+      'price': 950000,
+      'locationName': '대치동',
+      'location': const GeoPoint(37.4923615, 127.0292881),
+      'category': '스포츠/레저',
+      'images': [
+        'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=1000',
+        'https://images.unsplash.com/photo-1496115965489-21be7e6e59a0?q=80&w=1000'
+      ],
+      'viewCount': 167,
+      'likeCount': 11,
+      'favoriteCount': 0,
+      'createdAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 25))),
+      'sellerId': userId,
+      'isOfferEnabled': true,
+      'status': 'active',
+      'chatCount': 4,
+      'searchKeywords': ['골프', '골프클럽', '캘러웨이', '스포츠', '골프세트'],
     },
   ];
 

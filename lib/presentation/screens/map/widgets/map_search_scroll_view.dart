@@ -15,18 +15,30 @@ class MapSearchScrollView extends ConsumerWidget {
 
     return SingleChildScrollView(
       child: Container(
-        height: 200,
-        color: AppColors.primary.withAlpha(150).withRed(80),
+        height: 250,
+        color: AppColors.surface.withAlpha(200),
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: mapState.searchStoreDataList.length,
           itemBuilder: (context, index) {
             final searchStoreData = mapState.searchStoreDataList[index];
+            final distance = mapState.betweenDistance[index];
+
             return ListTile(
-                title: Text(
-                  searchStoreData.storeName,
-                  style:
-                      AppStyles.labelMedium.copyWith(color: AppColors.primary),
+                title: Row(
+                  children: [
+                    Text(
+                      searchStoreData.storeName,
+                      style:
+                          AppStyles.labelMedium.copyWith(color: AppColors.primary),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${distance}m',
+                      style: AppStyles.labelMedium
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
                 ),
                 subtitle: Text(searchStoreData.address),
                 onTap: () async {

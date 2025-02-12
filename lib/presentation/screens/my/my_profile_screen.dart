@@ -109,6 +109,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final userEntity = ref.read(authProvider)!.copyWith(
           name: nameController.text,
           image: url,
+          updatedAt: DateTime.now(),
         );
 
     ref.read(authProvider.notifier).updateProfile(userEntity);
@@ -172,10 +173,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     radius: 40,
                     backgroundColor: Colors.grey[200],
                     backgroundImage: _selectedImage != null
-                        ? FileImage(_selectedImage!)
+                        ? FileImage(_selectedImage!) as ImageProvider
                         : ref.read(authProvider)?.image != null &&
                                 ref.read(authProvider)!.image!.isNotEmpty
                             ? NetworkImage(ref.read(authProvider)!.image!)
+                                as ImageProvider
                             : null,
                     child: _selectedImage == null &&
                             (ref.read(authProvider)?.image == null ||
