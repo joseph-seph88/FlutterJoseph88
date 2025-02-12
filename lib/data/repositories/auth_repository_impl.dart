@@ -143,4 +143,24 @@ class AuthRepositoryImpl implements AuthRepository {
     }
     return null;
   }
+
+  @override
+  Future<UserEntity?> signInWithKakao() async {
+    final user = await _authDataSource.signInWithKakao();
+    if (user != null) {
+      final existingUser = await _userDataSource.getUser(user.uid);
+      if (existingUser != null) {
+        return existingUser.toEntity();
+      }
+
+      final newUser = UserEntity(
+        id: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? '',
+      );
+      await _userDataSource.saveUser(newUser.toModel(user.uid));
+      return newUser;
+    }
+    return null;
+  }
 }

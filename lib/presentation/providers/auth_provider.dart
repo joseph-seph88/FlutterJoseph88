@@ -94,4 +94,13 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
     }
     return false;
   }
+
+  Future<bool> signInWithKakao() async {
+    final user = await authUseCase.signInWithKakao();
+    if (user != null) {
+      state = user;
+      return true;
+    }
+    return false;
+  }
 }

@@ -49,4 +49,8 @@ class AuthUseCase {
   Future<UserEntity?> signInWithNaver() async {
     return await _authRepository.signInWithNaver();
   }
+
+  Future<UserEntity?> signInWithKakao() async {
+    return await _authRepository.signInWithKakao();
+  }
 }
