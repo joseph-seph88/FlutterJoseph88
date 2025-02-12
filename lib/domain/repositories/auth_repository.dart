@@ -11,4 +11,5 @@ abstract class AuthRepository {
   Future<UserEntity?> signInWithGoogle();
   Future<UserEntity?> signInWithFacebook();
   Future<UserEntity?> signInWithNaver();
+  Future<UserEntity?> signInWithKakao();
 }

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:o2/data/datasources/auth_kakao_data_source.dart';
 
 class AuthDataSource {
   final _firebaseAuth = FirebaseAuth.instance;
@@ -48,6 +49,8 @@ class AuthDataSource {
     if (isNaverLoggedIn) {
       await FlutterNaverLogin.logOut();
     }
+
+    await AuthKakaoDataSource().logOut();
 
     await _firebaseAuth.signOut();
   }
@@ -155,6 +158,19 @@ class AuthDataSource {
       throw e.message ?? "네이버 로그인 오류";
     } catch (e) {
       throw "네이버 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  Future<User?> signInWithKakao() async {
+    try {
+      final credential = await AuthKakaoDataSource().signInWithKakao();
+      final userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? "카카오 로그인 오류";
+    } catch (e) {
+      throw "카카오 로그인 중 오류가 발생했습니다";
     }
   }
 }

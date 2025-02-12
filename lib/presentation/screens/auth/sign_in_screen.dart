@@ -58,6 +58,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
+  void _onClickedKakaoButton() async {
+    final success = await ref.read(authProvider.notifier).signInWithKakao();
+    if (success && mounted) {
+      context.go("/home");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,6 +104,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             AuthButton(
               onPressed: _onClickedNaverButton,
               text: "네이버",
+            ),
+            const SizedBox(height: AppStyles.defaultSpacing),
+            AuthButton(
+              onPressed: _onClickedKakaoButton,
+              text: "카카오",
             ),
             const Spacer(),
             AuthButton(
