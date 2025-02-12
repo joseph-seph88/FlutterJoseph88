@@ -16,10 +16,9 @@ class ChatRoomTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
     final otherUserID =
         userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
-    final otherUserData = getUserDataUseCase(otherUserID);
+    final otherUserData = ref.read(otherUserProvider)(otherUserID);
 
     return ListTile(
       leading: _buildLeadingIcons(ref),
@@ -57,11 +56,9 @@ class ChatRoomTile extends ConsumerWidget {
 
   Widget _buildLeadingIcons(WidgetRef ref) {
     const double iconSize = 40;
-    final product = chatRoom.productID == null
-        ? null
-        : ref
-            .read(getProductDetailUseCaseProvider)
-            .execute(chatRoom.productID!);
+    final productAsync = chatRoom.productID == null
+        ? const AsyncData(null)
+        : ref.watch(productDetailProvider(chatRoom.productID!));
 
     return SizedBox(
       width: iconSize * 1.5,
@@ -78,19 +75,20 @@ class ChatRoomTile extends ConsumerWidget {
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: FutureBuilder(
-                future: product,
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) return const Icon(Icons.photo);
+              child: productAsync.when(
+                data: (data) {
+                  if (data == null) return const Icon(Icons.photo);
 
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      snapshot.data!.images[0],
+                      data.images[0],
                       fit: BoxFit.cover,
                     ),
                   );
                 },
+                error: (error, stackTrace) => const Icon(Icons.photo),
+                loading: () => const Icon(Icons.photo),
               ),
             ),
           ),
@@ -130,7 +128,7 @@ class ChatRoomTile extends ConsumerWidget {
             Icon(Icons.delete),
             SizedBox(width: 8),
             Text(
-              '삭제된 메시지입니다.',
+              '삭제된 메시지',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],

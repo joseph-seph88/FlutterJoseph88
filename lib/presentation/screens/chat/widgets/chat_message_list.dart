@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
-import 'package:o2/presentation/providers/chat_provider.dart';
-import '../../../providers/map_provider.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 
 class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
@@ -16,11 +16,9 @@ class ChatMessageList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stream = chatRoomId != null
-        ? ref.watch(chatMessageStreamProvider(chatRoomId!))
-        : const AsyncValue.data(<ChatMessage>[]);
+    final messages = ref.watch(chatMessageListViewModelProvider(chatRoomId));
 
-    return stream.when(
+    return messages.when(
       data: (data) => _buildMessageBody(ref, data),
       error: (error, stackTrace) => _buildErrorBody(),
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -50,7 +48,7 @@ class ChatMessageList extends ConsumerWidget {
             children: [
               if (showDateDivider)
                 _buildDateDivider(context, message.sentTime.toDateOnlyString()),
-              _buildMessageItem(ref, context, message, showTimestamp, isMine),
+              _buildMessageItem(context, ref, message, showTimestamp, isMine),
             ],
           );
         },
@@ -86,7 +84,7 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMessageItem(WidgetRef ref, BuildContext context,
+  Widget _buildMessageItem(BuildContext context, WidgetRef ref,
       ChatMessage message, bool showTimestamp, bool isMine) {
     return Padding(
       padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
@@ -129,18 +127,55 @@ class ChatMessageList extends ConsumerWidget {
     final messageMaxHeight = MediaQuery.of(context).size.height * 0.4;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      constraints: BoxConstraints(
-        maxWidth: messageMaxWidth,
-        maxHeight: messageMaxHeight,
+    return GestureDetector(
+      onLongPress: () =>
+          _showMessagePopupMenu(context, ref, message.id, isMine),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        constraints: BoxConstraints(
+          maxWidth: messageMaxWidth,
+          maxHeight: messageMaxHeight,
+        ),
+        decoration: BoxDecoration(
+          color: isMine
+              ? colorScheme.primary
+              : colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
+        ),
+        child: _buildMessageContent(ref, message, isMine, isDarkMode),
       ),
-      decoration: BoxDecoration(
-        color:
-            isMine ? colorScheme.primary : colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-      ),
-      child: _buildMessageContent(ref, message, isMine, isDarkMode),
+    );
+  }
+
+  void _showMessagePopupMenu(
+      BuildContext context, WidgetRef ref, String messageId, bool isMine) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'chat_message_menu',
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return SimpleDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            if (isMine) ...[
+              SimpleDialogOption(
+                onPressed: () {
+                  ref
+                      .read(
+                          chatMessageListViewModelProvider(chatRoomId).notifier)
+                      .deleteMessage(messageId);
+                  context.pop();
+                },
+                child: const Text(
+                  '삭제',
+                  style: TextStyle(color: AppColors.text),
+                ),
+              )
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -221,35 +256,28 @@ class ChatMessageList extends ConsumerWidget {
         ),
     };
   }
-}
 
-NCameraPosition _getCameraPosition(String content) {
-  final latLng = content.split(' ').map((e) => double.tryParse(e));
-  if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
+  NCameraPosition _getCameraPosition(String content) {
+    final latLng = content.split(' ').map((e) => double.tryParse(e));
+    if (latLng.contains(null)) return NaverMapViewOptions.seoulCityHall;
 
-  return NCameraPosition(
-      target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
-}
-
-Future<String?> _getAddress(String content, WidgetRef ref) async {
-  final mapUseCase = ref.read(mapUseCaseProvider);
-  var latLng = content.split(' ').map((e) => double.tryParse(e));
-  if (latLng.contains(null)) {
-    final target = NaverMapViewOptions.seoulCityHall.target;
-    latLng = [target.latitude, target.longitude];
+    return NCameraPosition(
+        target: NLatLng(latLng.first!, latLng.last!), zoom: 14);
   }
 
-  final place = await mapUseCase
-      .transPositionToAddress(NLatLng(latLng.first!, latLng.last!));
-  return place?.street;
-}
+  Future<String?> _getAddress(String content, WidgetRef ref) {
+    return ref
+        .read(chatMessageListViewModelProvider(chatRoomId).notifier)
+        .getAddress(content);
+  }
 
-void _addMarker(NaverMapController controller, String content) {
-  final latLng = content.split(' ').map(double.tryParse);
-  final target = latLng.contains(null)
-      ? NaverMapViewOptions.seoulCityHall.target
-      : NLatLng(latLng.first!, latLng.last!);
-  final marker = NMarker(id: 'location', position: target);
+  void _addMarker(NaverMapController controller, String content) {
+    final latLng = content.split(' ').map(double.tryParse);
+    final target = latLng.contains(null)
+        ? NaverMapViewOptions.seoulCityHall.target
+        : NLatLng(latLng.first!, latLng.last!);
+    final marker = NMarker(id: 'location', position: target);
 
-  controller.addOverlay(marker);
+    controller.addOverlay(marker);
+  }
 }

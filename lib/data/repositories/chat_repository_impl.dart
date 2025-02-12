@@ -44,4 +44,9 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> markChatAsRead(String chatRoomId, String userId) async {
     await _dataSource.markChatAsRead(chatRoomId, userId);
   }
+
+  @override
+  Future<void> deleteMessage(String chatRoomId, String messageId) async {
+    await _dataSource.deleteMessage(chatRoomId, messageId);
+  }
 }
