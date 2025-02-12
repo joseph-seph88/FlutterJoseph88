@@ -3,7 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
+import 'package:o2/presentation/providers/map_provider.dart';
 
 class SelectLocationView extends ConsumerStatefulWidget {
   final Function(NLatLng) onLocationSelected;
@@ -168,7 +168,7 @@ final _currentAddressProvider = FutureProvider.autoDispose<Placemark?>((ref) {
   final mapUseCase = ref.read(mapUseCaseProvider);
 
   return target.when(
-    data: (data) => mapUseCase.transAddressFromGeo(data),
+    data: (data) => mapUseCase.transPositionToAddress(data),
     error: (error, stackTrace) => Future.error(error),
     loading: () => Future.delayed(const Duration(days: 365)),
   );

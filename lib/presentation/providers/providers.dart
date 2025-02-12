@@ -9,8 +9,8 @@ import 'package:o2/domain/repositories/chat_repository.dart';
 import 'package:o2/domain/repositories/image_repository.dart';
 import 'package:o2/domain/repositories/user_repository.dart';
 import 'package:o2/domain/usecases/chat_use_case.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/domain/usecases/user_use_case.dart';
+import 'package:o2/presentation/providers/map_provider.dart';
 
 final chatRemoteDataSourceProvider =
     Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSourceImpl());

@@ -4,6 +4,7 @@ import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/usecases/chat_use_case.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
+import 'package:o2/presentation/providers/map_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageListViewModel
@@ -53,7 +54,7 @@ class ChatMessageListViewModel
     }
 
     final place = await mapUseCase
-        .transAddressFromGeo(NLatLng(latLng.first!, latLng.last!));
+        .transPositionToAddress(NLatLng(latLng.first!, latLng.last!));
     return place?.street;
   }
 }
