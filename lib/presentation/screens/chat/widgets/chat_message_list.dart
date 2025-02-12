@@ -5,14 +5,20 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/presentation/providers/providers.dart';
 import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
+import 'package:o2/presentation/widgets/profile_image.dart';
 
 class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
   final String userId;
+  final String otherUserId;
 
   const ChatMessageList(
-      {super.key, required this.chatRoomId, required this.userId});
+      {super.key,
+      required this.chatRoomId,
+      required this.userId,
+      required this.otherUserId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,7 +100,7 @@ class ChatMessageList extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMine) ...[
-            _buildSenderAvatar(),
+            _buildSenderAvatar(ref),
             const SizedBox(width: 8),
           ],
           Row(
@@ -116,8 +122,15 @@ class ChatMessageList extends ConsumerWidget {
     );
   }
 
-  Widget _buildSenderAvatar() {
-    return const CircleAvatar();
+  Widget _buildSenderAvatar(WidgetRef ref) {
+    final otherUserData = ref.read(otherUserProvider)(otherUserId);
+
+    return FutureBuilder(
+      future: otherUserData,
+      builder: (context, snapshot) => ProfileImageAvatar(
+        imageUrl: snapshot.data?.image,
+      ),
+    );
   }
 
   Widget _buildMessageBubble(
