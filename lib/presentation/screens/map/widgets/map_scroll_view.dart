@@ -37,10 +37,12 @@ class MapScrollView extends ConsumerWidget {
                     color: AppColors.primary,
                   ),
                   const SizedBox(width: 5),
-                  Text(
-                    currentAddress,
-                    style:
-                        AppStyles.labelLarge.copyWith(color: AppColors.primary),
+                  Expanded(
+                    child: Text(
+                      currentAddress,
+                      style:
+                          AppStyles.labelLarge.copyWith(color: AppColors.primary),
+                    ),
                   )
                 ],
               ),
