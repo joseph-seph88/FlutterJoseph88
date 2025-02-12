@@ -1,7 +1,7 @@
 class ReviewModel {
   final String userId;
   final String email;
-  final Map<String, dynamic>? storeReview; //   {mapId, comment, starRating}
+  final Map<String, dynamic>? storeReview; //   {mapId, comment}
 
   ReviewModel({
     required this.userId,

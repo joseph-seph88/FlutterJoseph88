@@ -278,7 +278,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           ),
                         ),
                         style: AppStyles.labelLarge
-                            .copyWith(color: AppColors.text),
+                            .copyWith(color: AppColors.primary.withAlpha(200)),
                         onTapOutside: (_) => _focusNode.unfocus())),
                 if (toggled)
                   MapSearchScrollView(onTap: (data) async {
@@ -288,12 +288,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
           Positioned(
-            bottom: _buttonOffset + 320,
-            right: 20,
+            bottom: _buttonOffset + 150,
+            left: 20,
             child: ElevatedButton(
               onPressed: _zoomIn,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.backgroundTransparent),
+                  backgroundColor: AppColors.surface.withAlpha(150)),
               child: const Icon(
                 Icons.add,
                 color: AppColors.primary,
@@ -302,12 +302,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
           Positioned(
-            bottom: _buttonOffset + 250,
-            right: 20,
+            bottom: _buttonOffset + 80,
+            left: 20,
             child: ElevatedButton(
               onPressed: _zoomOut,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.backgroundTransparent),
+                  backgroundColor: AppColors.surface.withAlpha(150)),
               child: const Icon(
                 Icons.remove,
                 color: AppColors.primary,
@@ -323,7 +323,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 await moveMyPosition(myPosition);
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.backgroundTransparent),
+                  backgroundColor: AppColors.surface.withAlpha(150)),
               child: const Icon(
                 Icons.my_location,
                 color: AppColors.primary,
@@ -336,9 +336,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             right: 20,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.backgroundTransparent),
+                  backgroundColor: AppColors.surface.withAlpha(150),
+                ),
                 onPressed: () {
                   final mapBottomSheet = ref.read(bottomSheetProvider);
+                  _searchController.clear();
+                  setState(() {
+                    toggled = false;
+                  });
                   mapBottomSheet.mapBottomSheetWithTwoBtn(context, ref);
                 },
                 child: Row(
@@ -349,7 +354,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       size: 25,
                     ),
                     Text("추가하기",
-                        style: AppStyles.labelMedium
+                        style: AppStyles.labelLarge
                             .copyWith(color: AppColors.primary)),
                   ],
                 )),
@@ -362,32 +367,48 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             builder: (context, scrollController) {
               final geoLatLng =
                   GeoPoint(currentPosition.latitude, currentPosition.longitude);
-              return Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+              return GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  final newOffset = (_sheetController.size -
+                          details.primaryDelta! /
+                              MediaQuery.of(context).size.height)
+                      .clamp(0.0, 1.0);
+                  _sheetController.jumpTo(newOffset);
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 10,
-                      width: 50,
-                      margin: const EdgeInsets.only(top: 5, bottom: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.green[200],
-                        borderRadius: BorderRadius.circular(5),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 30,
+                        width: 65,
+                        margin: const EdgeInsets.only(top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(30),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.drag_handle,
+                            color: AppColors.primary.withAlpha(100),
+                            size: 30,
+                          ),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: MapScrollView(scrollController, geoLatLng,
-                          onButtonPressed: (category, geoPosition) async {
-                        await onButtonPressed(category, geoLatLng);
-                      }),
-                    ),
-                  ],
+                      Expanded(
+                        child: MapScrollView(scrollController, geoLatLng,
+                            onButtonPressed: (category, geoPosition) async {
+                          await onButtonPressed(category, geoLatLng);
+                        }),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

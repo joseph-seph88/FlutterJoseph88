@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 class AppConstant {
 
+  // data source Collection
+  static const mapCollection = 'maps';
+  static const reviewCollection = 'reviews';
+
   //Icon path
   static const coffeePath = "assets/icons/coffee.png";
   static const fishPath = "assets/icons/fish.png";

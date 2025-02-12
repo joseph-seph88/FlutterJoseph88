@@ -18,7 +18,6 @@ class RecommendedShopPage extends ConsumerWidget {
     final mapState = ref.watch(mapProvider);
 
     void onTap(MapEntity searchData) {
-      // ref.read(mapProvider.notifier).clearStateSearchData();
       ref.read(selectedMapDataProvider.notifier).state = searchData;
       ref.read(reviewProvider.notifier).getReviewAboutStore(searchData.mapId);
       _textController.clear();
