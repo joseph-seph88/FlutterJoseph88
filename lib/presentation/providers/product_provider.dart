@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/domain/entities/product.dart';
-import 'package:o2/domain/entities/user_entity.dart';
 import 'package:o2/domain/repositories/product_repository.dart';
 import 'package:o2/domain/repositories/user_repository.dart';
 import 'package:o2/domain/usecases/product/get_products_usecase.dart';

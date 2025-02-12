@@ -7,7 +7,7 @@ Future<void> uploadDummyData() async {
   final usersRef = firestore.collection('users');
 
   // 사용자 더미 데이터
-  final String userId = 'L8IM3YPhZYeQO9oZQnWJeHGKL5u2';
+  const String userId = 'L8IM3YPhZYeQO9oZQnWJeHGKL5u2';
   final dummyUser = {
     'id': userId,
     'email': 'test@naver.com',
