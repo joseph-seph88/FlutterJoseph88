@@ -11,7 +11,9 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<List<Product>> getProducts() async {
     final snapshots = await _dataSource.getProducts();
-    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
+    return snapshots
+        .map((doc) => Product.fromModel(ProductModel.fromFirebase(doc)))
+        .toList();
   }
 
   @override
@@ -24,13 +26,17 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<List<Product>> searchProducts(String query) async {
     final snapshots = await _dataSource.searchProducts(query);
-    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
+    return snapshots
+        .map((doc) => Product.fromModel(ProductModel.fromFirebase(doc)))
+        .toList();
   }
 
   @override
   Future<List<Product>> getProductsByCategory(String category) async {
     final snapshots = await _dataSource.getProductsByCategory(category);
-    return snapshots.map((doc) => Product.fromModel(ProductModel.fromFirebase(doc))).toList();
+    return snapshots
+        .map((doc) => Product.fromModel(ProductModel.fromFirebase(doc)))
+        .toList();
   }
 
   @override
@@ -39,7 +45,25 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<void> toggleLike(String id, bool isLiked) async {
-    await _dataSource.toggleLike(id, isLiked);
+  Future<void> addToFavorites(String userId, String productId) async {
+    await _dataSource.addToFavorites(userId, productId);
+  }
+
+  @override
+  Future<void> removeFromFavorites(String userId, String productId) async {
+    await _dataSource.removeFromFavorites(userId, productId);
+  }
+
+  @override
+  Future<List<Product>> getFavoriteProducts(String userId) async {
+    final snapshots = await _dataSource.getFavoriteProducts(userId);
+    return snapshots
+        .map((doc) => Product.fromModel(ProductModel.fromFirebase(doc)))
+        .toList();
+  }
+
+  @override
+  Future<bool> isFavoriteProduct(String userId, String productId) async {
+    return await _dataSource.isFavoriteProduct(userId, productId);
   }
 }

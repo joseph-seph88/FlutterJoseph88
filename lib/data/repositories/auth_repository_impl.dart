@@ -85,6 +85,8 @@ class AuthRepositoryImpl implements AuthRepository {
         id: user.uid,
         email: user.email ?? '',
         name: user.displayName ?? '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
       await _userDataSource.saveUser(newUser.toModel(user.uid));
       return newUser;

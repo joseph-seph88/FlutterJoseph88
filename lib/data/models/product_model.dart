@@ -10,13 +10,13 @@ class ProductModel {
   final String category;
   final List<String> images;
   final int viewCount;
-  final int likeCount;
+  final int favoriteCount;
   final Timestamp createdAt;
   final String sellerId;
   final bool isOfferEnabled;
   final String status;
   final int chatCount;
-  final List<String> searchKeywords; // 검색 키워드 필드 추가
+  final List<String> searchKeywords;
 
   ProductModel({
     required this.id,
@@ -28,14 +28,15 @@ class ProductModel {
     required this.category,
     required this.images,
     required this.viewCount,
-    required this.likeCount,
+    required this.favoriteCount,
     required this.createdAt,
     required this.sellerId,
     required this.isOfferEnabled,
     required this.status,
     required this.chatCount,
-    List<String>? searchKeywords, // 선택적 매개변수로 추가
-  }) : searchKeywords = searchKeywords ?? generateSearchKeywords(title, description);
+    List<String>? searchKeywords,
+  }) : searchKeywords =
+            searchKeywords ?? generateSearchKeywords(title, description);
 
   factory ProductModel.fromFirebase(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -49,7 +50,7 @@ class ProductModel {
       category: data['category'] as String,
       images: List<String>.from(data['images']),
       viewCount: data['viewCount'] as int,
-      likeCount: data['likeCount'] as int,
+      favoriteCount: data['favoriteCount'] as int? ?? 0,
       createdAt: data['createdAt'] as Timestamp,
       sellerId: data['sellerId'] as String,
       isOfferEnabled: data['isOfferEnabled'] as bool,
@@ -69,7 +70,7 @@ class ProductModel {
       'category': category,
       'images': images,
       'viewCount': viewCount,
-      'likeCount': likeCount,
+      'favoriteCount': favoriteCount,
       'createdAt': createdAt,
       'sellerId': sellerId,
       'isOfferEnabled': isOfferEnabled,
@@ -103,7 +104,8 @@ class ProductModel {
     keywords.addAll(titleWords.where((word) => word.length >= 2));
 
     // 3. 설명에서 주요 단어 추출 (2글자 이상인 단어만)
-    final descriptionWords = lowercaseDescription.split(' ').where((word) => word.length >= 2);
+    final descriptionWords =
+        lowercaseDescription.split(' ').where((word) => word.length >= 2);
     keywords.addAll(descriptionWords);
 
     // 4. 카테고리 관련 키워드 추가 (예: "중고", "새제품" 등)

@@ -97,6 +97,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       id: "",
       email: _listTextFieldData[0].controller.text,
       name: _listTextFieldData[2].controller.text,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     final success = await ref
