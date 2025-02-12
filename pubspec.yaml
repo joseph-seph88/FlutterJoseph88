@@ -56,6 +56,7 @@ dependencies:
   kakao_flutter_sdk_user: ^1.9.6
   flutter_facebook_auth: ^6.0.4
   flutter_svg: ^2.0.17
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -109,3 +110,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#1c6b3a"
+  image: "assets/images/o2_splash.png"
+  android_12:
+    image: "assets/images/o2_splash.png"
+    color: "#1c6b3a"
+
