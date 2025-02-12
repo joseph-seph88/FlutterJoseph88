@@ -72,7 +72,7 @@ class MapRepositoryImpl implements MapRepository {
         }).toList();
       });
     } catch (e) {
-      throw Exception('맵레포에러: $e');
+      throw Exception('맵레포에러: ${e.toString()}');
     }
   }
 
@@ -89,10 +89,10 @@ class MapRepositoryImpl implements MapRepository {
           return model.toEntity(iconColor);
         }).toList();
       }
+      return [];
     } catch (e) {
-      throw Exception("레포구현에러: $e");
+      throw Exception('맵레포에러: ${e.toString()}');
     }
-    return [];
   }
 
   @override
@@ -108,10 +108,10 @@ class MapRepositoryImpl implements MapRepository {
           return model.toEntity(iconColor);
         }).toList();
       }
+      return [];
     } catch (e) {
-      throw Exception("레포구현에러: $e");
+      throw Exception('맵레포에러: ${e.toString()}');
     }
-    return [];
   }
 
   @override
@@ -133,10 +133,10 @@ class MapRepositoryImpl implements MapRepository {
       if (positionData != null) {
         return positionData;
       }
+      return null;
     } catch (e) {
       rethrow;
     }
-    return null;
   }
 
   @override
