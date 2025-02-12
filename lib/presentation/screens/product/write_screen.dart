@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
+import 'package:o2/presentation/widgets/select_location_modal.dart';
 
 class WriteScreen extends ConsumerStatefulWidget {
   const WriteScreen({super.key});
@@ -14,6 +16,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
   String? _selectedLocationName;
+  NLatLng? _selectedPosition;
 
   Future<void> _pickImage() async {
     try {
@@ -302,7 +305,20 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                   const SizedBox(height: AppStyles.smallSpacing),
                   OutlinedButton(
                     onPressed: () {
-                      // TODO: 장소 선택 모달 표시
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => SelectLocationModal(
+                          onLocationSelected: (locationName, position) {
+                            setState(() {
+                              _selectedLocationName = locationName;
+                              _selectedPosition = position;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      );
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.all(12),
