@@ -19,7 +19,9 @@ class AuthKakaoDataSource {
 
   Future<void> logOut() async {
     try {
-      await UserApi.instance.logout();
+      if (await AuthApi.instance.hasToken()) {
+        await UserApi.instance.logout();
+      }
     } catch (error) {
       rethrow;
     }
