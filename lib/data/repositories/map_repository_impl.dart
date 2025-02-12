@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:o2/core/utils/color_trans_util.dart';
@@ -11,10 +10,6 @@ import '../../domain/repositories/map_repository.dart';
 import '../models/map_model.dart';
 import 'package:flutter/material.dart';
 
-final mapRepositoryProvider = Provider<MapRepositoryImpl>((ref) {
-  final mapDataSource = ref.read(mapDataSourceProvider);
-  return MapRepositoryImpl(mapDataSource);
-});
 
 class MapRepositoryImpl implements MapRepository {
   final MapDataSource _mapDataSource;
@@ -141,9 +136,9 @@ class MapRepositoryImpl implements MapRepository {
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition) async {
     try {
-      final mapAddress = _mapDataSource.transAddressFromGeo(
+      final mapAddress = _mapDataSource.transPositionToAddress(
           currentPosition.latitude, currentPosition.longitude);
       return mapAddress;
     } catch (e) {

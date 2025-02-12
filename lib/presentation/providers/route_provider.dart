@@ -6,9 +6,8 @@ import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
 import 'package:o2/presentation/screens/map/recommended_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
-import 'package:o2/presentation/screens/map/search_address_page.dart';
+import 'package:o2/presentation/screens/map/send_location_page.dart';
 import 'package:o2/presentation/screens/map/star_rating_page.dart';
-import 'package:o2/presentation/screens/map/transaction_location_page.dart';
 import 'package:o2/presentation/screens/my/my_favorite_screen.dart';
 import 'package:o2/presentation/screens/my/my_profile_screen.dart';
 import 'package:o2/presentation/screens/my/my_purchase_history_screen.dart';
@@ -111,22 +110,30 @@ final routerProvider = Provider<GoRouter>(
           builder: (context, state) => const ProductListView(),
         ),
         GoRoute(
-          path: "/transactionMap",
-          builder: (context, state) => const TransactionLocationPage(),
+          path: "/sendMap",
+          builder: (context, state) {
+            final chatRoomId =
+                (state.extra as Map<String, String>)['chatRoomId'];
+            final otherUserId =
+                (state.extra as Map<String, String>)['otherUserId']!;
+            final productID =
+                (state.extra as Map<String, String>)['productID']!;
+
+            return SendLocationPage(
+              chatRoomId: chatRoomId,
+              otherUserId: otherUserId,
+              productID: productID,
+            );
+          },
         ),
         GoRoute(
             path: "/map",
             builder: (context, state) => const MapScreen(),
             routes: [
               GoRoute(
-                  path: "/addShop",
-                  builder: (context, state) => const AddShopPage(),
-                  routes: [
-                    GoRoute(
-                      path: "/searchAddr",
-                      builder: (context, state) => const SearchAddressPage(),
-                    ),
-                  ]),
+                path: "/addShop",
+                builder: (context, state) => const AddShopPage(),
+              ),
               GoRoute(
                   path: "/recommendShop",
                   builder: (context, state) => RecommendedShopPage(),

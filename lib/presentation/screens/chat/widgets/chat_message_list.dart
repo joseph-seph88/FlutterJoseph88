@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
-import 'package:o2/domain/usecases/map_use_case.dart';
 import 'package:o2/presentation/providers/chat_provider.dart';
+import '../../../providers/map_provider.dart';
 
 class ChatMessageList extends ConsumerWidget {
   final String? chatRoomId;
@@ -240,7 +240,7 @@ Future<String?> _getAddress(String content, WidgetRef ref) async {
   }
 
   final place = await mapUseCase
-      .transAddressFromGeo(NLatLng(latLng.first!, latLng.last!));
+      .transPositionToAddress(NLatLng(latLng.first!, latLng.last!));
   return place?.street;
 }
 

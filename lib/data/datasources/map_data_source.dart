@@ -1,23 +1,9 @@
-import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:o2/data/models/map_model.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constant.dart';
-
-final fireStoreProvider = Provider((ref) => FirebaseFirestore.instance);
-final placesSdkProvider = Provider<FlutterGooglePlacesSdk>((ref) {
-  return FlutterGooglePlacesSdk('AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk',
-      locale: const Locale('ko', 'KR'));
-});
-
-final mapDataSourceProvider = Provider((ref) {
-  final fireStore = ref.read(fireStoreProvider);
-  final placeSdk = ref.read(placesSdkProvider);
-  return MapDataSource(fireStore, placeSdk);
-});
 
 class MapDataSource {
   final FirebaseFirestore _fireStore;
@@ -25,7 +11,7 @@ class MapDataSource {
 
   MapDataSource(this._fireStore, this._places);
 
-  Future<Placemark?> transAddressFromGeo(
+  Future<Placemark?> transPositionToAddress(
       double latitude, double longitude) async {
     try {
       List<Placemark> placeMarks =
