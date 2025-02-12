@@ -12,7 +12,10 @@ class ImageViewWidget extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.transparent),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+      ),
       body: PhotoView(
         imageProvider: NetworkImage(imageUrl),
         minScale: PhotoViewComputedScale.contained * 0.8,
