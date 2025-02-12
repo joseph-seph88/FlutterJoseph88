@@ -45,4 +45,8 @@ class AuthUseCase {
   Future<UserEntity?> signInWithFacebook() async {
     return await _authRepository.signInWithFacebook();
   }
+
+  Future<UserEntity?> signInWithNaver() async {
+    return await _authRepository.signInWithNaver();
+  }
 }
