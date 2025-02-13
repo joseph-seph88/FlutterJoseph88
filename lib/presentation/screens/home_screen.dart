@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:o2/presentation/providers/permission_provider.dart';
 import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
 import 'package:o2/presentation/screens/my/my_screen.dart';
@@ -25,10 +24,6 @@ class HomeScreen extends ConsumerWidget {
 
     void onTabTapped(int index) async {
       ref.read(currentIndexProvider.notifier).state = index;
-
-      if (index == 1) {
-        await ref.read(locationPermissionProvider.notifier).requestPermission();
-      }
     }
 
     return Scaffold(
