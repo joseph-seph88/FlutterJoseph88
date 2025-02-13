@@ -1,39 +1,76 @@
+import 'dart:async';
+
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/domain/entities/chat_message.dart';
+import 'package:o2/domain/entities/product.dart';
+import 'package:o2/domain/entities/user_entity.dart';
 import 'package:o2/domain/usecases/chat_use_case.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
-import 'package:o2/presentation/providers/chat_provider.dart';
+import 'package:o2/domain/usecases/product/get_product_detail_usecase.dart';
+import 'package:o2/domain/usecases/user_use_case.dart';
 import 'package:o2/presentation/providers/map_provider.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageListViewModel
-    extends StateNotifier<AsyncValue<List<ChatMessage>>> {
+    extends StateNotifier<List<ChatMessage>> {
   final Ref ref;
   final String? chatRoomId;
+  final GetChatMessagesUseCase getChatMessagesUseCase;
+
+  // final CreateChatRoomUseCase createChatRoomUseCase;
+  // final SendChatMessageUseCase sendChatMessageUseCase;
+  // final SendChatImageUseCase sendChatImageUseCase;
+  final MarkChatAsReadUseCase markChatAsReadUseCase;
   final DeleteChatMessageUseCase deleteChatMessageUseCase;
+  final GetUserDataUseCase getUserDataUseCase;
+  final GetProductDetailUseCase getProductDetailUseCase;
   final MapUseCase mapUseCase;
+  StreamSubscription? _subscription;
 
   ChatMessageListViewModel(
     this.ref,
     this.chatRoomId,
+    this.getChatMessagesUseCase,
+    this.markChatAsReadUseCase,
     this.deleteChatMessageUseCase,
+    this.getUserDataUseCase,
+    this.getProductDetailUseCase,
     this.mapUseCase,
-  ) : super(const AsyncLoading()) {
-    _loadMessages();
+  ) : super([]) {
+    _listenChatMessageStream();
   }
 
-  Future<void> _loadMessages() async {
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenChatMessageStream() {
+    _subscription?.cancel();
     if (chatRoomId == null) {
-      state = const AsyncData([]);
+      state = [];
       return;
     }
 
-    try {
-      state = ref.watch(chatMessageStreamProvider(chatRoomId!));
-    } catch (e, stackTrace) {
-      state = AsyncError(e, stackTrace);
-    }
+    _subscription = getChatMessagesUseCase(chatRoomId!).listen(
+      (messages) {
+        if (state.isEmpty || state.length == messages.length) {
+          state = messages;
+        } else if (state.length < messages.length) {
+          state = [messages.first, ...state];
+        }
+      },
+      onError: (e, stackTrace) {
+        state = [];
+      },
+    );
+  }
+
+  void markChatAsRead(String chatRoomId, String userId) {
+    markChatAsReadUseCase(chatRoomId, userId);
   }
 
   Future<void> deleteMessage(String messageId) async {
@@ -41,9 +78,17 @@ class ChatMessageListViewModel
 
     try {
       await deleteChatMessageUseCase(chatRoomId!, messageId);
-    } catch (e, stackTrace) {
-      state = AsyncError(e, stackTrace);
+    } catch (e) {
+      state = [];
     }
+  }
+
+  Future<UserEntity?> getOtherUserData(String userId) {
+    return getUserDataUseCase(userId);
+  }
+
+  Future<Product?> getProductDetail(String productId) {
+    return getProductDetailUseCase.execute(productId);
   }
 
   Future<String?> getAddress(String content) async {
@@ -60,15 +105,17 @@ class ChatMessageListViewModel
 }
 
 final chatMessageListViewModelProvider = StateNotifierProvider.autoDispose
-    .family<ChatMessageListViewModel, AsyncValue<List<ChatMessage>>, String?>(
+    .family<ChatMessageListViewModel, List<ChatMessage>, String?>(
   (ref, chatRoomId) {
-    final deleteChatMessageUseCase = ref.read(deleteChatMessageUseCaseProvider);
-    final mapUseCase = ref.read(mapUseCaseProvider);
     return ChatMessageListViewModel(
       ref,
       chatRoomId,
-      deleteChatMessageUseCase,
-      mapUseCase,
+      ref.read(getChatMessagesUseCaseProvider),
+      ref.read(markChatAsReadUseCaseProvider),
+      ref.read(deleteChatMessageUseCaseProvider),
+      ref.read(getUserDataUseCaseProvider),
+      ref.read(getProductDetailUseCaseProvider),
+      ref.read(mapUseCaseProvider),
     );
   },
 );
