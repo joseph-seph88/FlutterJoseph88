@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,15 +14,13 @@ import 'package:o2/presentation/providers/map_provider.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
-class ChatMessageListViewModel
-    extends StateNotifier<List<ChatMessage>> {
+class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
   final Ref ref;
   final String? chatRoomId;
   final GetChatMessagesUseCase getChatMessagesUseCase;
-
-  // final CreateChatRoomUseCase createChatRoomUseCase;
-  // final SendChatMessageUseCase sendChatMessageUseCase;
-  // final SendChatImageUseCase sendChatImageUseCase;
+  final CreateChatRoomUseCase createChatRoomUseCase;
+  final SendChatMessageUseCase sendChatMessageUseCase;
+  final SendChatImageUseCase sendChatImageUseCase;
   final MarkChatAsReadUseCase markChatAsReadUseCase;
   final DeleteChatMessageUseCase deleteChatMessageUseCase;
   final GetUserDataUseCase getUserDataUseCase;
@@ -33,6 +32,9 @@ class ChatMessageListViewModel
     this.ref,
     this.chatRoomId,
     this.getChatMessagesUseCase,
+    this.createChatRoomUseCase,
+    this.sendChatMessageUseCase,
+    this.sendChatImageUseCase,
     this.markChatAsReadUseCase,
     this.deleteChatMessageUseCase,
     this.getUserDataUseCase,
@@ -73,6 +75,43 @@ class ChatMessageListViewModel
     markChatAsReadUseCase(chatRoomId, userId);
   }
 
+  Future<String?> sendMessage({
+    required String? chatRoomId,
+    required String senderId,
+    required String otherUserId,
+    required String productId,
+    required String message,
+    required File? image,
+  }) async {
+    String? roomId;
+
+    if (message.isNotEmpty || image != null) {
+      roomId = chatRoomId ??
+          await createChatRoomUseCase(otherUserId, senderId, productId);
+
+      await Future.wait([
+        Future(() async {
+          if (message.isNotEmpty) {
+            await sendChatMessageUseCase(
+                roomId!, ChatMessageType.text, message, senderId);
+          }
+        }),
+        Future(() async {
+          if (image != null) {
+            await sendChatImageUseCase(
+              roomId!,
+              ChatMessageType.image,
+              image.path,
+              senderId,
+            );
+          }
+        }),
+      ]);
+    }
+
+    return roomId;
+  }
+
   Future<void> deleteMessage(String messageId) async {
     if (chatRoomId == null) return;
 
@@ -111,6 +150,9 @@ final chatMessageListViewModelProvider = StateNotifierProvider.autoDispose
       ref,
       chatRoomId,
       ref.read(getChatMessagesUseCaseProvider),
+      ref.read(createChatRoomUseCaseProvider),
+      ref.read(sendChatMessageUseCaseProvider),
+      ref.read(sendChatImageUseCaseProvider),
       ref.read(markChatAsReadUseCaseProvider),
       ref.read(deleteChatMessageUseCaseProvider),
       ref.read(getUserDataUseCaseProvider),

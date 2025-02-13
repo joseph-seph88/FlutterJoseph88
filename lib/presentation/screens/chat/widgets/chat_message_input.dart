@@ -1,22 +1,28 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
-import 'package:o2/presentation/screens/chat/widgets/chat_message_input_view_model.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
+  final String userId;
   final String otherUserId;
   final String productID;
   final bool isAddButtonClicked;
+  final File? selectedImage;
   final Function onAddButtonClicked;
 
   const ChatMessageInput(
       {super.key,
       required this.chatRoomId,
+      required this.userId,
       required this.otherUserId,
       required this.productID,
       required this.isAddButtonClicked,
+      required this.selectedImage,
       required this.onAddButtonClicked});
 
   @override
@@ -27,6 +33,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
   late final AnimationController _animationController;
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -46,15 +53,13 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
 
   @override
   Widget build(BuildContext context) {
-    final isSending = ref.watch(chatMessageInputViewModelProvider);
-
     return Container(
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           _buildAddButton(),
           _buildMessageTextField(),
-          _buildSendButton(isSending),
+          _buildSendButton(_isSending),
         ],
       ),
     );
@@ -118,19 +123,30 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   }
 
   Future<void> _handleMessageSubmitted() async {
+    setState(() {
+      _isSending = true;
+    });
+
     await _sendMessage();
     _messageController.clear();
     ref.read(selectedImageProvider.notifier).clear();
+
+    setState(() {
+      _isSending = false;
+    });
   }
 
   Future<void> _sendMessage() async {
-    final viewModel = ref.read(chatMessageInputViewModelProvider.notifier);
+    final viewModel =
+        ref.read(chatMessageListViewModelProvider(widget.chatRoomId).notifier);
 
     final chatRoomId = await viewModel.sendMessage(
       chatRoomId: widget.chatRoomId,
+      senderId: widget.userId,
       otherUserId: widget.otherUserId,
       productId: widget.productID,
       message: _messageController.text,
+      image: widget.selectedImage,
     );
 
     if (widget.chatRoomId == null) {

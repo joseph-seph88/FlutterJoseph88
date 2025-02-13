@@ -85,9 +85,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ],
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
+            userId: userId,
             otherUserId: widget.otherUserId,
             productID: widget.productID,
             isAddButtonClicked: _isAddButtonClicked,
+            selectedImage: selectedImage,
             onAddButtonClicked: _onAddButtonClicked,
           ),
           _isAddButtonClicked
