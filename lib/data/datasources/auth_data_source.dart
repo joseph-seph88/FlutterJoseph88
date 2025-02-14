@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
@@ -126,32 +127,23 @@ class AuthDataSource {
 
   Future<User?> signInWithNaver() async {
     try {
+      final functions = FirebaseFunctions.instance;
       final result = await FlutterNaverLogin.logIn();
       if (result.status == NaverLoginStatus.loggedIn) {
-        final naverUser = result.account;
+        final httpsCallableResult =
+            await functions.httpsCallable("createCustomToken").call({
+          "id": result.account.id,
+          "email": result.account.email,
+          "name": result.account.name,
+        });
 
-        try {
-          final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-            email: naverUser.email,
-            password: "Naver_${naverUser.id}",
-          );
-          return userCredential.user;
-        } on FirebaseAuthException catch (e) {
-          if (e.code == "user-not-found" || e.code == "invalid-credential") {
-            final userCredential =
-                await _firebaseAuth.createUserWithEmailAndPassword(
-              email: naverUser.email,
-              password: "Naver_${naverUser.id}",
-            );
+        final customToken = httpsCallableResult.data["customToken"];
 
-            await userCredential.user?.updateDisplayName(naverUser.name);
-            await userCredential.user?.reload();
+        final userCredential = await _firebaseAuth.signInWithCustomToken(
+          customToken,
+        );
 
-            return FirebaseAuth.instance.currentUser;
-          }
-        } catch (e) {
-          rethrow;
-        }
+        return userCredential.user;
       }
       return null;
     } on FirebaseAuthException catch (e) {
