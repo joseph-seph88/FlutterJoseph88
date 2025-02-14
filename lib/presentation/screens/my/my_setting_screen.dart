@@ -8,8 +8,8 @@ import 'package:o2/presentation/providers/auth_provider.dart';
 class MySettingScreen extends ConsumerWidget {
   const MySettingScreen({super.key});
 
-  void _clickLogout(BuildContext context, WidgetRef ref, String text) {
-    final providerData = FirebaseAuth.instance.currentUser?.providerData;
+  void _showDialog(BuildContext context, WidgetRef ref, String text) {
+    final isEmailProvider = _isEmailProvider();
     final passwordController = TextEditingController();
 
     showDialog(
@@ -21,10 +21,7 @@ class MySettingScreen extends ConsumerWidget {
           style: const TextStyle(color: AppColors.text),
         ),
         actions: [
-          if (text == "회원탈퇴" &&
-              providerData != null &&
-              providerData.isNotEmpty &&
-              providerData[0].providerId == "password") ...[
+          if (text == "회원탈퇴" && isEmailProvider) ...[
             TextField(
               controller: passwordController,
               style: const TextStyle(color: AppColors.text),
@@ -37,22 +34,12 @@ class MySettingScreen extends ConsumerWidget {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: ElevatedButton(
-              onPressed: () async {
-                if (text == "로그아웃") {
-                  await ref.read(authProvider.notifier).signOut();
-                  if (context.mounted) {
-                    context.go("/signIn");
-                  }
-                } else {
-                  String userId = ref.read(authProvider)!.id;
-                  await ref
-                      .read(authProvider.notifier)
-                      .withdraw(userId, passwordController.text);
-                  if (context.mounted) {
-                    context.go("/signIn");
-                  }
-                }
-              },
+              onPressed: () => _onPressed(
+                context,
+                ref,
+                text,
+                passwordController.text,
+              ),
               child: Text(text),
             ),
           ),
@@ -66,6 +53,37 @@ class MySettingScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  bool _isEmailProvider() {
+    final providerData = FirebaseAuth.instance.currentUser?.providerData;
+    return providerData != null &&
+        providerData.isNotEmpty &&
+        providerData[0].providerId == "password";
+  }
+
+  void _onPressed(
+      BuildContext context, WidgetRef ref, String text, String password) async {
+    if (text == "로그아웃") {
+      await ref.read(authProvider.notifier).signOut();
+      if (context.mounted) {
+        context.go("/signIn");
+      }
+    } else {
+      String userId = ref.read(authProvider)!.id;
+      try {
+        await ref.read(authProvider.notifier).withdraw(userId, password);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      }
+      if (context.mounted) {
+        context.go("/signIn");
+      }
+    }
   }
 
   @override
@@ -89,7 +107,7 @@ class MySettingScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppStyles.defaultSpacing),
             GestureDetector(
-              onTap: () => _clickLogout(context, ref, "로그아웃"),
+              onTap: () => _showDialog(context, ref, "로그아웃"),
               child: Text(
                 "로그아웃",
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -99,7 +117,7 @@ class MySettingScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppStyles.defaultSpacing),
             GestureDetector(
-              onTap: () => _clickLogout(context, ref, "회원탈퇴"),
+              onTap: () => _showDialog(context, ref, "회원탈퇴"),
               child: Text(
                 "회원탈퇴",
                 style: theme.textTheme.bodyLarge?.copyWith(
