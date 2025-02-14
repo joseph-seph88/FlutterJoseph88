@@ -119,7 +119,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final userEntity = UserEntity(
       id: "",
       email: _listTextFieldData[0].controller.text,
-      name: _listTextFieldData[2].controller.text,
+      name: _listTextFieldData[3].controller.text,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
