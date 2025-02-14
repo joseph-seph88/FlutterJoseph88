@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ class MySettingScreen extends ConsumerWidget {
   const MySettingScreen({super.key});
 
   void _clickLogout(BuildContext context, WidgetRef ref, String text) {
+    final providerData = FirebaseAuth.instance.currentUser?.providerData;
     final passwordController = TextEditingController();
 
     showDialog(
@@ -19,7 +21,10 @@ class MySettingScreen extends ConsumerWidget {
           style: const TextStyle(color: AppColors.text),
         ),
         actions: [
-          if (text == "회원탈퇴") ...[
+          if (text == "회원탈퇴" &&
+              providerData != null &&
+              providerData.isNotEmpty &&
+              providerData[0].providerId == "password") ...[
             TextField(
               controller: passwordController,
               style: const TextStyle(color: AppColors.text),

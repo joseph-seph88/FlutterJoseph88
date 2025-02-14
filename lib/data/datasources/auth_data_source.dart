@@ -67,15 +67,42 @@ class AuthDataSource {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: password,
-      );
+      final providerData = user.providerData;
+      final providerId =
+          providerData.isEmpty ? "naver.com" : providerData[0].providerId;
 
-      await user.reauthenticateWithCredential(credential);
+      switch (providerId) {
+        case "password":
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: password,
+          );
+          await user.reauthenticateWithCredential(credential);
+          break;
+        case "google.com":
+          await GoogleSignIn().signOut();
+          break;
+        case "facebook.com":
+          await FacebookAuth.instance.logOut();
+          break;
+        case "oidc.kakao_o2":
+          await AuthKakaoDataSource().logOut();
+          break;
+        case "naver.com":
+          await FlutterNaverLogin.logOut();
+          break;
+        default:
+          throw "지원하지 않는 인증 방식입니다.";
+      }
+
       await user.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw '최근에 로그인한 사용자만 회원 탈퇴가 가능합니다. 다시 로그인해주세요.';
+      }
+      throw e.message ?? '회원 탈퇴 중 오류가 발생했습니다.';
     } catch (e) {
-      rethrow;
+      throw '회원 탈퇴 중 오류가 발생했습니다.';
     }
   }
 
@@ -119,7 +146,11 @@ class AuthDataSource {
       }
       return null;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? "페이스북 로그인 오류";
+      if (e.code == "account-exists-with-different-credential") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw e.message ?? "페이스북 로그인 오류";
+      }
     } catch (e) {
       throw "페이스북 로그인 중 오류가 발생했습니다";
     }
@@ -148,6 +179,12 @@ class AuthDataSource {
       return null;
     } on FirebaseAuthException catch (e) {
       throw e.message ?? "네이버 로그인 오류";
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == "already-exists") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw "네이버 로그인 중 오류가 발생했습니다";
+      }
     } catch (e) {
       throw "네이버 로그인 중 오류가 발생했습니다";
     }
@@ -160,7 +197,11 @@ class AuthDataSource {
           await _firebaseAuth.signInWithCredential(credential);
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? "카카오 로그인 오류";
+      if (e.code == "account-exists-with-different-credential") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw e.message ?? "카카오 로그인 오류";
+      }
     } catch (e) {
       throw "카카오 로그인 중 오류가 발생했습니다";
     }
