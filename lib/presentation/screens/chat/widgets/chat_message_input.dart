@@ -32,6 +32,7 @@ class ChatMessageInput extends ConsumerStatefulWidget {
 class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
+  final _textFieldFocusNode = FocusNode();
   late final AnimationController _animationController;
   bool _isSending = false;
 
@@ -85,6 +86,8 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
         ),
         child: TextField(
           controller: _messageController,
+          focusNode: _textFieldFocusNode,
+          textInputAction: TextInputAction.send,
           style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
             hintText: '메시지 보내기',
@@ -96,7 +99,10 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
             filled: true,
             fillColor: ColorScheme.of(context).surfaceContainerHigh,
           ),
-          onSubmitted: (_) => _handleMessageSubmitted(),
+          onSubmitted: (_) {
+            _textFieldFocusNode.requestFocus();
+            _handleMessageSubmitted();
+          },
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
         ),
       ),
@@ -106,7 +112,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   Widget _buildSendButton(bool isSending) {
     return IconButton(
       constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
-      onPressed: isSending ? null : _handleMessageSubmitted,
+      onPressed: isSending ? null : _handleSendButtonPressed,
       icon: isSending
           ? const CircularProgressIndicator()
           : const Icon(Icons.send),
@@ -122,13 +128,17 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     }
   }
 
-  Future<void> _handleMessageSubmitted() async {
+  void _handleMessageSubmitted() {
+    _sendMessage(_messageController.text);
+    _messageController.clear();
+  }
+
+  Future<void> _handleSendButtonPressed() async {
     setState(() {
       _isSending = true;
     });
 
-    await _sendMessage();
-    _messageController.clear();
+    _handleMessageSubmitted();
     ref.read(selectedImageProvider.notifier).clear();
 
     setState(() {
@@ -136,7 +146,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     });
   }
 
-  Future<void> _sendMessage() async {
+  Future<void> _sendMessage(String text) async {
     final viewModel =
         ref.read(chatMessageListViewModelProvider(widget.chatRoomId).notifier);
 
@@ -145,7 +155,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
       senderId: widget.userId,
       otherUserId: widget.otherUserId,
       productId: widget.productID,
-      message: _messageController.text,
+      message: text,
       image: widget.selectedImage,
     );
 
