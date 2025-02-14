@@ -18,6 +18,7 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
   final Ref ref;
   final String? chatRoomId;
   final GetChatMessagesUseCase getChatMessagesUseCase;
+  final FetchMoreMessagesUseCase fetchMoreMessagesUseCase;
   final CreateChatRoomUseCase createChatRoomUseCase;
   final SendChatMessageUseCase sendChatMessageUseCase;
   final SendChatImageUseCase sendChatImageUseCase;
@@ -32,6 +33,7 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
     this.ref,
     this.chatRoomId,
     this.getChatMessagesUseCase,
+    this.fetchMoreMessagesUseCase,
     this.createChatRoomUseCase,
     this.sendChatMessageUseCase,
     this.sendChatImageUseCase,
@@ -41,7 +43,7 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
     this.getProductDetailUseCase,
     this.mapUseCase,
   ) : super([]) {
-    _listenChatMessageStream();
+    _listenChatMessageStream(20);
   }
 
   @override
@@ -50,25 +52,39 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
     super.dispose();
   }
 
-  void _listenChatMessageStream() {
+  void _listenChatMessageStream(int pageSize) {
     _subscription?.cancel();
     if (chatRoomId == null) {
       state = [];
       return;
     }
 
-    _subscription = getChatMessagesUseCase(chatRoomId!).listen(
+    _subscription = getChatMessagesUseCase(chatRoomId!, pageSize).listen(
       (messages) {
-        if (state.isEmpty || state.length == messages.length) {
+        if (state.isEmpty || state.first.id == messages.first.id) {
           state = messages;
-        } else if (state.length < messages.length) {
+        } else {
           state = [messages.first, ...state];
+          _listenChatMessageStream(state.length);
         }
       },
       onError: (e, stackTrace) {
         state = [];
       },
     );
+  }
+
+  Future<void> fetchMoreMessages() async {
+    if (chatRoomId == null || state.isEmpty) {
+      state = [];
+      return;
+    }
+
+    final newMessages =
+        await fetchMoreMessagesUseCase(chatRoomId!, state.last.sentTime);
+    state = [...state, ...newMessages];
+
+    _listenChatMessageStream(state.length);
   }
 
   void markChatAsRead(String chatRoomId, String userId) {
@@ -150,6 +166,7 @@ final chatMessageListViewModelProvider = StateNotifierProvider.autoDispose
       ref,
       chatRoomId,
       ref.read(getChatMessagesUseCaseProvider),
+      ref.read(fetchMoreMessagesUseCaseProvider),
       ref.read(createChatRoomUseCaseProvider),
       ref.read(sendChatMessageUseCaseProvider),
       ref.read(sendChatImageUseCaseProvider),

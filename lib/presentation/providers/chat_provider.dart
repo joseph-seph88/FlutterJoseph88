@@ -20,7 +20,7 @@ final chatMessageStreamProvider = StreamProvider.autoDispose
   if (userId == null) return Stream.error('not_logged_in');
 
   final getChatMessagesUseCase = ref.read(getChatMessagesUseCaseProvider);
-  return getChatMessagesUseCase(chatRoomId);
+  return getChatMessagesUseCase(chatRoomId, 20);
 });
 
 final createChatRoomProvider = Provider((ref) {

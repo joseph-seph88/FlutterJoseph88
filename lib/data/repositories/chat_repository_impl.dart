@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:o2/data/datasources/chat_remote_data_source.dart';
 import 'package:o2/data/models/chat_message_model.dart';
 import 'package:o2/data/models/chat_room_model.dart';
@@ -20,13 +21,22 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<List<ChatMessage>> getChatMessages(String chatRoomId) {
-    final models = _dataSource.getChatMessages(chatRoomId).map((snapshot) =>
+  Stream<List<ChatMessage>> getChatMessages(String chatRoomId, int pageSize) {
+    final models = _dataSource.getChatMessages(chatRoomId, pageSize).map((snapshot) =>
         snapshot.docs
             .map((doc) => ChatMessageModel.fromJson(doc.id, doc.data())));
 
     return models
         .map((data) => data.map((element) => element.toEntity()).toList());
+  }
+
+  @override
+  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last) {
+    return _dataSource
+        .fetchMoreMessages(chatRoomId, Timestamp.fromDate(last))
+        .then((snapshot) => snapshot.docs
+            .map((doc) => ChatMessageModel.fromJson(doc.id, doc.data()))
+        .map((e) => e.toEntity()).toList());
   }
 
   @override
