@@ -3,10 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:o2/core/constants/auth_provider_type.dart';
 import 'package:o2/data/datasources/auth_kakao_data_source.dart';
 
 class AuthDataSource {
   final _firebaseAuth = FirebaseAuth.instance;
+  final _googleSignIn = GoogleSignIn();
+  final _facebookAuth = FacebookAuth.instance;
+  final _kakaoAuth = AuthKakaoDataSource();
 
   // 회원가입
   Future<User?> signUp(String email, String password) async {
@@ -36,14 +40,14 @@ class AuthDataSource {
 
   // 로그아웃
   Future<void> signOut() async {
-    final isGoogleLoggedIn = await GoogleSignIn().isSignedIn();
+    final isGoogleLoggedIn = await _googleSignIn.isSignedIn();
     if (isGoogleLoggedIn) {
-      await GoogleSignIn().signOut();
+      await _googleSignIn.signOut();
     }
 
-    final isFacebookLoggedIn = await FacebookAuth.instance.accessToken != null;
+    final isFacebookLoggedIn = await _facebookAuth.accessToken != null;
     if (isFacebookLoggedIn) {
-      await FacebookAuth.instance.logOut();
+      await _facebookAuth.logOut();
     }
 
     final isNaverLoggedIn = await FlutterNaverLogin.isLoggedIn;
@@ -51,7 +55,7 @@ class AuthDataSource {
       await FlutterNaverLogin.logOut();
     }
 
-    await AuthKakaoDataSource().logOut();
+    await _kakaoAuth.logOut();
 
     await _firebaseAuth.signOut();
   }
@@ -64,7 +68,7 @@ class AuthDataSource {
   // 회원 탈퇴
   Future<void> withdraw(String password) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _firebaseAuth.currentUser;
       if (user == null) return;
 
       final providerData = user.providerData;
@@ -80,13 +84,13 @@ class AuthDataSource {
           await user.reauthenticateWithCredential(credential);
           break;
         case "google.com":
-          await GoogleSignIn().signOut();
+          await _googleSignIn.signOut();
           break;
         case "facebook.com":
-          await FacebookAuth.instance.logOut();
+          await _facebookAuth.logOut();
           break;
         case "oidc.kakao_o2":
-          await AuthKakaoDataSource().logOut();
+          await _kakaoAuth.logOut();
           break;
         case "naver.com":
           await FlutterNaverLogin.logOut();
@@ -109,7 +113,7 @@ class AuthDataSource {
   // 구글 로그인
   Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth =
@@ -132,7 +136,7 @@ class AuthDataSource {
   // 페이스북 로그인
   Future<User?> signInWithFacebook() async {
     try {
-      final result = await FacebookAuth.instance.login(
+      final result = await _facebookAuth.login(
         permissions: ['email'],
       );
 
@@ -192,7 +196,7 @@ class AuthDataSource {
 
   Future<User?> signInWithKakao() async {
     try {
-      final credential = await AuthKakaoDataSource().signInWithKakao();
+      final credential = await _kakaoAuth.signInWithKakao();
       final userCredential =
           await _firebaseAuth.signInWithCredential(credential);
       return userCredential.user;
@@ -204,6 +208,29 @@ class AuthDataSource {
       }
     } catch (e) {
       throw "카카오 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  Future<User?> signInWithProvider(
+    AuthProviderType authProviderType, {
+    String? email,
+    String? password,
+  }) async {
+    try {
+      switch (authProviderType) {
+        case AuthProviderType.email:
+          return await signIn(email!, password!);
+        case AuthProviderType.google:
+          return await signInWithGoogle();
+        case AuthProviderType.facebook:
+          return await signInWithFacebook();
+        case AuthProviderType.naver:
+          return await signInWithNaver();
+        case AuthProviderType.kakao:
+          return await signInWithKakao();
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }
