@@ -139,16 +139,13 @@ class MapNotifier extends StateNotifier<MapState> {
     const int participant = 0;
     final geoPosition = GeoPoint(position.latitude, position.longitude);
 
-    state = state.copyWith(isLoading: true, error: '');
+    state = state.copyWith(error: '');
     try {
       await _mapUseCase.addMarker(
           geoPosition, address, category, storeName, starRating, participant);
-      state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       throw Exception("프로바이더 에러 ${e.toString()}");
-    } finally {
-      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -217,19 +214,24 @@ class MapNotifier extends StateNotifier<MapState> {
   }
 
 // 등록된 업체 중 쿼리
-  void updateStoreList(String query) {
-    state = state.copyWith(error: '');
-    try {
-      final queryWithoutSpace = query.replaceAll(' ', '');
-      final searchData = state.mapDataList.where((mapData) {
-        final storeName = mapData.storeName.replaceAll(' ', '');
-        return storeName.contains(queryWithoutSpace);
-      }).toList();
-      state = state.copyWith(searchStoreDataList: searchData);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
-    }
+  void updateStoreList(String query) async {
+    state = state.copyWith(isLoading: true, error: '');
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+      try {
+        final queryWithoutSpace = query.replaceAll(' ', '');
+        final searchData = state.mapDataList.where((mapData) {
+          final storeName = mapData.storeName.replaceAll(' ', '');
+          return storeName.contains(queryWithoutSpace);
+        }).toList();
+        state = state.copyWith(searchStoreDataList: searchData);
+      } catch (e) {
+        state = state.copyWith(isLoading: false, error: e.toString());
+        throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+      } finally {
+        state = state.copyWith(isLoading: false);
+      }
+    });
   }
 
 // state에 별점 업데이트
@@ -317,6 +319,7 @@ class MapNotifier extends StateNotifier<MapState> {
     _debounceTimer = Timer(const Duration(seconds: 1), () async {
       state =
           state.copyWith(error: '', asyncPredictionList: const AsyncLoading());
+
       try {
         final predictions = await _mapUseCase.getPredictions(input);
         state =
