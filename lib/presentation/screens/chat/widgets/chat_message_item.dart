@@ -5,6 +5,7 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
+import 'package:o2/presentation/widgets/image_error_widget.dart';
 import 'package:o2/presentation/widgets/profile_image.dart';
 
 class ChatMessageItem extends StatelessWidget {
@@ -30,18 +31,17 @@ class ChatMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (showDateDivider)
-          _buildDateDivider(context, message.sentTime.toDateOnlyString()),
-        _buildMessageItem(context, message, showTimestamp, isMine),
+        if (showDateDivider) _buildDateDivider(context),
+        _buildMessageItem(context),
       ],
     );
   }
 
-  Widget _buildDateDivider(BuildContext context, String date) {
+  Widget _buildDateDivider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Text(
-        date,
+        message.sentTime.toDateOnlyString(),
         style: TextStyle(
           color: ColorScheme.of(context).onSurfaceVariant,
           fontSize: 12,
@@ -50,8 +50,7 @@ class ChatMessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageItem(BuildContext context, ChatMessage message,
-      bool showTimestamp, bool isMine) {
+  Widget _buildMessageItem(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: showTimestamp ? 8 : 4),
       child: Row(
@@ -67,13 +66,13 @@ class ChatMessageItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (isMine && showTimestamp) ...[
-                _buildTimestamp(context, message.sentTime),
+                _buildTimestamp(context),
                 const SizedBox(width: 4),
               ],
-              _buildMessageBubble(context, message, isMine),
+              _buildMessageBubble(context),
               if (!isMine && showTimestamp) ...[
                 const SizedBox(width: 4),
-                _buildTimestamp(context, message.sentTime),
+                _buildTimestamp(context),
               ],
             ],
           ),
@@ -93,15 +92,14 @@ class ChatMessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageBubble(
-      BuildContext context, ChatMessage message, bool isMine) {
+  Widget _buildMessageBubble(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
     final messageMaxWidth = MediaQuery.of(context).size.width * 0.6;
     final messageMaxHeight = MediaQuery.of(context).size.height * 0.4;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onLongPress: () => _showMessagePopupMenu(context, message.id, isMine),
+      onLongPress: () => _showMessagePopupMenu(context),
       child: Container(
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(
@@ -114,13 +112,12 @@ class ChatMessageItem extends StatelessWidget {
               : colorScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.all(Radius.circular(16)),
         ),
-        child: _buildMessageContent(context, message, isMine, isDarkMode),
+        child: _buildMessageContent(context, isDarkMode),
       ),
     );
   }
 
-  void _showMessagePopupMenu(
-      BuildContext context, String messageId, bool isMine) {
+  void _showMessagePopupMenu(BuildContext context) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -133,7 +130,7 @@ class ChatMessageItem extends StatelessWidget {
             if (isMine) ...[
               SimpleDialogOption(
                 onPressed: () {
-                  viewModel.deleteMessage(messageId);
+                  viewModel.deleteMessage(message.id);
                   context.pop();
                 },
                 child: const Text(
@@ -148,9 +145,9 @@ class ChatMessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildTimestamp(BuildContext context, DateTime sentTime) {
+  Widget _buildTimestamp(BuildContext context) {
     return Text(
-      sentTime.toTimeOnlyString(),
+      message.sentTime.toTimeOnlyString(),
       style: TextStyle(
         fontSize: 12,
         color: ColorScheme.of(context).onSurfaceVariant,
@@ -158,8 +155,7 @@ class ChatMessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageContent(
-      BuildContext context, ChatMessage message, bool isMine, bool isDarkMode) {
+  Widget _buildMessageContent(BuildContext context, bool isDarkMode) {
     switch (message.type) {
       case ChatMessageType.text:
         return Text(
@@ -183,9 +179,16 @@ class ChatMessageItem extends StatelessWidget {
 
               return Container(
                 color: Colors.grey,
-                width: 200,
-                height: 200,
+                width: 100,
+                height: 100,
                 child: const Center(child: Icon(Icons.photo)),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return const SizedBox(
+                width: 100,
+                height: 100,
+                child: ImageErrorWidget(),
               );
             },
           ),
