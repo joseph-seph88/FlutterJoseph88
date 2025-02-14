@@ -86,7 +86,10 @@ class ChatRoomTile extends ConsumerWidget {
                     if (!snapshot.hasData || snapshot.data == null) {
                       return const Icon(Icons.photo);
                     }
-                    return Image.network(snapshot.data!);
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(snapshot.data!, fit: BoxFit.cover),
+                    );
                   }),
             ),
           ),
