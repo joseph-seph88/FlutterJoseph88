@@ -1,26 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:o2/data/models/chat_message_model.dart';
 
-abstract interface class ChatRemoteDataSource {
-  Stream<QuerySnapshot<Map<String, dynamic>>> getChatRooms(String userId);
-
-  Stream<QuerySnapshot<Map<String, dynamic>>> getChatMessages(
-      String chatRoomId);
-
-  Future<String> createChatRoom(String otherUserId, String senderId, String productID);
-
-  Future<void> sendMessage(
-      String chatRoomId, String type, String content, String senderId);
-
-  Future<void> markChatAsRead(String chatRoomId, String userId);
-
-  Future<void> deleteMessage(String chatRoomId, String messageId);
-}
-
-class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
+class ChatRemoteDataSource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  @override
   Stream<QuerySnapshot<Map<String, dynamic>>> getChatRooms(String userId) {
     return _firestore
         .collection('chats')
@@ -32,7 +15,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         .snapshots();
   }
 
-  @override
   Stream<QuerySnapshot<Map<String, dynamic>>> getChatMessages(
       String chatRoomId) {
     return _firestore
@@ -43,7 +25,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         .snapshots();
   }
 
-  @override
   Future<String> createChatRoom(String otherUserId, String senderId, String productID) async {
     final chatRoomId = (await _firestore.collection('chats').add({
       'buyer': senderId,
@@ -55,7 +36,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     return chatRoomId;
   }
 
-  @override
   Future<void> sendMessage(
       String chatRoomId, String type, String content, String senderId) async {
     final timestamp = Timestamp.now();
@@ -83,7 +63,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     });
   }
 
-  @override
   Future<void> markChatAsRead(String chatRoomId, String userId) async {
     final chatRoom = await _firestore.collection('chats').doc(chatRoomId).get();
     final senderId = chatRoom['lastMessageSender'];
@@ -95,7 +74,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     }
   }
 
-  @override
   Future<void> deleteMessage(String chatRoomId, String messageId) async {
     await _firestore.collection('chats')
         .doc(chatRoomId)

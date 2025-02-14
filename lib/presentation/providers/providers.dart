@@ -13,10 +13,10 @@ import 'package:o2/domain/usecases/user_use_case.dart';
 import 'package:o2/presentation/providers/map_provider.dart';
 
 final chatRemoteDataSourceProvider =
-    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSourceImpl());
+    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSource());
 
 final imageDataSourceProvider =
-    Provider<ImageDataSource>((ref) => ImageDataSourceImpl());
+    Provider<ImageDataSource>((ref) => ImageDataSource());
 
 final userDataSourceProvider = Provider<UserDataSource>(
     (ref) => UserDataSource());

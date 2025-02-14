@@ -7,8 +7,8 @@ class ImageRepositoryImpl implements ImageRepository {
   ImageRepositoryImpl(this._dataSource);
 
   @override
-  Future<String> uploadImage(String id, String path) async {
-    final snapshot = await _dataSource.uploadImage(id, path);
+  Future<String> uploadImage(String root, String id, String path) async {
+    final snapshot = await _dataSource.uploadImage(root, id, path);
 
     return snapshot.ref.getDownloadURL();
   }
