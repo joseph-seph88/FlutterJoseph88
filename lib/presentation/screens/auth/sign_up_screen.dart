@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:o2/core/utils/auth_validator.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/screens/auth/widgets/auth_text.dart';
@@ -20,6 +21,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final List<TextFieldData> _listTextFieldData = [
     TextFieldData("email"),
     TextFieldData("password"),
+    TextFieldData("passwordConfirm"),
     TextFieldData("name"),
   ];
 
@@ -36,6 +38,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           _validateField(field);
         }
       });
+
+      field.controller.addListener(() {
+        if (field.isValid) {
+          _validateField(field);
+        }
+      });
     }
   }
 
@@ -48,42 +56,57 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     super.dispose();
   }
 
-  // 유효성 검사 함수
   void _validateField(TextFieldData field) async {
-    bool isValid = false;
+    final result = await _getValidationResult(field);
+    _updateFieldState(field, result);
+  }
 
+  Future<ValidatorResult> _getValidationResult(TextFieldData field) async {
     switch (field.fieldName) {
-      case 'email':
-        isValid = await ref
-            .read(authProvider.notifier)
-            .validEmail(field.controller.text);
-        field.errorText = isValid ? null : "사용할 수 없는 이메일입니다.";
-        break;
-      case 'password':
-        isValid = field.controller.text.length >= 6;
-        field.errorText = isValid ? null : "사용할 수 없는 비밀번호입니다.";
-        break;
-      case 'name':
-        isValid = field.controller.text.isNotEmpty;
-        break;
+      case "email":
+        return await AuthValidator.validateEmail(field.controller.text, ref);
+      case "password":
+        return AuthValidator.validatePassword(field.controller.text);
+      case "passwordConfirm":
+        return AuthValidator.validatePasswordConfirm(
+            field.controller.text, _listTextFieldData[1].controller.text);
+      default:
+        return ValidatorResult(isValid: true, errorMessage: null);
     }
+  }
 
+  void _updateFieldState(TextFieldData field, ValidatorResult result) {
     setState(() {
-      field.isValid = isValid;
+      field.isValid = result.isValid;
+      field.errorText = result.errorMessage;
 
-      // 이메일이 유효하면 비밀번호 필드를 보이게
-      if (field.fieldName == 'email' && isValid) {
-        _listTextFieldData[1].showField = true; // 비밀번호 필드 표시
-      }
-      // 비밀번호가 유효하면 이름 필드를 보이게
-      if (field.fieldName == 'password' && isValid) {
-        _listTextFieldData[2].showField = true; // 이름 필드 표시
-      }
-
-      if (field.fieldName == 'name' && isValid) {
-        _showSignUpButton = true; // 이름 필드 표시
+      if (result.isValid) {
+        _handleValidField(field);
+      } else {
+        _handleInvalidField(field);
       }
     });
+  }
+
+  void _handleValidField(TextFieldData field) {
+    final currentIndex = _listTextFieldData.indexOf(field);
+    if (currentIndex < _listTextFieldData.length - 1) {
+      _listTextFieldData[currentIndex + 1].showField = true;
+    }
+    if (field.fieldName == "passwordConfirm") {
+      _showSignUpButton = true;
+    }
+  }
+
+  void _handleInvalidField(TextFieldData field) {
+    final currentIndex = _listTextFieldData.indexOf(field);
+    for (int index = currentIndex + 1;
+        index < _listTextFieldData.length;
+        index++) {
+      _listTextFieldData[index].showField = false;
+      _listTextFieldData[index].controller.clear();
+    }
+    _showSignUpButton = false;
   }
 
   void _togglePasswordVisible() {
@@ -106,9 +129,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         .signUp(userEntity, _listTextFieldData[1].controller.text);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("회원가입이 완료되었습니다."),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("회원가입이 완료되었습니다.")),
+      );
       context.pop();
     }
   }
@@ -119,35 +142,42 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       appBar: AppBar(
         title: const Text("회원가입"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (TextFieldData field in _listTextFieldData)
-              if (field.showField) ...[
-                AuthText(text: "${field.fieldName} *"),
-                AuthTextField(
-                  controller: field.controller,
-                  fieldName: field.fieldName,
-                  obscureText:
-                      field.fieldName == 'password' ? _showPassword : null,
-                  onSuffixIconPressed: field.fieldName == 'password'
-                      ? _togglePasswordVisible
-                      : null,
-                  focusNode: field.focusNode,
-                  errorText: field.errorText,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (TextFieldData field in _listTextFieldData)
+                if (field.showField) ...[
+                  AuthText(fieldName: field.fieldName),
+                  AuthTextField(
+                    controller: field.controller,
+                    fieldName: field.fieldName,
+                    obscureText: field.fieldName.contains("password")
+                        ? _showPassword
+                        : null,
+                    onSuffixIconPressed: field.fieldName.contains("password")
+                        ? _togglePasswordVisible
+                        : null,
+                    focusNode: field.focusNode,
+                    errorText: field.errorText,
+                  ),
+                ],
+              const Spacer(),
+              if (_showSignUpButton) ...[
+                AuthButton(
+                  onPressed: _onClickedSignUpButton,
+                  text: "회원가입",
                 ),
               ],
-            const Spacer(),
-            if (_showSignUpButton) ...[
-              AuthButton(
-                onPressed: _onClickedSignUpButton,
-                text: "회원가입",
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );
