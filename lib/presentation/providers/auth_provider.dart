@@ -78,29 +78,41 @@ class AuthNotifier extends StateNotifier<UserEntity?> {
   }
 
   Future<bool> signInWithFacebook() async {
-    final user = await authUseCase.signInWithFacebook();
-    if (user != null) {
-      state = user;
-      return true;
+    try {
+      final user = await authUseCase.signInWithFacebook();
+      if (user != null) {
+        state = user;
+        return true;
+      }
+      return false;
+    } catch (e) {
+      rethrow;
     }
-    return false;
   }
 
   Future<bool> signInWithNaver() async {
-    final user = await authUseCase.signInWithNaver();
-    if (user != null) {
-      state = user;
-      return true;
+    try {
+      final user = await authUseCase.signInWithNaver();
+      if (user != null) {
+        state = user;
+        return true;
+      }
+      return false;
+    } catch (e) {
+      rethrow;
     }
-    return false;
   }
 
   Future<bool> signInWithKakao() async {
-    final user = await authUseCase.signInWithKakao();
-    if (user != null) {
-      state = user;
-      return true;
+    try {
+      final user = await authUseCase.signInWithKakao();
+      if (user != null) {
+        state = user;
+        return true;
+      }
+      return false;
+    } catch (e) {
+      rethrow;
     }
-    return false;
   }
 }

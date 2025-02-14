@@ -98,79 +98,91 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity?> signInWithFacebook() async {
-    final user = await _authDataSource.signInWithFacebook();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
-
-      String email = '';
-
-      if (user.email == null) {
-        final userData = await FacebookAuth.instance.getUserData();
-
-        if (userData['email'] != null) {
-          email = userData['email'];
+    try {
+      final user = await _authDataSource.signInWithFacebook();
+      if (user != null) {
+        final existingUser = await _userDataSource.getUser(user.uid);
+        if (existingUser != null) {
+          return existingUser.toEntity();
         }
+
+        String email = '';
+
+        if (user.email == null) {
+          final userData = await FacebookAuth.instance.getUserData();
+
+          if (userData['email'] != null) {
+            email = userData['email'];
+          }
+        }
+
+        final newUser = UserEntity(
+          id: user.uid,
+          email: user.email ?? email,
+          name: user.displayName ?? '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await _userDataSource.saveUser(newUser.toModel(user.uid));
+
+        return newUser;
       }
-
-      final newUser = UserEntity(
-        id: user.uid,
-        email: user.email ?? email,
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
-
-      return newUser;
+      return null;
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 
   @override
   Future<UserEntity?> signInWithNaver() async {
-    final user = await _authDataSource.signInWithNaver();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
+    try {
+      final user = await _authDataSource.signInWithNaver();
+      if (user != null) {
+        final existingUser = await _userDataSource.getUser(user.uid);
+        if (existingUser != null) {
+          return existingUser.toEntity();
+        }
 
-      final newUser = UserEntity(
-        id: user.uid,
-        email: user.email ?? '',
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
-      return newUser;
+        final newUser = UserEntity(
+          id: user.uid,
+          email: user.email ?? '',
+          name: user.displayName ?? '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await _userDataSource.saveUser(newUser.toModel(user.uid));
+        return newUser;
+      }
+      return null;
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 
   @override
   Future<UserEntity?> signInWithKakao() async {
-    final user = await _authDataSource.signInWithKakao();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
+    try {
+      final user = await _authDataSource.signInWithKakao();
+      if (user != null) {
+        final existingUser = await _userDataSource.getUser(user.uid);
+        if (existingUser != null) {
+          return existingUser.toEntity();
+        }
 
-      final userData = await UserApi.instance.me();
-      final newUser = UserEntity(
-        id: user.uid,
-        email: user.email ?? userData.kakaoAccount?.email ?? '',
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
-      return newUser;
+        final userData = await UserApi.instance.me();
+        final newUser = UserEntity(
+          id: user.uid,
+          email: user.email ?? userData.kakaoAccount?.email ?? '',
+          name: user.displayName ?? '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await _userDataSource.saveUser(newUser.toModel(user.uid));
+        return newUser;
+      }
+      return null;
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 }

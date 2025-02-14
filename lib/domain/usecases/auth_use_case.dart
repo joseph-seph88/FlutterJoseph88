@@ -43,14 +43,26 @@ class AuthUseCase {
   }
 
   Future<UserEntity?> signInWithFacebook() async {
-    return await _authRepository.signInWithFacebook();
+    try {
+      return await _authRepository.signInWithFacebook();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<UserEntity?> signInWithNaver() async {
-    return await _authRepository.signInWithNaver();
+    try {
+      return await _authRepository.signInWithNaver();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<UserEntity?> signInWithKakao() async {
-    return await _authRepository.signInWithKakao();
+    try {
+      return await _authRepository.signInWithKakao();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

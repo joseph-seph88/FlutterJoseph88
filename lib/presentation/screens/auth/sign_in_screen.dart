@@ -46,23 +46,48 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   void _onClickedFacebookButton() async {
-    final success = await ref.read(authProvider.notifier).signInWithFacebook();
-    if (success && mounted) {
-      context.go("/home");
+    try {
+      final success =
+          await ref.read(authProvider.notifier).signInWithFacebook();
+      if (success && mounted) {
+        context.go("/home");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
   void _onClickedNaverButton() async {
-    final success = await ref.read(authProvider.notifier).signInWithNaver();
-    if (success && mounted) {
-      context.go("/home");
+    try {
+      final success = await ref.read(authProvider.notifier).signInWithNaver();
+      if (success && mounted) {
+        context.go("/home");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
   void _onClickedKakaoButton() async {
-    final success = await ref.read(authProvider.notifier).signInWithKakao();
-    if (success && mounted) {
-      context.go("/home");
+    try {
+      final success = await ref.read(authProvider.notifier).signInWithKakao();
+      if (success && mounted) {
+        context.go("/home");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
