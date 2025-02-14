@@ -1,4 +1,5 @@
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 
 import '../../domain/repositories/auth_repository.dart';
@@ -116,7 +117,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final newUser = UserEntity(
         id: user.uid,
-        email: email,
+        email: user.email ?? email,
         name: user.displayName ?? '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -159,9 +160,10 @@ class AuthRepositoryImpl implements AuthRepository {
         return existingUser.toEntity();
       }
 
+      final userData = await UserApi.instance.me();
       final newUser = UserEntity(
         id: user.uid,
-        email: user.email ?? '',
+        email: user.email ?? userData.kakaoAccount?.email ?? '',
         name: user.displayName ?? '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
