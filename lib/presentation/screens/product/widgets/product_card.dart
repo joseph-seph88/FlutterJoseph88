@@ -55,18 +55,59 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 제목
-                    Text(
-                      product.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.text,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
+                    // 제목 영역
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 45,
+                            ),
+                            decoration: BoxDecoration(
+                              color: product.status == ProductStatus.completed
+                                  ? AppColors.primary
+                                  : product.status == ProductStatus.reserved
+                                      ? Colors.orange
+                                      : Colors.green,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              product.status.label,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              product.title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: AppColors.text,
+                                    fontSize: 15,
+                                    height: 1.2,
+                                  ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     // 위치 · 시간
                     Row(
                       children: [
@@ -76,7 +117,7 @@ class ProductCard extends StatelessWidget {
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: AppColors.textSecondary,
-                                      fontSize: 13,
+                                      fontSize: 12,
                                     ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -87,7 +128,7 @@ class ProductCard extends StatelessWidget {
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppColors.textSecondary,
-                                    fontSize: 13,
+                                    fontSize: 12,
                                   ),
                         ),
                         Text(
@@ -95,58 +136,88 @@ class ProductCard extends StatelessWidget {
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppColors.textSecondary,
-                                    fontSize: 13,
+                                    fontSize: 12,
                                   ),
                         ),
                       ],
                     ),
                     const Spacer(),
-                    // 가격
-                    Text(
-                      product.price.toPrice(),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.text,
-                            fontSize: 16,
-                          ),
-                    ),
-                    // 상호작용 정보
+                    // 하단 정보 (가격 및 상호작용)
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (product.chatCount > 0) ...[
-                          const Icon(
-                            Icons.chat_bubble_outline,
-                            size: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            '${product.chatCount}',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                        // 가격
+                        Text(
+                          product.price.toPrice(),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.text,
+                                    fontSize: 16,
+                                  ),
+                        ),
+                        // 상호작용 정보
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (product.viewCount > 0) ...[
+                              const Icon(
+                                Icons.visibility_outlined,
+                                size: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${product.viewCount}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                       fontSize: 13,
                                     ),
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        if (product.favoriteCount > 0) ...[
-                          const Icon(
-                            Icons.favorite_border,
-                            size: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            '${product.favoriteCount}',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            if (product.chatCount > 0) ...[
+                              const Icon(
+                                Icons.chat_bubble_outline,
+                                size: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${product.chatCount}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                       fontSize: 13,
                                     ),
-                          ),
-                        ],
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            if (product.favoriteCount > 0) ...[
+                              const Icon(
+                                Icons.favorite_border,
+                                size: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${product.favoriteCount}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ],

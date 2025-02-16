@@ -218,13 +218,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed:
-                                        product.status == ProductStatus.active
-                                            ? null
-                                            : () {
-                                                // TODO: 상태 변경 로직 구현
-                                                // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.active);
-                                              },
+                                    onPressed: product.status ==
+                                            ProductStatus.active
+                                        ? null
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.active);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
+                                          },
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor:
                                           product.status == ProductStatus.active
@@ -245,13 +256,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed:
-                                        product.status == ProductStatus.reserved
-                                            ? null
-                                            : () {
-                                                // TODO: 상태 변경 로직 구현
-                                                // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.reserved);
-                                              },
+                                    onPressed: product.status ==
+                                            ProductStatus.reserved
+                                        ? null
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.reserved);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
+                                          },
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: product.status ==
                                               ProductStatus.reserved
@@ -275,9 +297,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     onPressed: product.status ==
                                             ProductStatus.completed
                                         ? null
-                                        : () {
-                                            // TODO: 상태 변경 로직 구현
-                                            // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.completed);
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.completed);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
                                           },
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: product.status ==
