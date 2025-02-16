@@ -14,6 +14,10 @@ import 'package:o2/data/datasources/user_data_source.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/product_provider.dart';
 import 'presentation/providers/route_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:o2/data/repositories/image_repository_impl.dart';
+import 'package:o2/data/datasources/image_data_source.dart';
+import 'package:o2/presentation/providers/image_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +48,9 @@ void main() async {
         ),
         userRepositoryProvider.overrideWithValue(
           UserRepositoryImpl(UserDataSource()),
+        ),
+        imageRepositoryProvider.overrideWithValue(
+          ImageRepositoryImpl(ImageDataSourceImpl(FirebaseStorage.instance)),
         ),
       ],
       child: const MyApp(),
