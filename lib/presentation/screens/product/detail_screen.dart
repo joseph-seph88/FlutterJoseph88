@@ -218,22 +218,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed: product.status == 'active'
-                                        ? null
-                                        : () {
-                                            // TODO: 상태 변경 로직 구현
-                                            // ref.read(productNotifierProvider(product.id)).updateStatus('active');
-                                          },
+                                    onPressed:
+                                        product.status == ProductStatus.active
+                                            ? null
+                                            : () {
+                                                // TODO: 상태 변경 로직 구현
+                                                // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.active);
+                                              },
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor:
-                                          product.status == 'active'
+                                          product.status == ProductStatus.active
                                               ? AppColors.primary
                                               : null,
                                     ),
                                     child: Text(
-                                      '판매중',
+                                      ProductStatus.active.label,
                                       style: TextStyle(
-                                        color: product.status == 'active'
+                                        color: product.status ==
+                                                ProductStatus.active
                                             ? Colors.white
                                             : AppColors.text,
                                       ),
@@ -243,22 +245,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed: product.status == 'reserved'
-                                        ? null
-                                        : () {
-                                            // TODO: 상태 변경 로직 구현
-                                            // ref.read(productNotifierProvider(product.id)).updateStatus('reserved');
-                                          },
+                                    onPressed:
+                                        product.status == ProductStatus.reserved
+                                            ? null
+                                            : () {
+                                                // TODO: 상태 변경 로직 구현
+                                                // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.reserved);
+                                              },
                                     style: OutlinedButton.styleFrom(
-                                      backgroundColor:
-                                          product.status == 'reserved'
-                                              ? AppColors.primary
-                                              : null,
+                                      backgroundColor: product.status ==
+                                              ProductStatus.reserved
+                                          ? AppColors.primary
+                                          : null,
                                     ),
                                     child: Text(
-                                      '예약중',
+                                      ProductStatus.reserved.label,
                                       style: TextStyle(
-                                        color: product.status == 'reserved'
+                                        color: product.status ==
+                                                ProductStatus.reserved
                                             ? Colors.white
                                             : AppColors.text,
                                       ),
@@ -268,22 +272,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed: product.status == 'completed'
+                                    onPressed: product.status ==
+                                            ProductStatus.completed
                                         ? null
                                         : () {
                                             // TODO: 상태 변경 로직 구현
-                                            // ref.read(productNotifierProvider(product.id)).updateStatus('completed');
+                                            // ref.read(productNotifierProvider(product.id)).updateStatus(ProductStatus.completed);
                                           },
                                     style: OutlinedButton.styleFrom(
-                                      backgroundColor:
-                                          product.status == 'completed'
-                                              ? AppColors.primary
-                                              : null,
+                                      backgroundColor: product.status ==
+                                              ProductStatus.completed
+                                          ? AppColors.primary
+                                          : null,
                                     ),
                                     child: Text(
-                                      '거래완료',
+                                      ProductStatus.completed.label,
                                       style: TextStyle(
-                                        color: product.status == 'completed'
+                                        color: product.status ==
+                                                ProductStatus.completed
                                             ? Colors.white
                                             : AppColors.text,
                                       ),
