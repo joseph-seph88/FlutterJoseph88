@@ -76,4 +76,9 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<bool> isFavoriteProduct(String userId, String productId) async {
     return await _dataSource.isFavoriteProduct(userId, productId);
   }
+
+  @override
+  Future<void> deleteProduct(String id) async {
+    await _dataSource.deleteProduct(id);
+  }
 }

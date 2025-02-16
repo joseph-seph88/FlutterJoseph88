@@ -294,4 +294,8 @@ class ProductDataSource {
       'status': status,
     });
   }
+
+  Future<void> deleteProduct(String id) async {
+    await _firestore.collection(_collection).doc(id).delete();
+  }
 }

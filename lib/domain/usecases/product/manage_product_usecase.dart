@@ -30,4 +30,8 @@ class ManageProductUseCase {
   Future<bool> isFavoriteProduct(String userId, String productId) async {
     return await _repository.isFavoriteProduct(userId, productId);
   }
+
+  Future<void> deleteProduct(String id) async {
+    await _repository.deleteProduct(id);
+  }
 }

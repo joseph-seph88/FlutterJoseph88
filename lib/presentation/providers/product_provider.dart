@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/domain/entities/product.dart';
+import 'package:o2/domain/entities/user_entity.dart';
 import 'package:o2/domain/usecases/product/get_products_usecase.dart';
 import 'package:o2/domain/usecases/product/get_product_detail_usecase.dart';
 import 'package:o2/domain/usecases/product/search_products_usecase.dart';
@@ -101,6 +102,18 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
       rethrow; // 에러를 상위로 전파하여 UI에서 처리하도록 함
     }
   }
+
+  Future<void> deleteProduct(String id) async {
+    try {
+      await _manageUseCase.deleteProduct(id);
+
+      // 관련 Provider들 갱신
+      ref.invalidate(productsProvider);
+      ref.invalidate(productDetailProvider(id));
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 final productNotifierProvider =
@@ -178,9 +191,10 @@ final isFavoriteProductProvider = FutureProvider.autoDispose
 });
 
 // 판매자 정보를 가져오는 Provider
-final sellerProvider = Provider((ref) {
+final sellerProvider =
+    FutureProvider.family<UserEntity?, String>((ref, sellerId) async {
   final repository = ref.read(userRepositoryProvider);
-  return (String sellerId) => repository.getUserData(sellerId);
+  return repository.getUserData(sellerId);
 });
 
 // 자동완성 검색을 위한 Provider
