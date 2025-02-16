@@ -102,7 +102,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     try {
       String? url;
       if (_selectedImage != null) {
-        url = await ref.read(uploadProfileImageProvider)(_selectedImage!);
+        final userId = ref.read(authProvider)!.id;
+        url =
+            await ref.read(uploadProfileImageProvider)(userId, _selectedImage!);
       }
 
       final userEntity = ref.read(authProvider)!.copyWith(

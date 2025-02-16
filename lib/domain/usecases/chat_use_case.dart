@@ -54,7 +54,8 @@ class SendChatImageUseCase {
   Future<void> call(String chatRoomId, ChatMessageType type, String path,
       String senderId) async {
     final file = File(path);
-    final imageURL = await _imageRepository.uploadChatImage(chatRoomId, file);
+    final imageURL =
+        await _imageRepository.uploadChatImage(chatRoomId, senderId, file);
     await _chatRepository.sendMessage(
         chatRoomId, type.code, imageURL, senderId);
   }

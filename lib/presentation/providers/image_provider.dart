@@ -9,27 +9,29 @@ final imageRepositoryProvider = Provider<ImageRepository>((ref) {
 
 // 프로필 이미지 업로드용
 final uploadProfileImageProvider =
-    Provider<Future<String> Function(File)>((ref) {
-  return (File image) {
+    Provider<Future<String> Function(String userId, File)>((ref) {
+  return (String userId, File image) {
     final imageRepository = ref.read(imageRepositoryProvider);
-    return imageRepository.uploadProfileImage(image);
+    return imageRepository.uploadProfileImage(userId, image);
   };
 });
 
 // 상품 이미지 업로드용
-final uploadProductImagesProvider =
-    Provider<Future<List<String>> Function(List<File>)>((ref) {
-  return (List<File> images) {
+final uploadProductImagesProvider = Provider<
+    Future<List<String>> Function(
+        String sellerId, String productId, List<File>)>((ref) {
+  return (String sellerId, String productId, List<File> images) {
     final imageRepository = ref.read(imageRepositoryProvider);
-    return imageRepository.uploadProductImages(images);
+    return imageRepository.uploadProductImages(sellerId, productId, images);
   };
 });
 
 // 채팅 이미지 업로드용
 final uploadChatImageProvider =
-    Provider<Future<String> Function(String, File)>((ref) {
-  return (String chatRoomId, File image) {
+    Provider<Future<String> Function(String chatRoomId, String senderId, File)>(
+        (ref) {
+  return (String chatRoomId, String senderId, File image) {
     final imageRepository = ref.read(imageRepositoryProvider);
-    return imageRepository.uploadChatImage(chatRoomId, image);
+    return imageRepository.uploadChatImage(chatRoomId, senderId, image);
   };
 });

@@ -4,6 +4,7 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/image_provider.dart';
 import 'package:o2/presentation/widgets/select_location_modal.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 
 class WriteScreen extends ConsumerStatefulWidget {
   const WriteScreen({super.key});
@@ -42,9 +43,12 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
     }
 
     try {
+      final sellerId = ref.read(authProvider)!.id;
+      final productId = DateTime.now().millisecondsSinceEpoch.toString();
+
       // 이미지 업로드
-      final imageUrls =
-          await ref.read(uploadProductImagesProvider)(selectedImages);
+      final imageUrls = await ref.read(uploadProductImagesProvider)(
+          sellerId, productId, selectedImages);
 
       // TODO: 나머지 상품 정보와 함께 저장 로직 구현
     } catch (e) {

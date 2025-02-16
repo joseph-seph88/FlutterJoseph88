@@ -8,22 +8,25 @@ class ImageRepositoryImpl implements ImageRepository {
   ImageRepositoryImpl(this._dataSource);
 
   @override
-  Future<String> uploadProfileImage(File file) async {
-    return await _dataSource.uploadProfileImage(file);
+  Future<String> uploadProfileImage(String userId, File file) async {
+    return await _dataSource.uploadProfileImage(userId, file);
   }
 
   @override
-  Future<String> uploadProductImage(File file) async {
-    return await _dataSource.uploadProductImage(file);
+  Future<String> uploadProductImage(
+      String sellerId, String productId, File file) async {
+    return await _dataSource.uploadProductImage(sellerId, productId, file);
   }
 
   @override
-  Future<List<String>> uploadProductImages(List<File> files) async {
-    return await _dataSource.uploadProductImages(files);
+  Future<List<String>> uploadProductImages(
+      String sellerId, String productId, List<File> files) async {
+    return await _dataSource.uploadProductImages(sellerId, productId, files);
   }
 
   @override
-  Future<String> uploadChatImage(String chatRoomId, File file) async {
-    return await _dataSource.uploadChatImage(chatRoomId, file);
+  Future<String> uploadChatImage(
+      String chatRoomId, String senderId, File file) async {
+    return await _dataSource.uploadChatImage(chatRoomId, senderId, file);
   }
 }

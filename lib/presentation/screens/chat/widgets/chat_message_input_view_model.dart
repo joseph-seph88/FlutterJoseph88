@@ -46,8 +46,8 @@ class ChatMessageInputViewModel extends StateNotifier<bool> {
         }),
         Future(() async {
           if (selectedImage != null) {
-            final imageUrl =
-                await ref.read(uploadChatImageProvider)(roomId!, selectedImage);
+            final imageUrl = await ref.read(uploadChatImageProvider)(
+                roomId!, senderId, selectedImage);
             await sendChatImageUseCase(
               roomId,
               ChatMessageType.image,
