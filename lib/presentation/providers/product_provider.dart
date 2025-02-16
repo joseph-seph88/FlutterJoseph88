@@ -63,6 +63,20 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
     state = AsyncValue.data(updatedProduct);
   }
 
+  Future<void> updateStatus(String id, ProductStatus status) async {
+    try {
+      await _manageUseCase.updateStatus(id, status);
+      final updatedProduct = await _detailUseCase.execute(id);
+      state = AsyncValue.data(updatedProduct);
+
+      // 관련 Provider들 갱신
+      ref.invalidate(productDetailProvider(id));
+      ref.invalidate(productsProvider);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> toggleFavorite(String userId, String productId) async {
     try {
       final isFavorite =
@@ -77,6 +91,9 @@ class ProductNotifier extends StateNotifier<AsyncValue<Product?>> {
 
       // 관련 Provider들 갱신
       ref.invalidate(productDetailProvider(productId));
+      ref.invalidate(productsProvider);
+      ref.invalidate(
+          productsByCategoryProvider(updatedProduct?.category ?? ''));
       ref.invalidate(
           isFavoriteProductProvider((userId: userId, productId: productId)));
       ref.invalidate(favoriteProductsProvider(userId));

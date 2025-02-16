@@ -8,6 +8,7 @@ abstract class ProductRepository {
   Future<List<Product>> getProductsByCategory(String category);
   Future<void> incrementViewCount(String id);
   Future<void> createProduct(ProductModel product);
+  Future<void> updateStatus(String id, ProductStatus status);
 
   // 관심 상품 관련 메서드
   Future<void> addToFavorites(String userId, String productId);

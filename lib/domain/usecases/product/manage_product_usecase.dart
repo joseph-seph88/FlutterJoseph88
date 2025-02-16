@@ -1,5 +1,6 @@
 import 'package:o2/data/models/product_model.dart';
 import 'package:o2/domain/repositories/product_repository.dart';
+import 'package:o2/domain/entities/product.dart';
 
 class ManageProductUseCase {
   final ProductRepository _repository;
@@ -12,6 +13,10 @@ class ManageProductUseCase {
 
   Future<void> incrementViewCount(String id) async {
     await _repository.incrementViewCount(id);
+  }
+
+  Future<void> updateStatus(String id, ProductStatus status) async {
+    await _repository.updateStatus(id, status);
   }
 
   Future<void> addToFavorites(String userId, String productId) async {
