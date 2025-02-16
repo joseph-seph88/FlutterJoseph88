@@ -298,4 +298,41 @@ class ProductDataSource {
   Future<void> deleteProduct(String id) async {
     await _firestore.collection(_collection).doc(id).delete();
   }
+
+  Future<void> updateProductImages(String id, List<String> imageUrls) async {
+    await _firestore.collection(_collection).doc(id).update({
+      'images': imageUrls,
+    });
+  }
+
+  Future<void> createProductWithTransaction(ProductModel product) async {
+    final productRef = _firestore.collection(_collection).doc(product.id);
+
+    return _firestore.runTransaction((transaction) async {
+      // 트랜잭션 내에서 상품 정보 저장
+      transaction.set(productRef, product.toFirebase());
+      return;
+    });
+  }
+
+  Future<void> updateProductImagesWithBatch(
+      String id, List<String> imageUrls) async {
+    final batch = _firestore.batch();
+    final productRef = _firestore.collection(_collection).doc(id);
+
+    batch.update(productRef, {
+      'images': imageUrls,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
+  }
+
+  Future<void> rollbackProductCreation(String id) async {
+    final batch = _firestore.batch();
+    final productRef = _firestore.collection(_collection).doc(id);
+
+    batch.delete(productRef);
+    await batch.commit();
+  }
 }

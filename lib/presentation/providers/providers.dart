@@ -39,8 +39,11 @@ final imageRepositoryProvider = Provider<ImageRepository>(
 final userRepositoryProvider = Provider<UserRepository>(
     (ref) => UserRepositoryImpl(ref.read(userDataSourceProvider)));
 
-final productRepositoryProvider = Provider<ProductRepository>(
-    (ref) => ProductRepositoryImpl(ref.read(productDataSourceProvider)));
+final productRepositoryProvider =
+    Provider<ProductRepository>((ref) => ProductRepositoryImpl(
+          ref.read(productDataSourceProvider),
+          ref.read(imageRepositoryProvider),
+        ));
 
 // UseCase Providers
 final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>(
