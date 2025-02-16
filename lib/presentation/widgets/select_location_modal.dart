@@ -41,8 +41,12 @@ class _SelectLocationModalState extends ConsumerState<SelectLocationModal> {
       final mapUseCase = ref.read(mapUseCaseProvider);
       final placemark = await mapUseCase.transPositionToAddress(position);
       if (placemark != null) {
+        final roadAddress = placemark.thoroughfare?.isNotEmpty == true
+            ? '${placemark.thoroughfare} ${placemark.subThoroughfare ?? ''}'
+            : placemark.street;
+
         setState(() {
-          _selectedLocationName = placemark.street;
+          _selectedLocationName = roadAddress;
         });
       }
     } catch (e) {

@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/domain/repositories/image_repository.dart';
+import 'package:o2/presentation/providers/providers.dart' as providers;
 
 // 이미지 저장소 Provider
-final imageRepositoryProvider = Provider<ImageRepository>((ref) {
-  throw UnimplementedError(); // DI 설정에서 실제 구현체를 주입해야 합니다.
-});
+final imageRepositoryProvider = Provider<ImageRepository>(
+    (ref) => ref.watch(providers.imageRepositoryProvider));
 
 // 프로필 이미지 업로드용
 final uploadProfileImageProvider =
