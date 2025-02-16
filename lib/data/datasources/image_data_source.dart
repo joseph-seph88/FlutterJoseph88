@@ -16,17 +16,26 @@ class ImageDataSourceImpl implements ImageDataSource {
 
   @override
   Future<String> uploadProfileImage(File file) async {
+    final userId = DateTime.now()
+        .millisecondsSinceEpoch
+        .toString(); // TODO: 실제 userId로 변경 필요
     final fileName =
         '${DateTime.now().millisecondsSinceEpoch}_${path.basename(file.path)}';
-    final ref = _storage.ref().child('profiles/$fileName');
+    final ref = _storage.ref().child('profiles/$userId/$fileName');
     return _uploadAndGetUrl(ref, file);
   }
 
   @override
   Future<String> uploadProductImage(File file) async {
+    final sellerId = DateTime.now()
+        .millisecondsSinceEpoch
+        .toString(); // TODO: 실제 sellerId로 변경 필요
+    final productId = DateTime.now()
+        .millisecondsSinceEpoch
+        .toString(); // TODO: 실제 productId로 변경 필요
     final fileName =
         '${DateTime.now().millisecondsSinceEpoch}_${path.basename(file.path)}';
-    final ref = _storage.ref().child('products/$fileName');
+    final ref = _storage.ref().child('products/$sellerId/$productId/$fileName');
     return _uploadAndGetUrl(ref, file);
   }
 
@@ -38,9 +47,13 @@ class ImageDataSourceImpl implements ImageDataSource {
 
   @override
   Future<String> uploadChatImage(String chatRoomId, File file) async {
+    final senderId = DateTime.now()
+        .millisecondsSinceEpoch
+        .toString(); // TODO: 실제 senderId로 변경 필요
     final fileName =
         '${DateTime.now().millisecondsSinceEpoch}_${path.basename(file.path)}';
-    final ref = _storage.ref().child('chats/$chatRoomId/$fileName');
+    final ref =
+        _storage.ref().child('chats/$chatRoomId/images/$senderId/$fileName');
     return _uploadAndGetUrl(ref, file);
   }
 

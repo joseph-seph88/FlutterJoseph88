@@ -3,6 +3,7 @@ import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/usecases/chat_use_case.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
+import 'package:o2/presentation/providers/image_provider.dart';
 import 'package:o2/presentation/providers/providers.dart';
 
 class ChatMessageInputViewModel extends StateNotifier<bool> {
@@ -44,11 +45,13 @@ class ChatMessageInputViewModel extends StateNotifier<bool> {
           }
         }),
         Future(() async {
-          if (ref.read(selectedImageProvider) != null) {
+          if (selectedImage != null) {
+            final imageUrl =
+                await ref.read(uploadChatImageProvider)(roomId!, selectedImage);
             await sendChatImageUseCase(
-              roomId!,
+              roomId,
               ChatMessageType.image,
-              ref.read(selectedImageProvider)!.path,
+              imageUrl,
               senderId,
             );
           }

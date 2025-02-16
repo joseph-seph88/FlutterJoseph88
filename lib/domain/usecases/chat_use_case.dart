@@ -2,6 +2,7 @@ import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
 import 'package:o2/domain/repositories/chat_repository.dart';
 import 'package:o2/domain/repositories/image_repository.dart';
+import 'dart:io';
 
 class GetChatRoomsUseCase {
   final ChatRepository _repository;
@@ -52,8 +53,10 @@ class SendChatImageUseCase {
 
   Future<void> call(String chatRoomId, ChatMessageType type, String path,
       String senderId) async {
-    final imageURL = await _imageRepository.uploadImage(chatRoomId, path);
-    await _chatRepository.sendMessage(chatRoomId, type.code, imageURL, senderId);
+    final file = File(path);
+    final imageURL = await _imageRepository.uploadChatImage(chatRoomId, file);
+    await _chatRepository.sendMessage(
+        chatRoomId, type.code, imageURL, senderId);
   }
 }
 

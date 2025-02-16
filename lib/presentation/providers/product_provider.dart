@@ -44,7 +44,7 @@ final productsProvider = FutureProvider<List<Product>>((ref) async {
 final productsByCategoryProvider =
     FutureProvider.family<List<Product>, String>((ref, category) async {
   final useCase = ref.watch(getProductsUseCaseProvider);
-  return useCase.execute(); // TODO: 카테고리 필터링 로직 추가 필요
+  return useCase.execute();
 });
 
 final productDetailProvider =

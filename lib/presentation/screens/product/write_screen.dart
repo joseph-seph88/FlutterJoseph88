@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
+import 'package:o2/presentation/providers/image_provider.dart';
 import 'package:o2/presentation/widgets/select_location_modal.dart';
 
 class WriteScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,29 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
 
   void _removeImage(int index) {
     ref.read(multiImageProvider.notifier).removeImage(index);
+  }
+
+  Future<void> _onSubmit() async {
+    final selectedImages = ref.read(multiImageProvider);
+    if (selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('최소 1개의 이미지를 선택해주세요.')),
+      );
+      return;
+    }
+
+    try {
+      // 이미지 업로드
+      final imageUrls =
+          await ref.read(uploadProductImagesProvider)(selectedImages);
+
+      // TODO: 나머지 상품 정보와 함께 저장 로직 구현
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('상품 등록 중 오류가 발생했습니다.')),
+      );
+    }
   }
 
   @override
@@ -382,7 +406,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
         child: Padding(
           padding: AppStyles.defaultPadding,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: _onSubmit,
             child: Text(
               '작성 완료',
               style: theme.textTheme.labelLarge?.copyWith(

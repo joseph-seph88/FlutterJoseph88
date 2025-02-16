@@ -15,11 +15,13 @@ import 'package:o2/presentation/providers/map_provider.dart';
 final chatRemoteDataSourceProvider =
     Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSourceImpl());
 
-final imageDataSourceProvider =
-    Provider<ImageDataSource>((ref) => ImageDataSourceImpl());
+final imageDataSourceProvider = Provider<ImageDataSource>((ref) {
+  throw UnimplementedError(); // main.dart에서 실제 구현체를 주입.
+});
 
-final userDataSourceProvider = Provider<UserDataSource>(
-    (ref) => UserDataSource());
+final userDataSourceProvider = Provider<UserDataSource>((ref) {
+  throw UnimplementedError(); // main.dart에서 실제 구현체를 주입.
+});
 
 final chatRepositoryProvider = Provider<ChatRepository>(
     (ref) => ChatRepositoryImpl(ref.read(chatRemoteDataSourceProvider)));
@@ -56,11 +58,11 @@ final getUserDataUseCaseProvider = Provider<GetUserDataUseCase>(
     (ref) => GetUserDataUseCase(ref.read(userRepositoryProvider)));
 
 final otherUserProvider = Provider((ref) {
-    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
-    return (String otherUserId) => getUserDataUseCase(otherUserId);
+  final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
+  return (String otherUserId) => getUserDataUseCase(otherUserId);
 });
 
 final getLatLngProvider = Provider((ref) {
-    final mapUseCase = ref.read(mapUseCaseProvider);
-    return (String placeId) => mapUseCase.getLatLng(placeId);
+  final mapUseCase = ref.read(mapUseCaseProvider);
+  return (String placeId) => mapUseCase.getLatLng(placeId);
 });
