@@ -196,6 +196,107 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                     ),
                     const Divider(height: 1),
+                    // 판매자가 자신의 상품일 경우 상태 변경 섹션 추가
+                    if (product.sellerId == ref.read(authProvider)?.id) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '상품 상태 변경',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.text,
+                                  ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status == 'active'
+                                        ? null
+                                        : () {
+                                            // TODO: 상태 변경 로직 구현
+                                            // ref.read(productNotifierProvider(product.id)).updateStatus('active');
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor:
+                                          product.status == 'active'
+                                              ? AppColors.primary
+                                              : null,
+                                    ),
+                                    child: Text(
+                                      '판매중',
+                                      style: TextStyle(
+                                        color: product.status == 'active'
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status == 'reserved'
+                                        ? null
+                                        : () {
+                                            // TODO: 상태 변경 로직 구현
+                                            // ref.read(productNotifierProvider(product.id)).updateStatus('reserved');
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor:
+                                          product.status == 'reserved'
+                                              ? AppColors.primary
+                                              : null,
+                                    ),
+                                    child: Text(
+                                      '예약중',
+                                      style: TextStyle(
+                                        color: product.status == 'reserved'
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status == 'completed'
+                                        ? null
+                                        : () {
+                                            // TODO: 상태 변경 로직 구현
+                                            // ref.read(productNotifierProvider(product.id)).updateStatus('completed');
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor:
+                                          product.status == 'completed'
+                                              ? AppColors.primary
+                                              : null,
+                                    ),
+                                    child: Text(
+                                      '거래완료',
+                                      style: TextStyle(
+                                        color: product.status == 'completed'
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
                     // 상품 정보
                     Padding(
                       padding: const EdgeInsets.all(16),
