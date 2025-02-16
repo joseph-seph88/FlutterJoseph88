@@ -39,4 +39,10 @@ class UserDataSource {
   Future<void> deleteUser(String userId) async {
     await _firestore.collection("users").doc(userId).delete();
   }
+
+  Future<void> updateFcmToken(String userId, String? token) async {
+    await _firestore.collection("users").doc(userId).update({
+      "fcmToken": token,
+    });
+  }
 }

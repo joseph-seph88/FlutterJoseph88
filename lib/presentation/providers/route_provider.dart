@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/presentation/screens/auth/sign_in_screen.dart';
 import 'package:o2/presentation/screens/auth/sign_up_screen.dart';
@@ -23,11 +24,14 @@ import 'package:o2/presentation/screens/search/search_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 final routerProvider = Provider<GoRouter>(
   (ref) {
     final auth = ref.watch(authProvider);
 
     return GoRouter(
+      navigatorKey: navigatorKey,
       initialLocation: "/home",
       redirect: (context, state) {
         if (auth != null && state.matchedLocation == "/signIn") {
