@@ -69,8 +69,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           if (user != null)
             productAsync.when(
               data: (product) {
-                if (product == null || user.id != product.sellerId)
+                if (product == null || user.id != product.sellerId) {
                   return const SizedBox.shrink();
+                }
                 return PopupMenuButton(
                   offset: const Offset(0, 40),
                   shape: RoundedRectangleBorder(
