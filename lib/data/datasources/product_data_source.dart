@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:o2/core/utils/search_utils.dart';
+import 'package:o2/data/models/product_model.dart';
 
 class ProductDataSource {
   final _firestore = FirebaseFirestore.instance;
@@ -279,5 +280,12 @@ class ProductDataSource {
     final favoriteIds =
         List<String>.from(userDoc.data()?['favoriteProductIds'] ?? []);
     return favoriteIds.contains(productId);
+  }
+
+  Future<void> createProduct(ProductModel product) async {
+    await _firestore
+        .collection('products')
+        .doc(product.id)
+        .set(product.toFirebase());
   }
 }

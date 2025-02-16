@@ -5,6 +5,9 @@ import 'package:o2/presentation/providers/image_picker_provider.dart';
 import 'package:o2/presentation/providers/image_provider.dart';
 import 'package:o2/presentation/widgets/select_location_modal.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/data/models/product_model.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WriteScreen extends ConsumerStatefulWidget {
   const WriteScreen({super.key});
@@ -17,6 +20,19 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
   String? _selectedLocationName;
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _priceController = TextEditingController();
+  double? _latitude;
+  double? _longitude;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -34,10 +50,41 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
   }
 
   Future<void> _onSubmit() async {
+    // 1. 필수 입력값 검증
     final selectedImages = ref.read(multiImageProvider);
     if (selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('최소 1개의 이미지를 선택해주세요.')),
+      );
+      return;
+    }
+
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('제목을 입력해주세요.')),
+      );
+      return;
+    }
+
+    if (_descriptionController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('설명을 입력해주세요.')),
+      );
+      return;
+    }
+
+    if (_isSellingMode && _priceController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('가격을 입력해주세요.')),
+      );
+      return;
+    }
+
+    if (_selectedLocationName == null ||
+        _latitude == null ||
+        _longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('거래 희망 장소를 선택해주세요.')),
       );
       return;
     }
@@ -50,7 +97,35 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
       final imageUrls = await ref.read(uploadProductImagesProvider)(
           sellerId, productId, selectedImages);
 
-      // TODO: 나머지 상품 정보와 함께 저장 로직 구현
+      // 상품 정보 생성
+      final product = ProductModel(
+        id: productId,
+        title: _titleController.text,
+        description: _descriptionController.text,
+        price: _isSellingMode ? int.parse(_priceController.text) : 0,
+        locationName: _selectedLocationName!,
+        location: GeoPoint(_latitude!, _longitude!),
+        category: "기타", // TODO: 카테고리 선택 기능 추가
+        images: imageUrls,
+        viewCount: 0,
+        favoriteCount: 0,
+        createdAt: Timestamp.now(),
+        sellerId: sellerId,
+        isOfferEnabled: _isSellingMode && _isPriceOfferEnabled,
+        status: 'active',
+        chatCount: 0,
+      );
+
+      // 상품 저장
+      await ref.read(manageProductUseCaseProvider).createProduct(product);
+
+      if (!mounted) return;
+
+      // 성공 메시지 표시 및 화면 이동
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('상품이 등록되었습니다.')),
+      );
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -186,6 +261,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                   ),
                   const SizedBox(height: AppStyles.smallSpacing),
                   TextField(
+                    controller: _titleController,
                     decoration: const InputDecoration(
                       hintText: '제목',
                     ),
@@ -302,6 +378,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                     ),
                     const SizedBox(height: AppStyles.smallSpacing),
                     TextField(
+                      controller: _priceController,
                       keyboardType: TextInputType.number,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: AppColors.text,
@@ -339,6 +416,8 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                           onLocationSelected: (locationName, position) {
                             setState(() {
                               _selectedLocationName = locationName;
+                              _latitude = position.latitude;
+                              _longitude = position.longitude;
                             });
                             Navigator.pop(context);
                           },
@@ -389,6 +468,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
                   ),
                   const SizedBox(height: AppStyles.smallSpacing),
                   TextField(
+                    controller: _descriptionController,
                     maxLines: 8,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.text,
