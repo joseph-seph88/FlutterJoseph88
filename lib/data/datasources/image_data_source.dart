@@ -4,16 +4,7 @@ import 'package:path/path.dart' as path;
 import 'package:mime/mime.dart';
 import 'package:flutter/foundation.dart';
 
-abstract interface class ImageDataSource {
-  Future<String> uploadProfileImage(String userId, File file);
-  Future<String> uploadProductImage(
-      String sellerId, String productId, File file);
-  Future<List<String>> uploadProductImages(
-      String sellerId, String productId, List<File> files);
-  Future<String> uploadChatImage(String chatRoomId, String senderId, File file);
-}
-
-class ImageDataSourceImpl implements ImageDataSource {
+class ImageDataSource {
   final FirebaseStorage _storage;
   final _supportedMimeTypes = [
     'image/jpeg',
@@ -23,7 +14,7 @@ class ImageDataSourceImpl implements ImageDataSource {
     'image/heif'
   ];
 
-  ImageDataSourceImpl(this._storage);
+  ImageDataSource(this._storage);
 
   Future<void> _validateImageFile(File file) async {
     // URL인 경우 검증 스킵
@@ -64,7 +55,6 @@ class ImageDataSourceImpl implements ImageDataSource {
     }
   }
 
-  @override
   Future<String> uploadProfileImage(String userId, File file) async {
     await _validateImageFile(file);
     final fileName =
@@ -73,7 +63,6 @@ class ImageDataSourceImpl implements ImageDataSource {
     return _uploadAndGetUrl(ref, file);
   }
 
-  @override
   Future<String> uploadProductImage(
       String sellerId, String productId, File file) async {
     await _validateImageFile(file);
@@ -83,7 +72,6 @@ class ImageDataSourceImpl implements ImageDataSource {
     return _uploadAndGetUrl(ref, file);
   }
 
-  @override
   Future<List<String>> uploadProductImages(
       String sellerId, String productId, List<File> files) async {
     final List<String> urls = [];
@@ -160,7 +148,6 @@ class ImageDataSourceImpl implements ImageDataSource {
     }
   }
 
-  @override
   Future<String> uploadChatImage(
       String chatRoomId, String senderId, File file) async {
     await _validateImageFile(file);

@@ -21,7 +21,7 @@ final chatRemoteDataSourceProvider =
     Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSource());
 
 final imageDataSourceProvider = Provider<ImageDataSource>(
-    (ref) => ImageDataSourceImpl(FirebaseStorage.instance));
+    (ref) => ImageDataSource(FirebaseStorage.instance));
 
 final userDataSourceProvider =
     Provider<UserDataSource>((ref) => UserDataSource());
