@@ -1,3 +1,6 @@
+import '../../domain/entities/map_entity.dart';
+import 'package:flutter/material.dart';
+
 class MapModel {
   final String? mapId;
   final Map<String, dynamic> geo;
@@ -58,6 +61,21 @@ class MapModel {
       category: mapData['category'],
       starRating: mapData['starRating'],
       participant: mapData['participant'],
+    );
+  }
+
+  MapEntity toEntity(Color iconColor) {
+    return MapEntity(
+      mapId: mapId,
+      position: geo['geopoint'],
+      address: address,
+      storeName: storeName,
+      category: {
+        ...category,
+        'iconColor': iconColor,
+      },
+      starRating: starRating,
+      participant: participant,
     );
   }
 }

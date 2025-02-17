@@ -1,24 +1,28 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:o2/domain/entities/chat_message.dart';
-import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 
 class ChatMessageInput extends ConsumerStatefulWidget {
   final String? chatRoomId;
+  final String userId;
   final String otherUserId;
   final String productID;
   final bool isAddButtonClicked;
+  final File? selectedImage;
   final Function onAddButtonClicked;
 
   const ChatMessageInput(
       {super.key,
       required this.chatRoomId,
+      required this.userId,
       required this.otherUserId,
       required this.productID,
       required this.isAddButtonClicked,
+      required this.selectedImage,
       required this.onAddButtonClicked});
 
   @override
@@ -29,7 +33,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     with SingleTickerProviderStateMixin {
   final _messageController = TextEditingController();
   late final AnimationController _animationController;
-  bool _isSendingMessage = false;
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -55,7 +59,7 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
         children: [
           _buildAddButton(),
           _buildMessageTextField(),
-          _buildSendButton(),
+          _buildSendButton(_isSending),
         ],
       ),
     );
@@ -99,11 +103,11 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
     );
   }
 
-  Widget _buildSendButton() {
+  Widget _buildSendButton(bool isSending) {
     return IconButton(
       constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
-      onPressed: _isSendingMessage ? null : _handleSendButtonPressed,
-      icon: _isSendingMessage
+      onPressed: isSending ? null : _handleMessageSubmitted,
+      icon: isSending
           ? const CircularProgressIndicator()
           : const Icon(Icons.send),
     );
@@ -119,66 +123,40 @@ class _ChatMessageInputState extends ConsumerState<ChatMessageInput>
   }
 
   Future<void> _handleMessageSubmitted() async {
+    setState(() {
+      _isSending = true;
+    });
+
     await _sendMessage();
     _messageController.clear();
-  }
-
-  void _handleSendButtonPressed() async {
-    setState(() => _isSendingMessage = true);
-    await _handleMessageSubmitted();
     ref.read(selectedImageProvider.notifier).clear();
-    setState(() => _isSendingMessage = false);
+
+    setState(() {
+      _isSending = false;
+    });
   }
 
   Future<void> _sendMessage() async {
-    final senderId = ref.read(authProvider)?.id;
-    if (senderId == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('메시지를 전송할 수 없습니다')));
-      return;
-    }
+    final viewModel =
+        ref.read(chatMessageListViewModelProvider(widget.chatRoomId).notifier);
+
+    final chatRoomId = await viewModel.sendMessage(
+      chatRoomId: widget.chatRoomId,
+      senderId: widget.userId,
+      otherUserId: widget.otherUserId,
+      productId: widget.productID,
+      message: _messageController.text,
+      image: widget.selectedImage,
+    );
 
     if (widget.chatRoomId == null) {
-      final chatRoomId = await _createChatRoom(senderId);
-      await _sendContent(chatRoomId, senderId);
       if (mounted) {
         context.pushReplacement('/chat_room', extra: {
-          'chatRoomId': chatRoomId,
+          'chatRoomId': chatRoomId!,
           'otherUserId': widget.otherUserId,
           'productID': widget.productID,
         });
       }
-    } else {
-      await _sendContent(widget.chatRoomId!, senderId);
     }
-  }
-
-  Future<String> _createChatRoom(String senderId) {
-    final createChatRoomUseCase = ref.read(createChatRoomUseCaseProvider);
-    return createChatRoomUseCase(widget.otherUserId, senderId, widget.productID);
-  }
-
-  Future<void> _sendContent(String chatRoomId, String senderId) async {
-    final sendChatMessageUseCase = ref.read(sendChatMessageUseCaseProvider);
-    final sendChatImageUseCase = ref.read(sendChatImageUseCaseProvider);
-
-    await Future.wait([
-      Future(() async {
-        if (_messageController.text.isNotEmpty) {
-          await sendChatMessageUseCase(chatRoomId, ChatMessageType.text,
-              _messageController.text, senderId);
-        }
-      }),
-      Future(() async {
-        if (ref.read(selectedImageProvider) != null) {
-          await sendChatImageUseCase(
-            chatRoomId,
-            ChatMessageType.image,
-            ref.read(selectedImageProvider)!.path,
-            senderId,
-          );
-        }
-      }),
-    ]);
   }
 }

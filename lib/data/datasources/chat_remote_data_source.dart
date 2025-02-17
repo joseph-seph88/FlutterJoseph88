@@ -13,6 +13,8 @@ abstract interface class ChatRemoteDataSource {
       String chatRoomId, String type, String content, String senderId);
 
   Future<void> markChatAsRead(String chatRoomId, String userId);
+
+  Future<void> deleteMessage(String chatRoomId, String messageId);
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -65,14 +67,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       sentTime: timestamp,
     ).toJson();
 
-    await _firestore
+    final messageId = (await _firestore
         .collection('chats')
         .doc(chatRoomId)
         .collection('messages')
-        .add(message);
+        .add(message)).id;
 
     _firestore.collection('chats').doc(chatRoomId).update({
       'lastMessage': content,
+      'lastMessageId': messageId,
       'lastMessageSender': senderId,
       'lastMessageTime': timestamp,
       'lastMessageType': type,
@@ -88,6 +91,24 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     if (userId != senderId) {
       await _firestore.collection('chats').doc(chatRoomId).update({
         'unreadMessageCount': 0,
+      });
+    }
+  }
+
+  @override
+  Future<void> deleteMessage(String chatRoomId, String messageId) async {
+    await _firestore.collection('chats')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+      'type': 'deleted',
+    });
+
+    final chatRoom = (await _firestore.collection('chats').doc(chatRoomId).get()).data();
+    if (chatRoom?['lastMessageId'] == messageId) {
+      _firestore.collection('chats').doc(chatRoomId).update({
+        'lastMessageType': 'deleted',
       });
     }
   }

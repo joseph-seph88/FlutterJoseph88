@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:o2/presentation/providers/permission_provider.dart';
 import 'package:o2/presentation/screens/chat/chat_list_screen.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
 import 'package:o2/presentation/screens/my/my_screen.dart';
 import 'package:o2/presentation/screens/product/product_list_screen.dart';
-import 'package:o2/presentation/screens/search/search_screen.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 final currentIndexProvider = StateProvider<int>((ref) => 0);
@@ -19,7 +17,6 @@ class HomeScreen extends ConsumerWidget {
 
     final List<Widget> pages = [
       const ProductListScreen(),
-      const SearchScreen(),
       const MapScreen(),
       const ChatListScreen(),
       const MyScreen(),
@@ -27,10 +24,6 @@ class HomeScreen extends ConsumerWidget {
 
     void onTabTapped(int index) async {
       ref.read(currentIndexProvider.notifier).state = index;
-
-      if (index == 1) {
-        await ref.read(locationPermissionProvider.notifier).requestPermission();
-      }
     }
 
     return Scaffold(

@@ -5,7 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import '../entities/map_entity.dart';
 
 abstract class MapRepository {
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition);
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition);
 
   Future<LatLng?> transPositionFromAddress(String address);
 
@@ -33,4 +33,5 @@ abstract class MapRepository {
 
   Future<MapEntity> getMapData(String mapId);
 
+  Future<LatLng?> getLatLng(String placeId);
 }

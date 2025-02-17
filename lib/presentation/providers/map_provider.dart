@@ -1,18 +1,26 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
+import '../../core/theme/app_theme.dart';
+import '../../data/datasources/map_data_source.dart';
+import '../../data/repositories/map_repository_impl.dart';
 import '../../domain/entities/map_entity.dart';
 import '../state/map_state.dart';
 import '../screens/map/widgets/map_bottom_sheet.dart';
 
-// 거래 희망 장소
-final transactionLocationProvider =
-    StateProvider<Map<String, dynamic>>((ref) => {});
-
 // 바텀 시트
 final bottomSheetProvider = Provider((ref) => MapBottomSheet());
+
+// 업체 검색 관리
+final isStoreSearchProvider = StateProvider<bool>((ref) => false);
+
+// 스트림 검색 관리
+final isStreamProvider = StateProvider<bool>((ref) => false);
 
 // 초기화 관련 시점 관리
 final isInitProvider = StateProvider<bool>((ref) => false);
@@ -49,7 +57,35 @@ final mapDataStreamProvider =
   });
 });
 
-// Map Notifier
+// 파이어스토어
+final fireStoreProvider = Provider((ref) => FirebaseFirestore.instance);
+
+// 플레이스 SDK
+final placesSdkProvider = Provider<FlutterGooglePlacesSdk>((ref) {
+  return FlutterGooglePlacesSdk('AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk',
+      locale: const Locale('ko', 'KR'));
+});
+
+// 맵 유스케이스
+final mapUseCaseProvider = Provider((ref) {
+  final mapRepository = ref.read(mapRepositoryProvider);
+  return MapUseCaseImpl(mapRepository);
+});
+
+// 맵 레포지토리
+final mapRepositoryProvider = Provider<MapRepositoryImpl>((ref) {
+  final mapDataSource = ref.read(mapDataSourceProvider);
+  return MapRepositoryImpl(mapDataSource);
+});
+
+// 맵 데이터 소스
+final mapDataSourceProvider = Provider((ref) {
+  final fireStore = ref.read(fireStoreProvider);
+  final placeSdk = ref.read(placesSdkProvider);
+  return MapDataSource(fireStore, placeSdk);
+});
+
+// 맵 노티파이어
 final mapProvider = StateNotifierProvider<MapNotifier, MapState>((ref) {
   final mapUseCase = ref.read(mapUseCaseProvider);
   return MapNotifier(mapUseCase);
@@ -57,44 +93,63 @@ final mapProvider = StateNotifierProvider<MapNotifier, MapState>((ref) {
 
 class MapNotifier extends StateNotifier<MapState> {
   final MapUseCaseImpl _mapUseCase;
+  Timer? _debounceTimer;
 
   MapNotifier(this._mapUseCase)
       : super(MapState(
           isLoading: false,
           error: '',
           transAddress: '',
-          positionData: const LatLng(lat: 37.499889, lng: 126.920056),
           mapDataList: [],
           staticCategory: [],
-          predictionList: [],
           searchStoreDataList: [],
           markersSet: {},
+          betweenDistance: [],
+          asyncTransAddress: const AsyncValue.loading(),
+          asyncTargetPosition: const AsyncValue.loading(),
+          asyncPredictionList: const AsyncValue.data([]),
         ));
 
-  Future<void> addMarker(GeoPoint position, Map<String, dynamic> category,
-      String address, String storeName) async {
-    const double starRating = 0;
-    const int participant = 0;
-    state = state.copyWith(isLoading: true, error: '');
+// 등록된 맵정보 가져오기
+  Future<void> getAllMapData(NLatLng nLatLng) async {
+    state = state.copyWith(error: '');
     try {
-      await _mapUseCase.addMarker(
-          position, address, category, storeName, starRating, participant);
-      state = state.copyWith(isLoading: false);
+      final dataList = await _mapUseCase.getAllMapData();
+      List<double> distanceList = [];
+
+      for (var mapData in dataList) {
+        var storePoint = mapData.position;
+        double distance = transPositionToDistance(
+            nLatLng, NLatLng(storePoint.latitude, storePoint.longitude));
+        distanceList.add(distance);
+      }
+
+      state =
+          state.copyWith(mapDataList: dataList, betweenDistance: distanceList);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
-  void clearStateSearchData() {
-    state = state.copyWith(searchStoreDataList: []);
+// 맵 정보 등록
+  Future<void> addMarker(NLatLng position, Map<String, dynamic> category,
+      String address, String storeName) async {
+    const double starRating = 0;
+    const int participant = 0;
+    final geoPosition = GeoPoint(position.latitude, position.longitude);
+
+    state = state.copyWith(error: '');
+    try {
+      await _mapUseCase.addMarker(
+          geoPosition, address, category, storeName, starRating, participant);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception("프로바이더 에러 ${e.toString()}");
+    }
   }
 
-  void clearMapMarkers() {
-    state = state.copyWith(markersSet: {});
-  }
-
+// 맵 마커 리스트 state 등록
   Future<void> setMapMarkers(List<MapEntity> markers) async {
     state = state.copyWith(markersSet: {}, error: '');
     try {
@@ -124,19 +179,21 @@ class MapNotifier extends StateNotifier<MapState> {
       state = state.copyWith(markersSet: newMarkers);
     } catch (e) {
       state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
-  Future<NMarker?> setMapMarker(MapEntity marker) async {
+// 맵 마커 state 등록
+  Future<NMarker> setMapMarker(MapEntity marker) async {
     state = state.copyWith(error: '');
     try {
       final markerData = NMarker(
           id: marker.mapId ?? '1',
           position:
               NLatLng(marker.position.latitude, marker.position.longitude),
-          icon: NOverlayImage.fromAssetImage(marker.category['iconPath']),
-          iconTintColor: marker.category['iconColor'],
-          size: const NSize(20, 20));
+          icon: const NOverlayImage.fromAssetImage(AppConstant.locationPath),
+          iconTintColor: AppColors.primary,
+          size: const NSize(50, 50));
 
       markerData.setOnTapListener((overlay) async {
         final infoWindow = NInfoWindow.onMarker(
@@ -152,80 +209,32 @@ class MapNotifier extends StateNotifier<MapState> {
       return markerData;
     } catch (e) {
       state = state.copyWith(error: e.toString());
-    }
-    return null;
-  }
-
-  Future<void> getAllMapData() async {
-    state = state.copyWith(error: '');
-    try {
-      final dataList = await _mapUseCase.getAllMapData();
-      state = state.copyWith(mapDataList: dataList);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
-  Future<void> setAddress(String address) async {
-    state = state.copyWith(error: '');
-    try {
-      state = state.copyWith(transAddress: address);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
-  }
-
-  Future<void> transPositionToAddress(NLatLng currentPosition) async {
-    state = state.copyWith(error: '');
-    try {
-      final placeAddress =
-          await _mapUseCase.transAddressFromGeo(currentPosition);
-      if (placeAddress?.street != null) {
-        String transAddress = placeAddress!.street!;
-        List<String> parts = transAddress.split(' ');
-
-        if (parts.length >= 3) {
-          transAddress = parts.sublist(parts.length - 3).join(' ');
-        }
-
-        state = state.copyWith(transAddress: transAddress);
-      } else {
-        state = state.copyWith(transAddress: '알 수 없는 주소');
+// 등록된 업체 중 쿼리
+  void updateStoreList(String query) async {
+    state = state.copyWith(isLoading: true, error: '');
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+      try {
+        final queryWithoutSpace = query.replaceAll(' ', '');
+        final searchData = state.mapDataList.where((mapData) {
+          final storeName = mapData.storeName.replaceAll(' ', '');
+          return storeName.contains(queryWithoutSpace);
+        }).toList();
+        state = state.copyWith(searchStoreDataList: searchData);
+      } catch (e) {
+        state = state.copyWith(isLoading: false, error: e.toString());
+        throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+      } finally {
+        state = state.copyWith(isLoading: false);
       }
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
+    });
   }
 
-  Future<LatLng?> transAddressToPosition(String address) async {
-    state = state.copyWith(error: '');
-    try {
-      final positionData = await _mapUseCase.transPositionFromAddress(address);
-      if (positionData != null) {
-        state = state.copyWith(positionData: positionData);
-        return positionData;
-      }
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
-    return null;
-  }
-
-  void get getStaticCategoryData {
-    final staticCategory = _mapUseCase.getStaticCategoryData;
-    state = state.copyWith(staticCategory: staticCategory);
-  }
-
-  Future<void> getPredictionList(String input) async {
-    state = state.copyWith(error: '');
-    try {
-      final result = await _mapUseCase.getPredictions(input);
-      state = state.copyWith(predictionList: result);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-    }
-  }
-
+// state에 별점 업데이트
   Future<void> updateStarRating(String mapId, int starRating) async {
     state = state.copyWith(error: '');
     try {
@@ -255,18 +264,96 @@ class MapNotifier extends StateNotifier<MapState> {
       state = state.copyWith(mapDataList: updatedList);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
-  void searchStoreData(String query) {
-    final queryWithoutSpace = query.replaceAll(' ', '');
+  void get getStaticCategoryData {
+    final staticCategory = _mapUseCase.getStaticCategoryData;
+    state = state.copyWith(staticCategory: staticCategory);
+  }
 
-    final searchData = state.mapDataList.where((mapData) {
-      final storeName = mapData.storeName.replaceAll(' ', '');
-      return storeName.contains(queryWithoutSpace);
-    }).toList();
+  void clearStateSearchData() {
+    state = state.copyWith(searchStoreDataList: []);
+  }
 
-    state = state.copyWith(searchStoreDataList: searchData);
+  void clearMapMarkers() {
+    state = state.copyWith(markersSet: {});
+  }
+
+// 좌표값 주소 변환
+  Future<void> transPositionToAddress(NLatLng targetPosition) async {
+    state = state.copyWith(
+        error: '', transAddress: '', asyncTransAddress: const AsyncLoading());
+    try {
+      final placeAddress =
+          await _mapUseCase.transPositionToAddress(targetPosition);
+      final transAddress = placeAddress?.street ?? "알수없음";
+
+      state = state.copyWith(
+          transAddress: transAddress,
+          asyncTransAddress: AsyncValue.data(transAddress));
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+    }
+  }
+
+// 내 타겟 좌표 업데이트
+  Future<void> updateTargetPosition(NLatLng targetPosition) async {
+    state =
+        state.copyWith(error: '', asyncTargetPosition: const AsyncLoading());
+    try {
+      state =
+          state.copyWith(asyncTargetPosition: AsyncValue.data(targetPosition));
+      await transPositionToAddress(targetPosition);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+    }
+  }
+
+  // 장소 검색 정보 업데이트
+  Future<void> updatePredictionList(String input) async {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+      state =
+          state.copyWith(error: '', asyncPredictionList: const AsyncLoading());
+
+      try {
+        final predictions = await _mapUseCase.getPredictions(input);
+        state =
+            state.copyWith(asyncPredictionList: AsyncValue.data(predictions));
+      } catch (e) {
+        state = state.copyWith(error: e.toString());
+        throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+      }
+    });
+  }
+
+// placeId로 좌표값 가져오기
+  Future<LatLng?> transPlaceIdToLatLng(String placeId) {
+    state = state.copyWith(error: '');
+    try {
+      return _mapUseCase.getLatLng(placeId);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+    }
+  }
+
+// 내 위치와 등록된 업체 간 거리 가져오기
+  double transPositionToDistance(NLatLng myPosition, NLatLng storePosition) {
+    state = state.copyWith(error: '');
+    try {
+      final betweenDistance = myPosition.distanceTo(storePosition);
+      double distanceToKm = betweenDistance * 0.001;
+      String formattedDistance = distanceToKm.toStringAsFixed(2);
+      double distanceKm = double.parse(formattedDistance);
+      return distanceKm;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+    }
   }
 }

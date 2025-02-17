@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/domain/entities/chat_room.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
-import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_room_list.dart';
+import 'package:o2/presentation/screens/chat/chat_room_list_view_model.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -21,13 +21,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(authProvider)?.id;
-    final stream = ref.watch(chatRoomStreamProvider);
+    final chatRooms = ref.watch(chatRoomListViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('채팅')),
       body: userId == null
           ? _buildErrorBody()
-          : stream.when(
+          : chatRooms.when(
               data: (data) => _buildChatListBody(data, userId),
               error: (error, stackTrace) => _buildErrorBody(),
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -36,10 +36,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Widget _buildChatListBody(List<ChatRoom> data, String userId) {
-    final filtered = data
-        .where(
-            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
-        .toList();
+    final filtered = ref
+        .read(chatRoomListViewModelProvider.notifier)
+        .getFilteredChatRooms(_filterType);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,18 +96,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         return '판매';
       case FilterType.buying:
         return '구매';
-    }
-  }
-
-  bool _shouldIncludeChatRoom(
-      FilterType type, String userId, ChatRoom chatRoom) {
-    switch (type) {
-      case FilterType.all:
-        return true;
-      case FilterType.selling:
-        return chatRoom.seller == userId;
-      case FilterType.buying:
-        return chatRoom.buyer == userId;
     }
   }
 }

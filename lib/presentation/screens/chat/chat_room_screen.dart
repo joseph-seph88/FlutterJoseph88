@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
-import 'package:o2/presentation/providers/product_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
 
@@ -27,7 +28,15 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
+  late final ChatMessageListViewModel _viewModel;
   bool _isAddButtonClicked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel =
+        ref.read(chatMessageListViewModelProvider(widget.chatRoomId).notifier);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +53,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       );
     }
     final selectedImage = ref.watch(selectedImageProvider);
-    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
-    final otherUserData = getUserDataUseCase(widget.otherUserId);
+    final otherUserData = _viewModel.getOtherUserData(widget.otherUserId);
 
     if (widget.chatRoomId != null) {
-      final markChatAsReadUseCase = ref.read(markChatAsReadUseCaseProvider);
-      markChatAsReadUseCase(widget.chatRoomId!, userId);
+      _viewModel.markChatAsRead(widget.chatRoomId!, userId);
     }
 
     return Scaffold(
@@ -57,7 +64,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         title: FutureBuilder(
           future: otherUserData,
           builder: (context, snapshot) {
-            return Text(snapshot.data?.name ?? 'null');
+            return Text(snapshot.data?.name ?? '');
           },
         ),
       ),
@@ -66,17 +73,23 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           _buildProductInfo(),
           const Divider(),
           Expanded(
-            child:
-                ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
+            child: ChatMessageList(
+              chatRoomId: widget.chatRoomId,
+              userId: userId,
+              otherUserId: widget.otherUserId,
+              viewModel: _viewModel,
+            ),
           ),
           if (selectedImage != null) ...[
             _buildSelectedImage(selectedImage.path)
           ],
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
+            userId: userId,
             otherUserId: widget.otherUserId,
             productID: widget.productID,
             isAddButtonClicked: _isAddButtonClicked,
+            selectedImage: selectedImage,
             onAddButtonClicked: _onAddButtonClicked,
           ),
           _isAddButtonClicked
@@ -95,21 +108,20 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildProductInfo() {
     const double imageSize = 60;
-    final getProductDetailUseCase = ref.read(getProductDetailUseCaseProvider);
-    final productAsync = getProductDetailUseCase.execute(widget.productID);
+    final product = _viewModel.getProductDetail(widget.productID);
 
-    return Padding(
-      padding: AppStyles.defaultPadding,
-      child: FutureBuilder(
-        future: productAsync,
-        builder: (context, snapshot) {
-          final product = snapshot.data;
-          if (product == null) return const SizedBox.shrink();
+    return FutureBuilder(
+      future: product,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
 
-          return Row(
+        final data = snapshot.data!;
+        return Padding(
+          padding: AppStyles.defaultPadding,
+          child: Row(
             children: [
               Image.network(
-                product.images.first,
+                data.images.first,
                 width: imageSize,
                 height: imageSize,
                 fit: BoxFit.cover,
@@ -121,14 +133,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${product.status} ',
+                        '${data.status} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        product.title,
+                        data.title,
                         style: const TextStyle(color: AppColors.text),
                       ),
                     ],
@@ -136,14 +148,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${product.price}원 ',
+                        '${data.price.toPrice()} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        product.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
+                        data.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
                         style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ],
@@ -151,9 +163,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 ],
               ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -171,7 +183,15 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             text: '사진',
           ),
           _buildIconButtonWithText(
-            onPressed: () {},
+            onPressed: () {
+              context.push('/send_location', extra: {
+                if (widget.chatRoomId != null) ...{
+                  'chatRoomId': widget.chatRoomId!
+                },
+                'otherUserId': widget.otherUserId,
+                'productID': widget.productID,
+              });
+            },
             icon: Icons.location_pin,
             text: '장소',
           ),

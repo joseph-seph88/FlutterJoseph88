@@ -1,14 +1,15 @@
-import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart';
-import 'package:o2/core/theme/app_theme.dart';
-import 'package:o2/presentation/screens/map/widgets/map_scroll_view.dart';
-import 'package:o2/presentation/screens/map/widgets/map_search_scroll_view.dart';
+import 'package:o2/presentation/screens/map/widgets/map_stream_search.dart';
+import 'package:o2/presentation/screens/map/widgets/scroll_view_in_bottom_sheet.dart';
+import 'package:o2/presentation/screens/map/widgets/store_search_result.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/map_entity.dart';
 import '../../providers/map_provider.dart';
+import '../../providers/permission_provider.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -20,13 +21,11 @@ class MapScreen extends ConsumerStatefulWidget {
 class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   late DraggableScrollableController _sheetController;
-  final _searchController = TextEditingController();
   final _focusNode = FocusNode();
-  NLatLng currentPosition = const NLatLng(37.499889, 126.920056);
+  final _searchController = TextEditingController();
   double _buttonOffset = 100;
-  bool toggled = false;
-  String category = "";
-  bool isMoving = false;
+  bool _isSearching = false;
+  NLatLng myPosition = const NLatLng(37.5547, 126.9706);
 
   @override
   void initState() {
@@ -46,37 +45,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppColors.text,
-      statusBarIconBrightness: Brightness.light,
-    ));
     _searchController.dispose();
     _sheetController.dispose();
     _mapController?.dispose();
-    _mapController = null;
     _focusNode.dispose();
     super.dispose();
   }
 
-  Future<void> updateMapMarkers(List<MapEntity> markers) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-    ref.read(mapProvider.notifier).clearMapMarkers();
-    await ref.read(mapProvider.notifier).setMapMarkers(markers);
-    final markerSetData = ref.read(mapProvider).markersSet;
-    if (markerSetData.isNotEmpty) {
-      await _mapController?.addOverlayAll(markerSetData);
-    }
-  }
 
-  Future<void> moveCamera(NLatLng nLatLng) async {
-    final cameraUpdate = NCameraUpdate.fromCameraPosition(
-      NCameraPosition(
-        target: nLatLng,
-        zoom: 16,
-      ),
-    );
-    await _mapController?.updateCamera(cameraUpdate);
-  }
 
   void _zoomIn() {
     _mapController?.updateCamera(NCameraUpdate.zoomIn());
@@ -86,172 +62,149 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _mapController?.updateCamera(NCameraUpdate.zoomOut());
   }
 
-  Future<void> moveMyPosition(NLatLng nLatLng) async {
-    await moveCamera(nLatLng);
-    final param = {
-      'category': category,
-      'position': GeoPoint(nLatLng.latitude, nLatLng.longitude)
-    };
-    ref.read(mapParamProvider.notifier).state = param;
+  NaverMapViewOptions _initMap() {
+    return NaverMapViewOptions(
+      initialCameraPosition: NCameraPosition(target: myPosition, zoom: 15),
+      extent: const NLatLngBounds(
+        southWest: NLatLng(31.43, 122.37),
+        northEast: NLatLng(44.35, 132.0),
+      ),
+    );
+  }
+
+  void _onMapReady(NaverMapController controller) {
+    _mapController = controller;
+    if (_mapController != null) {
+      final nLatLng = _mapController!.nowCameraPosition.target;
+      final overlay = controller.getLocationOverlay();
+      overlay.setIsVisible(true);
+      ref.read(mapProvider.notifier).getAllMapData(nLatLng);
+      ref.read(mapProvider.notifier).getStaticCategoryData;
+      ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
+      ref.read(isStreamProvider.notifier).state = false;
+    }
+  }
+
+  void _onCameraIdle() {
+    if (_mapController != null) {
+      _mapController?.clearOverlays(type: NOverlayType.circleOverlay);
+      final nPosition = _mapController?.nowCameraPosition.target;
+      ref.read(mapProvider.notifier).updateTargetPosition(nPosition!);
+
+      if (ref.read(isStreamProvider)) {
+        addCircleOverlay(nPosition);
+        final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
+        final category = ref.read(categoryProvider);
+        final param = {'category': category, 'position': geoPosition};
+        ref.read(mapParamProvider.notifier).state = param;
+      }
+    }
+  }
+
+  void _textFieldOnChanged(String value) {
+    if (value.isEmpty) {
+      setState(() {
+        _isSearching = false;
+      });
+      return;
+    }
+    setState(() {
+      _isSearching = _searchController.text.isNotEmpty;
+    });
+    ref.read(mapProvider.notifier).updateStoreList(value);
+  }
+
+  Future<void> _searchResultOnTap(MapEntity storeData) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    ref.read(isStreamProvider.notifier).state = false;
+    _searchController.clear();
+
+    final nLatLng =
+        NLatLng(storeData.position.latitude, storeData.position.longitude);
+    final nMarker =
+        await ref.read(mapProvider.notifier).setMapMarker(storeData);
+    await _mapController?.addOverlay(nMarker);
+
+    ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
+    final cameraUpdate = NCameraUpdate.withParams(target: nLatLng)
+      ..setAnimation(animation: NCameraAnimation.fly);
+    _mapController?.updateCamera(cameraUpdate);
+
+    setState(() {
+      _isSearching = false;
+    });
+  }
+
+  void _moveMyPosition() {
+    if (_mapController != null) {
+      final cameraUpdate = NCameraUpdate.withParams(target: myPosition)
+        ..setAnimation(animation: NCameraAnimation.fly);
+
+      _mapController?.updateCamera(cameraUpdate);
+    }
+  }
+
+  Future<void> _radiusSearchOnButton(
+      String category, ScrollController scrollController) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    final nPosition = _mapController?.nowCameraPosition.target;
+    if (nPosition != null) {
+      final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
+      final param = {'category': category, 'position': geoPosition};
+      ref.read(isInitProvider.notifier).state = true;
+      ref.read(mapParamProvider.notifier).state = param;
+      await addCircleOverlay(nPosition);
+
+      setState(() {
+        _sheetController.animateTo(0,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        scrollController.animateTo(0,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      });
+    }
   }
 
   Future<void> addCircleOverlay(NLatLng latLng) async {
     const double radius = 220.0;
     final circleOverlay = NCircleOverlay(
-        id: "circle",
-        center: latLng,
-        radius: radius,
-        color: const Color.fromRGBO(169, 169, 169, 0.5));
+      id: "circle",
+      center: latLng,
+      radius: radius,
+      color: AppColors.textSecondary.withAlpha(80),
+    );
     await _mapController?.addOverlay(circleOverlay);
   }
 
-  Future<void> moveAndOverlayWithSearchData(MapEntity searchStoreData) async {
-    closeFocus();
-    await _mapController?.clearOverlays();
-    isMoving = true;
-    ref.read(isInitProvider.notifier).state = false;
-
-    final searchLat = searchStoreData.position.latitude;
-    final searchLng = searchStoreData.position.longitude;
-
-    final markerData =
-        await ref.read(mapProvider.notifier).setMapMarker(searchStoreData);
-    if (markerData != null) {
-      await _mapController?.addOverlay(markerData);
-    }
-    await moveCamera(NLatLng(searchLat, searchLng));
-    setState(() {
-      toggled = false;
-      _searchController.clear();
-    });
-
-    await Future.delayed(const Duration(seconds: 1));
-    ref.read(isInitProvider.notifier).state = true;
-  }
-
-  Future<void> onCameraIdle() async {
-    final getPosition = _mapController!.nowCameraPosition;
-    currentPosition = getPosition.target;
-    category = ref.read(categoryProvider);
-
-    if (currentPosition.latitude != 0) {
-      final currentLat = currentPosition.latitude;
-      final currentLng = currentPosition.longitude;
-      final latLng = NLatLng(currentLat, currentLng);
-      final param = {
-        'category': category,
-        'position': GeoPoint(currentLat, currentLng)
-      };
-      ref.read(mapParamProvider.notifier).state = param;
-      await ref.read(mapProvider.notifier).transPositionToAddress(latLng);
-    }
-    await addCircleOverlay(
-        NLatLng(currentPosition.latitude, currentPosition.longitude));
-  }
-
-  Future<void> onMapReady(NaverMapController controller) async {
-    _mapController = controller;
-    await ref.read(mapProvider.notifier).getAllMapData();
-    category = ref.read(categoryProvider);
-    ref.read(mapProvider.notifier).getStaticCategoryData;
-
-    if (_mapController != null) {
-      final overlay = controller.getLocationOverlay();
-      overlay.setIsVisible(true);
-      await _mapController?.clearOverlays(type: NOverlayType.marker);
-      ref.read(mapParamProvider.notifier).state = {};
-      await ref
-          .read(mapProvider.notifier)
-          .transPositionToAddress(currentPosition);
-    }
-  }
-
-  Future<void> setMarker(MapEntity marker) async {
-    final markerData =
-        await ref.read(mapProvider.notifier).setMapMarker(marker);
-    if (markerData != null) {
-      await _mapController?.addOverlay(markerData);
-    }
-  }
-
-  Future<void> onButtonPressed(String category, GeoPoint geoPosition) async {
+  Future<void> streamUpdateMarkers(List<MapEntity> mapDataList) async {
     await _mapController?.clearOverlays(type: NOverlayType.marker);
-    isMoving = false;
+    ref.read(mapProvider.notifier).clearMapMarkers();
 
-    final param = {'category': category, 'position': geoPosition};
+    await ref.read(mapProvider.notifier).setMapMarkers(mapDataList);
+    final markerSetData = ref.read(mapProvider).markersSet;
 
-    ref.read(isInitProvider.notifier).state = true;
-    ref.read(mapParamProvider.notifier).state = param;
-
-    final nLatLng = NLatLng(geoPosition.latitude, geoPosition.longitude);
-    await addCircleOverlay(nLatLng);
-    setState(() {
-      _sheetController.jumpTo(0);
-    });
-  }
-
-  void closeFocus() {
-    _focusNode.unfocus();
-    setState(() {
-      toggled = false;
-    });
+    if (markerSetData.isNotEmpty) {
+      await _mapController?.addOverlayAll(markerSetData);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final mapState = ref.watch(mapProvider);
-
-    ref.listen<AsyncValue<List<MapEntity>>>(
-      mapDataStreamProvider,
-      (previous, next) {
-        next.when(
-          data: (newData) async {
-            if (!isMoving) {
-              await updateMapMarkers(newData);
-            } else {
-              print("스트림 데이터 무시됨 (isMoving = true)");
-            }
-          },
-          loading: () {
-            print("데이터 로딩 중...");
-          },
-          error: (err, stack) {
-            print("스트림 에러 발생: $err");
-          },
-        );
-      },
-    );
-
-    if (mapState.isLoading) {
-      return const CircularProgressIndicator();
-    }
-    if (mapState.error.isNotEmpty) {
-      return Text("Error: ${mapState.error}");
-    }
+    ref.watch(locationPermissionProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           NaverMap(
-            options: const NaverMapViewOptions(
-              initialCameraPosition: NCameraPosition(
-                  target: NLatLng(37.499889, 126.920056), zoom: 15),
-              extent: NLatLngBounds(
-                southWest: NLatLng(31.43, 122.37),
-                northEast: NLatLng(44.35, 132.0),
-              ),
-            ),
-            onMapReady: (controller) async {
-              await onMapReady(controller);
-            },
-            onCameraIdle: () async {
-              if (_mapController != null &&
-                  ref.read(isInitProvider) == true &&
-                  isMoving == false) {
-                await onCameraIdle();
-              }
-            },
-          ),
+              options: _initMap(),
+              onMapReady: (controller) => _onMapReady(controller),
+              onCameraIdle: _onCameraIdle),
+
+          // if(ref.watch(isStreamProvider))
+          MapStateListener((List<MapEntity> mapDataList) async {
+            streamUpdateMarkers(mapDataList);
+          }),
+
           Positioned(
             top: 50,
             left: 20,
@@ -260,138 +213,134 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: Column(
               children: [
                 Container(
-                  color: AppColors.surface,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: TextField(
                     controller: _searchController,
                     focusNode: _focusNode,
-                    onTap: () async {
-                      setState(() {
-                        toggled = !toggled;
-                      });
-                      if (!toggled) {
-                        _focusNode.unfocus();
-                      }
-                    },
-                    onChanged: (query) {
-                      ref.read(mapProvider.notifier).searchStoreData(query);
-                    },
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
-                      hintText: "여기서 업체 검색",
+                      hintText: '여기서 업체 검색',
                       hintStyle: AppStyles.labelLarge
                           .copyWith(color: AppColors.textSecondary),
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppStyles.defaultRadius),
-                      ),
+                      filled: true,
+
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       prefixIcon: const Icon(
                         Icons.search,
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    style: AppStyles.labelLarge.copyWith(color: Colors.black),
+                    onChanged: (value) => _textFieldOnChanged(value),
+                    onTapOutside: (_) => _focusNode.unfocus(),
+                    onTap: (){
+                      setState(() {
+                        _sheetController.animateTo(0,
+                            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+                      });
+                    },
                   ),
                 ),
-                if (toggled)
-                  MapSearchScrollView(onTap: (data) async {
-                    await moveAndOverlayWithSearchData(data);
-                  })
+                const SizedBox(height: 10),
+                if (_isSearching) ...[
+                  StoreSearchResult(
+                    (MapEntity storeData) async {
+                      _searchResultOnTap(storeData);
+                    },
+                  )
+                ],
               ],
             ),
           ),
           Positioned(
-            bottom: _buttonOffset,
+            bottom: _buttonOffset + 150,
             left: 20,
             child: ElevatedButton(
-              onPressed: () async {
-                closeFocus();
-                const NLatLng currentMyLatLng = NLatLng(37.499889, 126.920056);
-                await moveMyPosition(currentMyLatLng);
-              },
-              child: const Icon(Icons.my_location, color: AppColors.surface),
+              onPressed: _zoomIn,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.surface.withAlpha(150)),
+              child: const Icon(
+                Icons.add,
+                color: AppColors.primary,
+                size: 25,
+              ),
             ),
           ),
           Positioned(
-            bottom: _buttonOffset + 120,
+            bottom: _buttonOffset + 80,
+            left: 20,
+            child: ElevatedButton(
+              onPressed: _zoomOut,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.surface.withAlpha(150)),
+              child: const Icon(
+                Icons.remove,
+                color: AppColors.primary,
+                size: 25,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 10,
+            left: 20,
+            child: ElevatedButton(
+              onPressed: _moveMyPosition,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.surface.withAlpha(150)),
+              child: const Icon(
+                Icons.my_location,
+                color: AppColors.primary,
+                size: 25,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: _buttonOffset + 10,
             right: 20,
             child: ElevatedButton(
-              onPressed: () {
-                closeFocus();
-                _zoomIn();
-              },
-              child: const Icon(Icons.add, color: AppColors.surface),
-            ),
-          ),
-          Positioned(
-            bottom: _buttonOffset + 65,
-            right: 20,
-            child: ElevatedButton(
-              onPressed: () {
-                closeFocus();
-                _zoomOut();
-              },
-              child: const Icon(Icons.remove, color: AppColors.surface),
-            ),
-          ),
-          Positioned(
-            bottom: _buttonOffset,
-            right: 20,
-            child: FloatingActionButton.extended(
-                backgroundColor: AppColors.primary,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.surface.withAlpha(150),
+                ),
                 onPressed: () {
-                  closeFocus();
                   final mapBottomSheet = ref.read(bottomSheetProvider);
+                  _searchController.clear();
+                  setState(() {
+                    _isSearching = false;
+                  });
                   mapBottomSheet.mapBottomSheetWithTwoBtn(context, ref);
                 },
-                label: Row(
+                child: Row(
                   children: [
                     const Icon(
                       Icons.add,
-                      color: AppColors.surface,
+                      color: AppColors.primary,
+                      size: 25,
                     ),
                     Text("추가하기",
-                        style: AppStyles.labelMedium
-                            .copyWith(color: AppColors.surface))
+                        style: AppStyles.labelLarge
+                            .copyWith(color: AppColors.primary)),
                   ],
                 )),
           ),
           DraggableScrollableSheet(
-            controller: _sheetController,
-            initialChildSize: 0.1,
-            minChildSize: 0.1,
-            maxChildSize: 0.45,
-            builder: (context, scrollController) {
-              final geoLatLng =
-                  GeoPoint(currentPosition.latitude, currentPosition.longitude);
-              return Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 10,
-                      width: 50,
-                      margin: const EdgeInsets.only(top: 5, bottom: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.green[200],
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    Expanded(
-                      child: MapScrollView(scrollController, geoLatLng,
-                          onButtonPressed: (category, geoPosition) async {
-                        await onButtonPressed(category, geoLatLng);
-                      }),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+              controller: _sheetController,
+              initialChildSize: 0.1,
+              minChildSize: 0.1,
+              maxChildSize: 0.45,
+              builder: (context, scrollController) {
+                return GestureDetector(
+                  onVerticalDragUpdate: (details) {
+                    final newOffset = (_sheetController.size -
+                            details.primaryDelta! /
+                                MediaQuery.of(context).size.height)
+                        .clamp(0.0, 1.0);
+                    _sheetController.jumpTo(newOffset);
+                  },
+                  child: ScrollViewInBottomSheet(scrollController,
+                      (String category) async {
+                    _radiusSearchOnButton(category, scrollController);
+                  }),
+                );
+              }),
         ],
       ),
     );

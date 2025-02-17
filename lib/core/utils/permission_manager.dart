@@ -1,99 +1,83 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:open_settings_plus/core/open_settings_plus.dart';
 
-
-final permissionManagerProvider = Provider((ref) => PermissionManager());
-
-class PermissionManager with WidgetsBindingObserver {
+class PermissionManager {
   Future<void> requestLocationPermission() async {
-    PermissionStatus status = await Permission.location.status;
+    LocationPermission permission = await Geolocator.checkPermission();
     if (Platform.isAndroid) {
-      await _handleAndroidPermission(status);
+      await _handleAndroidPermission(permission);
     } else if (Platform.isIOS) {
-      await _handleIOSPermission(status);
+      await _handleIOSPermission(permission);
     }
   }
 
-  Future<void> _handleAndroidPermission(PermissionStatus status) async {
+  Future<void> _handleAndroidPermission(LocationPermission permission) async {
     try {
-      if (status.isGranted) {
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
         debugPrint("ANDROID: 위치 권한 허용됨");
-      } else if (status.isDenied) {
-        var newStatus = await Permission.location.request();
-        if (newStatus.isGranted) {
+      } else if (permission == LocationPermission.denied) {
+        var newPermission = await Geolocator.requestPermission();
+
+        if (newPermission == LocationPermission.always ||
+            newPermission == LocationPermission.whileInUse) {
           debugPrint("ANDROID: 위치 권한 허용됨");
         } else {
           debugPrint("ANDROID: 위치 권한 거부됨");
-          await openAppSettingsM();
+          _openSettings();
         }
-      } else if (status.isPermanentlyDenied) {
+      } else if (permission == LocationPermission.deniedForever) {
         debugPrint("ANDROID: 위치 권한 영구적 거부됨");
-        await openAppSettingsM();
+        _openSettings();
       } else {
         debugPrint("ANDROID: 아무튼 위치 권한 거부됨");
       }
     } catch (e) {
-      debugPrint("권한 요청 중 오류 발생: $e");
+      debugPrint("권한 요청 중 오류 발생: ${e.toString()}");
+      throw Exception("[PER]:권한 오류 ${e.toString()}");
     }
   }
 
-  Future<void> _handleIOSPermission(PermissionStatus status) async {
-    if (status.isGranted) {
-      debugPrint("IOS: 위치 권한 허용됨");
-    } else if (status.isDenied) {
-      var newStatus =
-          await Permission.locationWhenInUse.request(); // 포그라운드 권한 요청
-      if (newStatus.isGranted) {
+  Future<void> _handleIOSPermission(LocationPermission permission) async {
+    try {
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
         debugPrint("IOS: 위치 권한 허용됨");
-      } else {
+      } else if (permission == LocationPermission.denied) {
         debugPrint("IOS: 위치 권한 거부됨");
-        var newStatusForBackground = await Permission.locationAlways.request();
-        if (newStatusForBackground.isGranted) {
-          debugPrint("IOS: 백그라운드 위치 권한 허용됨");
+        var newPermission = await Geolocator.requestPermission();
+
+        if (newPermission == LocationPermission.always ||
+            newPermission == LocationPermission.whileInUse) {
+          debugPrint("IOS: 위치 권한 허용됨");
         } else {
-          debugPrint("IOS: 위치 권한 여전히 거부됨");
-          await openAppSettingsM();
+          debugPrint("iOS: 위치 권한 거부됨");
+          _openSettings();
         }
+      } else if (permission == LocationPermission.deniedForever) {
+        debugPrint("IOS: 위치 권한 영구적으로 거부됨");
+        _openSettings();
+      } else {
+        debugPrint("iOS: 위치 권한 상태 알 수 없음");
       }
-    } else if (status.isPermanentlyDenied) {
-      debugPrint("IOS: 위치 권한 영구적 거부됨");
-      await openAppSettingsM();
-    } else {
-      debugPrint("IOS: 아무튼 위치 권한 거부됨");
+    } catch (e) {
+      debugPrint("iOS: 권한 요청 중 오류 발생: ${e.toString()}");
+      throw Exception("iOS: [PER]:권한 오류 ${e.toString()}");
     }
   }
 
-  Future<void> _checkLocationPermission() async {
-    var status = await Permission.location.status;
-    if (status.isGranted) {
-      debugPrint("recheck: 위치 권한 허용됨");
-    } else if (status.isDenied) {
-      debugPrint("recheck: 위치 권한 거부됨");
-      await openAppSettingsM();
-    } else if (status.isPermanentlyDenied) {
-      debugPrint("recheck: 위치 권한 영구적 거부됨");
-      await openAppSettingsM();
+  void _openSettings(){
+    switch (OpenSettingsPlus.shared) {
+      case OpenSettingsPlusAndroid settings:
+        settings.locationSource();
+        break;
+      case OpenSettingsPlusIOS settings:
+        settings.locationServices();
+        break;
+      default:
+        throw Exception('지원되지 않는 플랫폼입니다.');
     }
-  }
-
-  Future<void> openAppSettingsM() async {
-    await openAppSettings();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _checkLocationPermission();
-    }
-  }
-
-  void initializeLifecycleObserver() {
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  void disposeLifecycleObserver() {
-    WidgetsBinding.instance.removeObserver(this);
   }
 }

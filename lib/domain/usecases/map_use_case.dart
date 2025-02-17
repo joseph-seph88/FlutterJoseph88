@@ -1,16 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:o2/domain/entities/map_entity.dart';
-import '../../data/repositories/map_repository_impl.dart';
 import '../repositories/map_repository.dart';
-
-final mapUseCaseProvider = Provider((ref) {
-  final mapRepository = ref.read(mapRepositoryProvider);
-  return MapUseCaseImpl(mapRepository);
-});
 
 abstract class MapUseCase {
   Future<void> addMarker(
@@ -21,7 +14,7 @@ abstract class MapUseCase {
       double starRating,
       int participant);
 
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition);
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition);
 
   Future<LatLng?> transPositionFromAddress(String address);
 
@@ -41,7 +34,7 @@ abstract class MapUseCase {
 
   Future<MapEntity> getMapData(String mapId);
 
-// Future<List<MapEntity>> execute(String query);
+  Future<LatLng?> getLatLng(String placeId);
 }
 
 class MapUseCaseImpl implements MapUseCase {
@@ -55,7 +48,7 @@ class MapUseCaseImpl implements MapUseCase {
     try {
       return _repository.getMapDataWithIconStream(category, position);
     } catch (e) {
-      throw Exception("맵유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -65,7 +58,7 @@ class MapUseCaseImpl implements MapUseCase {
       final searchDataList = await _repository.searchStore(inputText);
       return searchDataList;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -75,7 +68,7 @@ class MapUseCaseImpl implements MapUseCase {
       final dataList = await _repository.getAllMapData();
       return dataList;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -96,9 +89,9 @@ class MapUseCaseImpl implements MapUseCase {
   }
 
   @override
-  Future<Placemark?> transAddressFromGeo(NLatLng currentPosition) async {
+  Future<Placemark?> transPositionToAddress(NLatLng currentPosition) async {
     try {
-      return await _repository.transAddressFromGeo(currentPosition);
+      return await _repository.transPositionToAddress(currentPosition);
     } catch (e) {
       rethrow;
     }
@@ -111,10 +104,10 @@ class MapUseCaseImpl implements MapUseCase {
       if (positionData != null) {
         return positionData;
       }
+      return null;
     } catch (e) {
       rethrow;
     }
-    return null;
   }
 
   @override
@@ -140,7 +133,7 @@ class MapUseCaseImpl implements MapUseCase {
           await _repository.updateStarRating(mapId, participant, starRating);
       return result;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -150,7 +143,12 @@ class MapUseCaseImpl implements MapUseCase {
       final mapData = await _repository.getMapData(mapId);
       return mapData;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
+  }
+
+  @override
+  Future<LatLng?> getLatLng(String placeId) {
+    return _repository.getLatLng(placeId);
   }
 }
