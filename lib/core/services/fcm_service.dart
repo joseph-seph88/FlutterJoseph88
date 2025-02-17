@@ -16,8 +16,8 @@ class FCMService {
   final _userDataSource = UserDataSource();
   final _auth = FirebaseAuth.instance;
 
-  late final FlutterLocalNotificationsPlugin _localNotifications;
-  late final AndroidNotificationChannel _channel;
+  FlutterLocalNotificationsPlugin? _localNotifications;
+  AndroidNotificationChannel? _channel;
 
   Future<void> initialize() async {
     _channel = const AndroidNotificationChannel(
@@ -31,7 +31,7 @@ class FCMService {
 
     _localNotifications = FlutterLocalNotificationsPlugin();
 
-    await _localNotifications.initialize(
+    await _localNotifications?.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
         iOS: DarwinInitializationSettings(
@@ -48,10 +48,12 @@ class FCMService {
   }
 
   Future<void> _initializeLocalNotifications() async {
+    if (_channel == null || _localNotifications == null) return;
+
     await _localNotifications
-        .resolvePlatformSpecificImplementation<
+        ?.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_channel);
+        ?.createNotificationChannel(_channel!);
   }
 
   Future<void> _setupFCM() async {
@@ -96,18 +98,24 @@ class FCMService {
   }
 
   void _handleNotificationData(Map<String, dynamic> data) {
+    final context = navigatorKey.currentContext;
     if (data['type'] == 'chat') {
       final chatRoomId = data['chatId'].toString();
       final otherUserId = data['senderId'].toString();
       final productID = data['productId'].toString();
 
-      final context = navigatorKey.currentContext;
       if (context != null) {
         context.push('/chat_room', extra: {
           'chatRoomId': chatRoomId,
           'otherUserId': otherUserId,
           'productID': productID,
         });
+      }
+    } else if (data['type'] == 'product_status_change') {
+      final productId = data['productId'].toString();
+
+      if (context != null) {
+        context.push('/detail/$productId');
       }
     }
   }
@@ -120,22 +128,28 @@ class FCMService {
     final context = navigatorKey.currentContext;
     if (context != null) {
       final router = GoRouter.of(context);
-      final isChatRoom = router.state.path?.startsWith('/chat_room') ?? false;
 
-      if (isChatRoom) return;
+      if (message.data['type'] == 'chat') {
+        final isChatRoom = router.state.path?.startsWith('/chat_room') ?? false;
+        if (isChatRoom) return;
+      } else if (message.data['type'] == 'product_status_change') {
+        final isProductDetail =
+            router.state.path?.startsWith('/detail') ?? false;
+        if (isProductDetail) return;
+      }
     }
 
     if (notification == null) return;
 
-    _localNotifications.show(
+    _localNotifications?.show(
       notification.hashCode,
       notification.title,
       notification.body,
       NotificationDetails(
         android: AndroidNotificationDetails(
-          _channel.id,
-          _channel.name,
-          channelDescription: _channel.description,
+          _channel!.id,
+          _channel!.name,
+          channelDescription: _channel!.description,
           icon: '@mipmap/ic_launcher',
           playSound: true,
           enableVibration: true,

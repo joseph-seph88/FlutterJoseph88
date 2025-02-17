@@ -11,6 +11,7 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/route_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +27,14 @@ void main() async {
     PermissionManager().requestLocationPermission(),
     Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    ).then((_) => FCMService().initialize()),
+    ),
   ]);
+
+  final prefs = await SharedPreferences.getInstance();
+  final notificationEnabled = prefs.getBool('notificationEnabled') ?? true;
+  if (notificationEnabled) {
+    await FCMService().initialize();
+  }
 
   runApp(
     const ProviderScope(
