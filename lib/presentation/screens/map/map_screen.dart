@@ -9,6 +9,7 @@ import 'package:o2/presentation/screens/map/widgets/store_search_result.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/map_entity.dart';
 import '../../providers/map_provider.dart';
+import '../../providers/permission_provider.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -50,6 +51,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _focusNode.dispose();
     super.dispose();
   }
+
+
 
   void _zoomIn() {
     _mapController?.updateCamera(NCameraUpdate.zoomIn());
@@ -186,6 +189,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(locationPermissionProvider);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
