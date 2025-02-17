@@ -50,4 +50,11 @@ class AuthValidator {
 
     return ValidatorResult(isValid: true, errorMessage: null);
   }
+
+  static ValidatorResult validateName(String name) {
+    if (name.trim().isEmpty) {
+      return ValidatorResult(isValid: false, errorMessage: "이름을 입력해주세요.");
+    }
+    return ValidatorResult(isValid: true, errorMessage: null);
+  }
 }

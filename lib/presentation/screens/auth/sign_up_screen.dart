@@ -70,6 +70,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       case "passwordConfirm":
         return AuthValidator.validatePasswordConfirm(
             field.controller.text, _listTextFieldData[1].controller.text);
+      case "name":
+        return AuthValidator.validateName(field.controller.text);
       default:
         return ValidatorResult(isValid: true, errorMessage: null);
     }
@@ -92,8 +94,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final currentIndex = _listTextFieldData.indexOf(field);
     if (currentIndex < _listTextFieldData.length - 1) {
       _listTextFieldData[currentIndex + 1].showField = true;
+      _listTextFieldData[currentIndex + 1].errorText = null;
     }
-    if (field.fieldName == "passwordConfirm") {
+    if (field.fieldName == "name") {
       _showSignUpButton = true;
     }
   }

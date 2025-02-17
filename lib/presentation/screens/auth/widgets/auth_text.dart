@@ -24,7 +24,7 @@ class AuthText extends StatelessWidget {
         text = "비밀번호 확인 *";
         break;
       case "name":
-        text = "이름";
+        text = "이름 *";
         break;
     }
 
