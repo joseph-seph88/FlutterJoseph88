@@ -67,8 +67,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           _buildProductInfo(),
           const Divider(),
           Expanded(
-            child:
-                ChatMessageList(chatRoomId: widget.chatRoomId, userId: userId),
+            child: ChatMessageList(
+              chatRoomId: widget.chatRoomId,
+              userId: userId,
+              otherUserId: widget.otherUserId,
+            ),
           ),
           if (selectedImage != null) ...[
             _buildSelectedImage(selectedImage.path)
