@@ -30,7 +30,7 @@ class ChatRoomTile extends ConsumerWidget {
           FutureBuilder(
             future: otherUserData,
             builder: (context, snapshot) {
-              return Text(snapshot.data?.name ?? 'null', maxLines: 1);
+              return Text(snapshot.data?.name ?? '알 수 없는 사용자', maxLines: 1);
             },
           ),
           const SizedBox(width: 12),

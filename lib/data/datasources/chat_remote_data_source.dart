@@ -60,20 +60,25 @@ class ChatRemoteDataSource {
       sentTime: timestamp,
     ).toJson();
 
-    final messageId = (await _firestore
+    final chatRef = _firestore.collection('chats').doc(chatRoomId);
+    final messageRef = _firestore
         .collection('chats')
         .doc(chatRoomId)
         .collection('messages')
-        .add(message)).id;
+        .doc();
+    final batch = _firestore.batch();
 
-    _firestore.collection('chats').doc(chatRoomId).update({
+    batch.set(messageRef, message);
+    batch.update(chatRef, {
       'lastMessage': content,
-      'lastMessageId': messageId,
+      'lastMessageId': messageRef.id,
       'lastMessageSender': senderId,
       'lastMessageTime': timestamp,
       'lastMessageType': type,
       'unreadMessageCount': FieldValue.increment(1),
     });
+
+    batch.commit();
   }
 
   Future<void> markChatAsRead(String chatRoomId, String userId) async {

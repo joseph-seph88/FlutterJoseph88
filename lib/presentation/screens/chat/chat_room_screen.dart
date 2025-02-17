@@ -55,16 +55,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final selectedImage = ref.watch(selectedImageProvider);
     final otherUserData = _viewModel.getOtherUserData(widget.otherUserId);
 
-    if (widget.chatRoomId != null) {
-      _viewModel.markChatAsRead(widget.chatRoomId!, userId);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder(
           future: otherUserData,
           builder: (context, snapshot) {
-            return Text(snapshot.data?.name ?? '');
+            return Text(snapshot.data?.name ?? '알 수 없는 사용자');
           },
         ),
       ),
@@ -131,9 +127,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${data.status} ',
+                        '${data.status.label} ',
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,

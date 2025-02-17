@@ -18,7 +18,7 @@ import 'package:o2/presentation/providers/map_provider.dart';
 
 // DataSource Providers
 final chatRemoteDataSourceProvider =
-    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSourceImpl());
+    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSource());
 
 final imageDataSourceProvider = Provider<ImageDataSource>(
     (ref) => ImageDataSourceImpl(FirebaseStorage.instance));

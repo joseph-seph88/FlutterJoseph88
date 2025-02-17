@@ -55,6 +55,10 @@ class ChatMessageListState extends ConsumerState<ChatMessageList> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatMessageListViewModelProvider(chatRoomId));
 
+    if (widget.chatRoomId != null) {
+      viewModel.markChatAsRead(widget.chatRoomId!, userId);
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: ListView.builder(
