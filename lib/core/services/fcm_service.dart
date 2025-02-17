@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/data/datasources/user_data_source.dart';
@@ -55,6 +56,12 @@ class FCMService {
 
   Future<void> _setupFCM() async {
     await _requestNotificationPermission();
+
+    final apnsToken = await _firebaseMessaging.getAPNSToken();
+    if (apnsToken == null) {
+      debugPrint("APNS 토큰을 받을 수 없습니다. 오류 발생.");
+      return;
+    }
 
     final fcmToken = await _firebaseMessaging.getToken();
     await _updateToken(fcmToken);

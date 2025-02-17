@@ -26,9 +26,34 @@ class ImageDataSourceImpl implements ImageDataSource {
   ImageDataSourceImpl(this._storage);
 
   Future<void> _validateImageFile(File file) async {
-    final mimeType = lookupMimeType(file.path);
+    // URL인 경우 검증 스킵
+    if (file.path.startsWith('http')) {
+      return;
+    }
 
-    if (mimeType == null || !_supportedMimeTypes.contains(mimeType)) {
+    final mimeType = lookupMimeType(file.path);
+    // 순수 확장자만 추출 (쿼리 파라미터 제거)
+    final extension = path.extension(file.path).split('?')[0].toLowerCase();
+    final validExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.webp',
+      '.heic',
+      '.heif'
+    ];
+
+    if (kDebugMode) {
+      debugPrint('파일 경로: ${file.path}');
+      debugPrint('MIME 타입: $mimeType');
+      debugPrint('파일 확장자: $extension');
+      debugPrint(
+          '지원되는 MIME 타입 포함 여부: ${mimeType != null && _supportedMimeTypes.contains(mimeType)}');
+      debugPrint('지원되는 확장자 포함 여부: ${validExtensions.contains(extension)}');
+    }
+
+    if ((mimeType == null || !_supportedMimeTypes.contains(mimeType)) &&
+        !validExtensions.contains(extension)) {
       throw Exception('지원하지 않는 이미지 형식입니다. (지원 형식: JPG, PNG, WebP, HEIC)');
     }
 
@@ -61,18 +86,36 @@ class ImageDataSourceImpl implements ImageDataSource {
   @override
   Future<List<String>> uploadProductImages(
       String sellerId, String productId, List<File> files) async {
-    // 모든 파일 사전 검증
-    await Future.wait(files.map(_validateImageFile));
+    final List<String> urls = [];
+
+    for (final file in files) {
+      // URL인 경우 바로 추가
+      if (file.path.startsWith('http')) {
+        urls.add(file.path);
+        continue;
+      }
+
+      // 파일 검증
+      await _validateImageFile(file);
+    }
+
+    // 실제 파일만 필터링
+    final localFiles =
+        files.where((file) => !file.path.startsWith('http')).toList();
+
+    if (localFiles.isEmpty) {
+      return urls;
+    }
 
     // 동시에 처리할 최대 이미지 수
     const int maxConcurrent = 3;
-    final List<String> urls = [];
 
     // 이미지를 청크로 나누어 처리
-    for (var i = 0; i < files.length; i += maxConcurrent) {
-      final end =
-          (i + maxConcurrent < files.length) ? i + maxConcurrent : files.length;
-      final chunk = files.sublist(i, end);
+    for (var i = 0; i < localFiles.length; i += maxConcurrent) {
+      final end = (i + maxConcurrent < localFiles.length)
+          ? i + maxConcurrent
+          : localFiles.length;
+      final chunk = localFiles.sublist(i, end);
 
       // 각 청크 내의 이미지를 병렬로 업로드
       final chunkResults = await Future.wait(
