@@ -5,6 +5,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:o2/presentation/providers/review_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/map_entity.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/map_provider.dart';
 
 class RecommendedShopPage extends ConsumerWidget {
@@ -16,6 +17,7 @@ class RecommendedShopPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mapState = ref.watch(mapProvider);
+    final authState = ref.watch(authProvider);
 
     void onTap(MapEntity searchData) {
       ref.read(selectedMapDataProvider.notifier).state = searchData;
@@ -40,7 +42,7 @@ class RecommendedShopPage extends ConsumerWidget {
         child: Column(
           children: [
             Text(
-              "${''}님이 추천하고 싶은 업체는 어디인가요?",
+              "${authState?.name ?? "탈퇴한 사용자"}님이 추천하고 싶은 업체는 어디인가요?",
               style:
                   AppStyles.labelLarge.copyWith(color: AppColors.textSecondary),
             ),
