@@ -644,16 +644,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () => _onChatButtonClicked(product),
+                        onPressed: product.status == ProductStatus.reserved ||
+                                product.status == ProductStatus.completed
+                            ? null
+                            : () => _onChatButtonClicked(product),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.grey[400],
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 12,
                           ),
                         ),
-                        child: const Text('채팅하기'),
+                        child: Text(switch (product.status) {
+                          ProductStatus.reserved => '예약중',
+                          ProductStatus.completed => '거래완료',
+                          _ => '채팅하기'
+                        }),
                       ),
                     ],
                   ),
@@ -672,7 +680,35 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   void _onChatButtonClicked(Product product) async {
     final userID = ref.read(authProvider)?.id;
-    if (userID == null) return;
+    if (userID == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('로그인이 필요합니다')),
+        );
+      }
+      return;
+    }
+
+    // 판매자와 동일한 사용자인 경우
+    if (userID == product.sellerId) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('자신의 상품입니다')),
+        );
+      }
+      return;
+    }
+
+    // 예약중이거나 거래완료인 경우
+    if (product.status == ProductStatus.reserved ||
+        product.status == ProductStatus.completed) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('거래가 불가능한 상품입니다')),
+        );
+      }
+      return;
+    }
 
     final chatRooms = ref.read(chatRoomStreamProvider).value;
     final chatRoom = chatRooms
