@@ -175,6 +175,7 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
     return Stack(
       children: [
         Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -529,7 +530,11 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
           ),
           bottomNavigationBar: SafeArea(
             child: Padding(
-              padding: AppStyles.defaultPadding,
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+              ),
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _onSubmit,
                 child: _isLoading
