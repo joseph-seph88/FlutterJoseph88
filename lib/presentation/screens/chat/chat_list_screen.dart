@@ -36,10 +36,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   Widget _buildChatListBody(List<ChatRoom> data, String userId) {
-    final filtered = data
-        .where(
-            (element) => _shouldIncludeChatRoom(_filterType, userId, element))
-        .toList();
+    final filtered = ref
+        .read(chatRoomListViewModelProvider.notifier)
+        .getFilteredChatRooms(_filterType);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,18 +96,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         return '판매';
       case FilterType.buying:
         return '구매';
-    }
-  }
-
-  bool _shouldIncludeChatRoom(
-      FilterType type, String userId, ChatRoom chatRoom) {
-    switch (type) {
-      case FilterType.all:
-        return true;
-      case FilterType.selling:
-        return chatRoom.seller == userId;
-      case FilterType.buying:
-        return chatRoom.buyer == userId;
     }
   }
 }

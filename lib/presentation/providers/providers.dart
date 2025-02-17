@@ -55,11 +55,6 @@ final deleteChatMessageUseCaseProvider = Provider<DeleteChatMessageUseCase>(
 final getUserDataUseCaseProvider = Provider<GetUserDataUseCase>(
     (ref) => GetUserDataUseCase(ref.read(userRepositoryProvider)));
 
-final otherUserProvider = Provider((ref) {
-    final getUserDataUseCase = ref.read(getUserDataUseCaseProvider);
-    return (String otherUserId) => getUserDataUseCase(otherUserId);
-});
-
 final getLatLngProvider = Provider((ref) {
     final mapUseCase = ref.read(mapUseCaseProvider);
     return (String placeId) => mapUseCase.getLatLng(placeId);

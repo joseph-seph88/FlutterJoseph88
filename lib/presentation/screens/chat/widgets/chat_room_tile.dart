@@ -5,8 +5,9 @@ import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/domain/entities/chat_message.dart';
 import 'package:o2/domain/entities/chat_room.dart';
-import 'package:o2/presentation/providers/product_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
+import 'package:o2/domain/entities/user_entity.dart';
+import 'package:o2/presentation/screens/chat/chat_room_list_view_model.dart';
+import 'package:o2/presentation/widgets/profile_image.dart';
 
 class ChatRoomTile extends ConsumerWidget {
   final ChatRoom chatRoom;
@@ -18,10 +19,12 @@ class ChatRoomTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final otherUserID =
         userId == chatRoom.buyer ? chatRoom.seller : chatRoom.buyer;
-    final otherUserData = ref.read(otherUserProvider)(otherUserID);
+    final viewModel = ref.read(chatRoomListViewModelProvider.notifier);
+    final otherUserData = viewModel.getOtherUserData(otherUserID);
+    final productImage = viewModel.getProductImage(chatRoom.productID);
 
     return ListTile(
-      leading: _buildLeadingIcons(ref),
+      leading: _buildLeadingIcons(otherUserData, productImage),
       title: Row(
         children: [
           FutureBuilder(
@@ -54,20 +57,22 @@ class ChatRoomTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildLeadingIcons(WidgetRef ref) {
+  Widget _buildLeadingIcons(
+      Future<UserEntity?> userData, Future<String?> productImage) {
     const double iconSize = 40;
-    final productAsync = chatRoom.productID == null
-        ? const AsyncData(null)
-        : ref.watch(productDetailProvider(chatRoom.productID!));
 
     return SizedBox(
       width: iconSize * 1.5,
       height: iconSize * 1.5,
       child: Stack(
         children: [
-          const Align(
+          Align(
             alignment: Alignment.topLeft,
-            child: CircleAvatar(),
+            child: FutureBuilder(
+              future: userData,
+              builder: (context, snapshot) =>
+                  ProfileImageAvatar(imageUrl: snapshot.data?.image),
+            ),
           ),
           Align(
             alignment: Alignment.bottomRight,
@@ -75,21 +80,14 @@ class ChatRoomTile extends ConsumerWidget {
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: productAsync.when(
-                data: (data) {
-                  if (data == null) return const Icon(Icons.photo);
-
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      data.images[0],
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
-                error: (error, stackTrace) => const Icon(Icons.photo),
-                loading: () => const Icon(Icons.photo),
-              ),
+              child: FutureBuilder(
+                  future: productImage,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Icon(Icons.photo);
+                    }
+                    return Image.network(snapshot.data!);
+                  }),
             ),
           ),
         ],

@@ -1,4 +1,6 @@
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:o2/core/constants/auth_provider_type.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 
 import '../../domain/repositories/auth_repository.dart';
@@ -24,18 +26,6 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     }
 
-    return null;
-  }
-
-  @override
-  Future<UserEntity?> signIn(String email, String password) async {
-    final user = await _authDataSource.signIn(email, password);
-    if (user != null) {
-      final userData = await _userDataSource.getUser(user.uid);
-      if (userData != null) {
-        return userData.toEntity();
-      }
-    }
     return null;
   }
 
@@ -69,69 +59,29 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> withdraw(String userId, String password) async {
-    await _userDataSource.deleteUser(userId);
-    await _authDataSource.withdraw(password);
-  }
-
-  @override
-  Future<UserEntity?> signInWithGoogle() async {
-    final user = await _authDataSource.signInWithGoogle();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
-
-      final newUser = UserEntity(
-        id: user.uid,
-        email: user.email ?? '',
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
-      return newUser;
+    try {
+      await _authDataSource.withdraw(password);
+      await _userDataSource.deleteUser(userId);
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 
   @override
-  Future<UserEntity?> signInWithFacebook() async {
-    final user = await _authDataSource.signInWithFacebook();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
-
-      String email = '';
-
-      if (user.email == null) {
-        final userData = await FacebookAuth.instance.getUserData();
-
-        if (userData['email'] != null) {
-          email = userData['email'];
-        }
-      }
-
-      final newUser = UserEntity(
-        id: user.uid,
+  Future<UserEntity?> signInWithProvider(
+    AuthProviderType authProviderType, {
+    String? email,
+    String? password,
+  }) async {
+    try {
+      final user = await _authDataSource.signInWithProvider(
+        authProviderType,
         email: email,
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        password: password,
       );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
 
-      return newUser;
-    }
-    return null;
-  }
+      if (user == null) return null;
 
-  @override
-  Future<UserEntity?> signInWithNaver() async {
-    final user = await _authDataSource.signInWithNaver();
-    if (user != null) {
       final existingUser = await _userDataSource.getUser(user.uid);
       if (existingUser != null) {
         return existingUser.toEntity();
@@ -139,36 +89,30 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final newUser = UserEntity(
         id: user.uid,
-        email: user.email ?? '',
+        email: email ?? await setEmail(authProviderType),
         name: user.displayName ?? '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+
       await _userDataSource.saveUser(newUser.toModel(user.uid));
       return newUser;
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 
-  @override
-  Future<UserEntity?> signInWithKakao() async {
-    final user = await _authDataSource.signInWithKakao();
-    if (user != null) {
-      final existingUser = await _userDataSource.getUser(user.uid);
-      if (existingUser != null) {
-        return existingUser.toEntity();
-      }
-
-      final newUser = UserEntity(
-        id: user.uid,
-        email: user.email ?? '',
-        name: user.displayName ?? '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userDataSource.saveUser(newUser.toModel(user.uid));
-      return newUser;
+  Future<String> setEmail(AuthProviderType authProviderType) async {
+    String email = "";
+    switch (authProviderType) {
+      case AuthProviderType.facebook:
+        final userData = await FacebookAuth.instance.getUserData();
+        return userData['email'] ?? '';
+      case AuthProviderType.kakao:
+        final userData = await UserApi.instance.me();
+        return userData.kakaoAccount?.email ?? '';
+      default:
+        return email;
     }
-    return null;
   }
 }
