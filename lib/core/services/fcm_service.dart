@@ -60,7 +60,6 @@ class FCMService {
     final apnsToken = await _firebaseMessaging.getAPNSToken();
     if (apnsToken == null) {
       debugPrint("APNS 토큰을 받을 수 없습니다. 오류 발생.");
-      return;
     }
 
     final fcmToken = await _firebaseMessaging.getToken();

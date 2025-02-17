@@ -1,13 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/repositories/review_repository_impl.dart';
 import 'package:o2/domain/usecases/review_use_case.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import '../../data/datasources/review_data_source.dart';
+import '../../domain/entities/user_entity.dart';
 import '../state/review_state.dart';
 import 'map_provider.dart';
-
-final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
 
 final reviewDataSourceProvider = Provider((ref) {
   final fireStore = ref.read(fireStoreProvider);
@@ -27,15 +25,15 @@ final reviewUseCaseProvider = Provider((ref) {
 final reviewProvider =
     StateNotifierProvider<ReviewNotifier, ReviewState>((ref) {
   final reviewUseCase = ref.read(reviewUseCaseProvider);
-  final firebaseAuth = ref.read(firebaseAuthProvider);
-  return ReviewNotifier(reviewUseCase, firebaseAuth);
+  final authState = ref.read(authProvider);
+  return ReviewNotifier(reviewUseCase, authState);
 });
 
 class ReviewNotifier extends StateNotifier<ReviewState> {
   final ReviewUseCase _reviewUseCase;
-  final FirebaseAuth _auth;
+  final UserEntity? _authState;
 
-  ReviewNotifier(this._reviewUseCase, this._auth)
+  ReviewNotifier(this._reviewUseCase, this._authState)
       : super(ReviewState(
           isLoading: false,
           error: '',
@@ -44,18 +42,14 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
           asyncStoreReviewList: const AsyncValue.data([]),
         ));
 
-  Future<void> addStoreReview(Map<String, dynamic> storeReview) async {
+  Future<void> addStoreReview(
+      Map<String, dynamic> storeReview) async {
     state = state.copyWith(error: '');
     try {
-      final userInfo = _auth.currentUser;
-      if (userInfo != null) {
-        if(userInfo.email != null) {
-          throw Exception('[RE:NOTIFIER_이메일 없음]');
-        }
-        final userId = userInfo.uid;
-        final email = userInfo.email;
-        await _reviewUseCase.addStoreReview(userId, email!, storeReview);
-      }
+      if(_authState == null) {return;}
+      final userId = _authState!.id;
+      final userEmail = _authState!.email;
+      await _reviewUseCase.addStoreReview(userId, userEmail, storeReview);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       throw Exception('[RE:NOTIFIER_업체 리뷰 등록 에러] ${e.toString()}');
@@ -77,21 +71,14 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
     }
   }
 
-  Future<bool> isDuplicateStoreReview(mapId) async {
+  Future<bool> isDuplicateStoreReview(String? mapId) async {
     state = state.copyWith(error: '');
     try {
-      final userInfo = _auth.currentUser;
-      debugPrint("중복1$userInfo");
-      if (userInfo != null) {
-        final userId = userInfo.uid;
-        debugPrint("중복2$userId");
-        debugPrint("중복2${userInfo.email}");
-
-        final isUse =
-            await _reviewUseCase.isDuplicateStoreReview(userId, mapId);
-        return isUse;
-      }
-      return false;
+      if(_authState == null) {return false;}
+      final userId = _authState!.id;
+      if (mapId == null) {return false;}
+      final isUse = await _reviewUseCase.isDuplicateStoreReview(userId, mapId);
+      return isUse;
     } catch (e) {
       state = state.copyWith(error: e.toString());
       throw Exception('[RE:NOTIFIER_업체 리뷰 중복 에러] ${e.toString()}');

@@ -80,7 +80,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       overlay.setIsVisible(true);
       ref.read(mapProvider.notifier).getAllMapData(nLatLng);
       ref.read(mapProvider.notifier).getStaticCategoryData;
-      ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
+      ref.read(mapProvider.notifier).updateTargetPosition(myPosition);
       ref.read(isStreamProvider.notifier).state = false;
     }
   }
@@ -90,7 +90,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _mapController?.clearOverlays(type: NOverlayType.circleOverlay);
       final nPosition = _mapController?.nowCameraPosition.target;
       ref.read(mapProvider.notifier).updateTargetPosition(nPosition!);
-
       if (ref.read(isStreamProvider)) {
         addCircleOverlay(nPosition);
         final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);

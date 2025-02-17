@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +21,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
   final _searchController = TextEditingController();
   final _storeTextController = TextEditingController();
   NaverMapController? _mapController;
-  NLatLng myPosition = const NLatLng(37.499889, 126.920056);
+  NLatLng myPosition = const NLatLng(37.5547, 126.9706);
   bool _isSearching = false;
   Map<String, dynamic> category = {};
   int? selectedIndex;
@@ -58,11 +57,10 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
   void _onMapReady(NaverMapController controller) {
     _mapController = controller;
     if (_mapController != null) {
+      final nLatLng = _mapController!.nowCameraPosition.target;
       final overlay = controller.getLocationOverlay();
       overlay.setIsVisible(true);
-      ref
-          .read(mapProvider.notifier)
-          .updateTargetPosition(_mapController!.nowCameraPosition.target);
+      ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
     }
   }
 
@@ -99,10 +97,9 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
               alignment: Alignment.center,
               children: [
                 NaverMap(
-                  options: initMap(),
-                  onMapReady: (controller) => _onMapReady(controller),
-                  onCameraIdle: _onCameraIdle
-                ),
+                    options: initMap(),
+                    onMapReady: (controller) => _onMapReady(controller),
+                    onCameraIdle: _onCameraIdle),
                 Positioned(
                     top: 10,
                     left: 20,
@@ -267,15 +264,9 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                               await ref.read(mapProvider.notifier).addMarker(
                                   data, category, addressData, storeName);
                               ref.read(isInitProvider.notifier).state = false;
-
-                              final param = {
-                                'category': category,
-                                'position':
-                                    GeoPoint(data.latitude, data.longitude)
-                              };
-
-                              ref.read(mapParamProvider.notifier).state = param;
-
+                              await ref
+                                  .read(mapProvider.notifier)
+                                  .getAllMapData(myPosition);
                               if (context.mounted) {
                                 context.pop();
                               }
