@@ -26,9 +26,8 @@ void main() async {
     PermissionManager().requestLocationPermission(),
     Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    ),
+    ).then((_) => FCMService().initialize()),
   ]);
-  await FCMService().initialize();
 
   runApp(
     const ProviderScope(
