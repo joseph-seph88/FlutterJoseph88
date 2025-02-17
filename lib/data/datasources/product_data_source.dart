@@ -214,15 +214,27 @@ class ProductDataSource {
   Future<void> addToFavorites(String userId, String productId) async {
     final batch = _firestore.batch();
 
-    // 사용자의 관심 상품 목록에 추가
+    // 1. 상품의 favorites 서브컬렉션에 사용자 추가
+    final favoriteRef = _firestore
+        .collection(_collection)
+        .doc(productId)
+        .collection('favorites')
+        .doc(userId);
+
+    batch.set(favoriteRef, {
+      'userId': userId,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // 2. 상품의 favoriteCount 증가
+    final productRef = _firestore.collection(_collection).doc(productId);
+    batch.update(productRef, {'favoriteCount': FieldValue.increment(1)});
+
+    // 3. 사용자의 favoriteProductIds 배열에 추가
     final userRef = _firestore.collection('users').doc(userId);
     batch.update(userRef, {
       'favoriteProductIds': FieldValue.arrayUnion([productId])
     });
-
-    // 상품의 favoriteCount 증가
-    final productRef = _firestore.collection(_collection).doc(productId);
-    batch.update(productRef, {'favoriteCount': FieldValue.increment(1)});
 
     await batch.commit();
   }
@@ -231,22 +243,43 @@ class ProductDataSource {
   Future<void> removeFromFavorites(String userId, String productId) async {
     final batch = _firestore.batch();
 
-    // 사용자의 관심 상품 목록에서 제거
+    // 1. 상품의 favorites 서브컬렉션에서 사용자 제거
+    final favoriteRef = _firestore
+        .collection(_collection)
+        .doc(productId)
+        .collection('favorites')
+        .doc(userId);
+
+    batch.delete(favoriteRef);
+
+    // 2. 상품의 favoriteCount 감소
+    final productRef = _firestore.collection(_collection).doc(productId);
+    batch.update(productRef, {'favoriteCount': FieldValue.increment(-1)});
+
+    // 3. 사용자의 favoriteProductIds 배열에서 제거
     final userRef = _firestore.collection('users').doc(userId);
     batch.update(userRef, {
       'favoriteProductIds': FieldValue.arrayRemove([productId])
     });
 
-    // 상품의 favoriteCount 감소
-    final productRef = _firestore.collection(_collection).doc(productId);
-    batch.update(productRef, {'favoriteCount': FieldValue.increment(-1)});
-
     await batch.commit();
+  }
+
+  // 관심 상품 여부 확인
+  Future<bool> isFavoriteProduct(String userId, String productId) async {
+    final favoriteDoc = await _firestore
+        .collection(_collection)
+        .doc(productId)
+        .collection('favorites')
+        .doc(userId)
+        .get();
+
+    return favoriteDoc.exists;
   }
 
   // 관심 상품 목록 조회
   Future<List<DocumentSnapshot>> getFavoriteProducts(String userId) async {
-    // 사용자의 관심 상품 ID 목록 가져오기
+    // 1. 사용자의 관심상품 ID 목록 가져오기 (빠른 조회용)
     final userDoc = await _firestore.collection('users').doc(userId).get();
     final favoriteIds =
         List<String>.from(userDoc.data()?['favoriteProductIds'] ?? []);
@@ -255,7 +288,7 @@ class ProductDataSource {
       return [];
     }
 
-    // 관심 상품 목록 조회
+    // 2. 관심 상품 목록 조회 (10개씩 나누어 처리)
     final chunks = <List<String>>[];
     for (var i = 0; i < favoriteIds.length; i += 10) {
       final end = (i + 10 < favoriteIds.length) ? i + 10 : favoriteIds.length;
@@ -274,12 +307,15 @@ class ProductDataSource {
     return results;
   }
 
-  // 관심 상품 여부 확인
-  Future<bool> isFavoriteProduct(String userId, String productId) async {
-    final userDoc = await _firestore.collection('users').doc(userId).get();
-    final favoriteIds =
-        List<String>.from(userDoc.data()?['favoriteProductIds'] ?? []);
-    return favoriteIds.contains(productId);
+  // 상품별 관심 등록 사용자 목록 조회 (새로 추가)
+  Future<List<String>> getProductFavoriteUsers(String productId) async {
+    final snapshot = await _firestore
+        .collection(_collection)
+        .doc(productId)
+        .collection('favorites')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.id).toList();
   }
 
   Future<void> createProduct(ProductModel product) async {
