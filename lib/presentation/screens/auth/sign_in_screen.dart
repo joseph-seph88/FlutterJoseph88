@@ -5,6 +5,7 @@ import 'package:o2/core/constants/auth_provider_type.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/screens/auth/widgets/auth_icon_button.dart';
+import 'package:o2/presentation/screens/home_screen.dart';
 
 import 'widgets/auth_button.dart';
 import 'widgets/auth_text_field.dart';
@@ -37,6 +38,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           );
 
       if (success && mounted) {
+        ref.read(currentIndexProvider.notifier).state = 0;
         context.go("/home");
       }
     } catch (e) {
