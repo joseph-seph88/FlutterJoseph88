@@ -11,7 +11,11 @@ class MyScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final auth = ref.watch(authProvider)!;
+    final auth = ref.watch(authProvider);
+
+    if (auth == null) {
+      return const SizedBox.shrink();
+    }
 
     return Scaffold(
       appBar: AppBar(

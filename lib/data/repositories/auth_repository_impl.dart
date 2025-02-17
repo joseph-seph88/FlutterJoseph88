@@ -89,7 +89,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final newUser = UserEntity(
         id: user.uid,
-        email: email ?? await setEmail(authProviderType),
+        email: user.email ?? await setEmail(authProviderType),
         name: user.displayName ?? '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

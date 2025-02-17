@@ -117,6 +117,14 @@ class FCMService {
 
     if (message.data['senderId'] == _auth.currentUser?.uid) return;
 
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      final router = GoRouter.of(context);
+      final isChatRoom = router.state.path?.startsWith('/chat_room') ?? false;
+
+      if (isChatRoom) return;
+    }
+
     if (notification == null) return;
 
     _localNotifications.show(
