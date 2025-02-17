@@ -6,10 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/format_utils.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
-import 'package:o2/presentation/providers/chat_provider.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
-import 'package:o2/presentation/providers/product_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
+import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_input.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_list.dart';
 
@@ -30,7 +28,15 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
+  late final ChatMessageListViewModel _viewModel;
   bool _isAddButtonClicked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel =
+        ref.read(chatMessageListViewModelProvider(widget.chatRoomId).notifier);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +53,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       );
     }
     final selectedImage = ref.watch(selectedImageProvider);
-    final otherUserData = ref.watch(otherUserProvider)(widget.otherUserId);
+    final otherUserData = _viewModel.getOtherUserData(widget.otherUserId);
 
     if (widget.chatRoomId != null) {
-      ref.read(readChatProvider)(widget.chatRoomId!, userId);
+      _viewModel.markChatAsRead(widget.chatRoomId!, userId);
     }
 
     return Scaffold(
@@ -71,6 +77,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               chatRoomId: widget.chatRoomId,
               userId: userId,
               otherUserId: widget.otherUserId,
+              viewModel: _viewModel,
             ),
           ),
           if (selectedImage != null) ...[
@@ -78,9 +85,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ],
           ChatMessageInput(
             chatRoomId: widget.chatRoomId,
+            userId: userId,
             otherUserId: widget.otherUserId,
             productID: widget.productID,
             isAddButtonClicked: _isAddButtonClicked,
+            selectedImage: selectedImage,
             onAddButtonClicked: _onAddButtonClicked,
           ),
           _isAddButtonClicked
@@ -99,15 +108,17 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildProductInfo() {
     const double imageSize = 60;
-    final productAsync = ref.watch(productDetailProvider(widget.productID));
+    final product = _viewModel.getProductDetail(widget.productID);
 
-    return Padding(
-      padding: AppStyles.defaultPadding,
-      child: productAsync.when(
-        data: (data) {
-          if (data == null) return const SizedBox.shrink();
+    return FutureBuilder(
+      future: product,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
 
-          return Row(
+        final data = snapshot.data!;
+        return Padding(
+          padding: AppStyles.defaultPadding,
+          child: Row(
             children: [
               Image.network(
                 data.images.first,
@@ -152,11 +163,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 ],
               ),
             ],
-          );
-        },
-        error: (error, stackTrace) => const SizedBox.shrink(),
-        loading: () => const SizedBox.shrink(),
-      ),
+          ),
+        );
+      },
     );
   }
 
