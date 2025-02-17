@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -10,15 +9,8 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:o2/core/services/fcm_service.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/core/utils/permission_manager.dart';
-import 'package:o2/data/datasources/image_data_source.dart';
-import 'package:o2/data/datasources/product_data_source.dart';
-import 'package:o2/data/datasources/user_data_source.dart';
-import 'package:o2/data/repositories/image_repository_impl.dart';
-import 'package:o2/data/repositories/product_repository_impl.dart';
-import 'package:o2/data/repositories/user_repository_impl.dart';
 import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/route_provider.dart';
-import 'package:o2/presentation/providers/providers.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -42,19 +34,8 @@ void main() async {
   // await uploadDummyData();
 
   runApp(
-    ProviderScope(
-      overrides: [
-        productRepositoryProvider.overrideWithValue(
-          ProductRepositoryImpl(ProductDataSource()),
-        ),
-        userRepositoryProvider.overrideWithValue(
-          UserRepositoryImpl(UserDataSource()),
-        ),
-        imageRepositoryProvider.overrideWithValue(
-          ImageRepositoryImpl(ImageDataSourceImpl(FirebaseStorage.instance)),
-        ),
-      ],
-      child: const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
