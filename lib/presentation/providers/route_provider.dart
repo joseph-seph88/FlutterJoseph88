@@ -7,7 +7,6 @@ import 'package:o2/presentation/screens/home_screen.dart';
 import 'package:o2/presentation/screens/map/add_shop_page.dart';
 import 'package:o2/presentation/screens/map/recommended_shop_page.dart';
 import 'package:o2/presentation/screens/map/map_screen.dart';
-import 'package:o2/presentation/screens/map/send_location_page.dart';
 import 'package:o2/presentation/screens/map/star_rating_page.dart';
 import 'package:o2/presentation/screens/my/my_favorite_screen.dart';
 import 'package:o2/presentation/screens/my/my_profile_screen.dart';
@@ -21,8 +20,10 @@ import 'package:o2/presentation/screens/chat/chat_room_screen.dart';
 import 'package:o2/presentation/screens/product/detail_screen.dart';
 import 'package:o2/presentation/screens/product/write_screen.dart';
 import 'package:o2/presentation/screens/search/search_screen.dart';
+import 'package:o2/presentation/widgets/image_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/widgets/map_view.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -114,23 +115,6 @@ final routerProvider = Provider<GoRouter>(
           builder: (context, state) => const ProductListView(),
         ),
         GoRoute(
-          path: "/sendMap",
-          builder: (context, state) {
-            final chatRoomId =
-                (state.extra as Map<String, String>)['chatRoomId'];
-            final otherUserId =
-                (state.extra as Map<String, String>)['otherUserId']!;
-            final productID =
-                (state.extra as Map<String, String>)['productID']!;
-
-            return SendLocationPage(
-              chatRoomId: chatRoomId,
-              otherUserId: otherUserId,
-              productID: productID,
-            );
-          },
-        ),
-        GoRoute(
             path: "/map",
             builder: (context, state) => const MapScreen(),
             routes: [
@@ -174,6 +158,14 @@ final routerProvider = Provider<GoRouter>(
             )
           ],
         ),
+        GoRoute(
+          path: '/image_view',
+          builder: (context, state) => const ImageViewWidget(),
+        ),
+        GoRoute(
+          path: '/map_view',
+          builder: (context, state) => const MapViewWidget(),
+        )
       ],
     );
   },

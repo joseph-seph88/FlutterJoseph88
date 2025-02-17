@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/repositories/review_repository_impl.dart';
 import 'package:o2/domain/usecases/review_use_case.dart';
@@ -48,13 +49,16 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
     try {
       final userInfo = _auth.currentUser;
       if (userInfo != null) {
+        if(userInfo.email != null) {
+          throw Exception('[RE:NOTIFIER_이메일 없음]');
+        }
         final userId = userInfo.uid;
         final email = userInfo.email;
         await _reviewUseCase.addStoreReview(userId, email!, storeReview);
       }
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception('[RE:NOTIFIER_업체 리뷰 등록 에러]');
+      throw Exception('[RE:NOTIFIER_업체 리뷰 등록 에러] ${e.toString()}');
     }
   }
 
@@ -69,7 +73,7 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
       }
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception('[RE:NOTIFIER_업체 리뷰 가져오기 에러]');
+      throw Exception('[RE:NOTIFIER_업체 리뷰 가져오기 에러] ${e.toString()}');
     }
   }
 
@@ -77,8 +81,12 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
     state = state.copyWith(error: '');
     try {
       final userInfo = _auth.currentUser;
+      debugPrint("중복1$userInfo");
       if (userInfo != null) {
         final userId = userInfo.uid;
+        debugPrint("중복2$userId");
+        debugPrint("중복2${userInfo.email}");
+
         final isUse =
             await _reviewUseCase.isDuplicateStoreReview(userId, mapId);
         return isUse;
@@ -86,7 +94,7 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
       return false;
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception('[RE:NOTIFIER_업체 리뷰 중복 에러]');
+      throw Exception('[RE:NOTIFIER_업체 리뷰 중복 에러] ${e.toString()}');
     }
   }
 }

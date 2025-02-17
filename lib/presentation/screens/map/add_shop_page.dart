@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,16 +27,6 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
   Map<String, dynamic> category = {};
   int? selectedIndex;
   Color? categoryColor;
-  NLatLng currentPosition = const NLatLng(37.499889, 126.920056);
-
-  @override
-  void initState() {
-    super.initState();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppColors.backgroundTransparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
-  }
 
   @override
   void dispose() {
@@ -92,10 +82,15 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 40,
-        leading: IconButton(onPressed: () {
-          context.pop();
-        }, icon: const Icon(Icons.arrow_back_ios)),
-      title: const Text("등록 할 업체를 선택하세요.", style: AppStyles.labelLarge,),
+        leading: IconButton(
+            onPressed: () {
+              context.pop();
+            },
+            icon: const Icon(Icons.arrow_back_ios)),
+        title: const Text(
+          "등록 할 업체를 선택하세요.",
+          style: AppStyles.labelLarge,
+        ),
       ),
       body: Column(
         children: [
@@ -105,10 +100,8 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
               children: [
                 NaverMap(
                   options: initMap(),
-                  onMapReady: (controller) {
-                    _onMapReady(controller);
-                  },
-                  onCameraIdle: _onCameraIdle,
+                  onMapReady: (controller) => _onMapReady(controller),
+                  onCameraIdle: _onCameraIdle
                 ),
                 Positioned(
                     top: 10,
@@ -136,8 +129,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       _mapController?.updateCamera(cameraUpdate);
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface.withAlpha(150)
-                    ),
+                        backgroundColor: AppColors.surface.withAlpha(150)),
                     child: const Icon(
                       Icons.my_location,
                       color: AppColors.primary,
@@ -151,8 +143,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                   child: ElevatedButton(
                     onPressed: _zoomIn,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface.withAlpha(150)
-                    ),
+                        backgroundColor: AppColors.surface.withAlpha(150)),
                     child: const Icon(
                       Icons.add,
                       color: AppColors.primary,
@@ -168,8 +159,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       _zoomOut();
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface.withAlpha(150)
-                    ),
+                        backgroundColor: AppColors.surface.withAlpha(150)),
                     child: const Icon(
                       Icons.remove,
                       color: AppColors.primary,
@@ -230,13 +220,13 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                                     categories[selectedIndex!]['iconColor']),
                               )
                             : Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
                                   "카테고리",
-                                  style: AppStyles.labelMedium
-                                      .copyWith(color: AppColors.primary.withAlpha(200)),
+                                  style: AppStyles.labelMedium.copyWith(
+                                      color: AppColors.primary.withAlpha(200)),
                                 ),
-                            ),
+                              ),
                       ),
                     ),
                     Expanded(
@@ -277,18 +267,27 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                               await ref.read(mapProvider.notifier).addMarker(
                                   data, category, addressData, storeName);
                               ref.read(isInitProvider.notifier).state = false;
+
+                              final param = {
+                                'category': category,
+                                'position':
+                                    GeoPoint(data.latitude, data.longitude)
+                              };
+
+                              ref.read(mapParamProvider.notifier).state = param;
+
                               if (context.mounted) {
                                 context.pop();
                               }
                             }, error: (error, stackTrace) {
-                              print('주소를 불러오는데 오류가 발생했습니다');
+                              debugPrint('주소 호출 에러 $error, $stackTrace');
                             }, loading: () {
-                              print('주소 로딩 중...');
+                              debugPrint('주소 로딩 중...');
                             });
                           }, error: (error, stackTrace) {
-                            print('주소를 불러오는데 오류가 발생했습니다');
+                            debugPrint('주소 호출 에러 $error, $stackTrace');
                           }, loading: () {
-                            print('주소 로딩 중...');
+                            debugPrint('주소 로딩 중...');
                           });
                         } else {
                           CustomSnackBar.customSnackBar(
@@ -321,7 +320,6 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
           hintText: '여기서 업체 검색',
           hintStyle:
               AppStyles.labelLarge.copyWith(color: AppColors.textSecondary),
-          focusedBorder: InputBorder.none,
           filled: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           prefixIcon: const Icon(
@@ -442,7 +440,9 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       .read(mapProvider.notifier)
                       .transPlaceIdToLatLng(predictionData.placeId);
                   if (latLng == null) return;
-
+                  ref
+                      .read(mapProvider.notifier)
+                      .transPositionToAddress(NLatLng(latLng.lat, latLng.lng));
                   final nLatLng = NLatLng(latLng.lat, latLng.lng);
                   final cameraUpdate = NCameraUpdate.withParams(target: nLatLng)
                     ..setAnimation(animation: NCameraAnimation.fly);
