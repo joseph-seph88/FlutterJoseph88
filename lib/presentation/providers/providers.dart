@@ -18,10 +18,10 @@ import 'package:o2/presentation/providers/map_provider.dart';
 
 // DataSource Providers
 final chatRemoteDataSourceProvider =
-    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSourceImpl());
+    Provider<ChatRemoteDataSource>((ref) => ChatRemoteDataSource());
 
 final imageDataSourceProvider = Provider<ImageDataSource>(
-    (ref) => ImageDataSourceImpl(FirebaseStorage.instance));
+    (ref) => ImageDataSource(FirebaseStorage.instance));
 
 final userDataSourceProvider =
     Provider<UserDataSource>((ref) => UserDataSource());
@@ -51,6 +51,9 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>(
 
 final getChatMessagesUseCaseProvider = Provider<GetChatMessagesUseCase>(
     (ref) => GetChatMessagesUseCase(ref.read(chatRepositoryProvider)));
+
+final fetchMoreMessagesUseCaseProvider = Provider<FetchMoreMessagesUseCase>(
+    (ref) => FetchMoreMessagesUseCase(ref.read(chatRepositoryProvider)));
 
 final createChatRoomUseCaseProvider = Provider<CreateChatRoomUseCase>(
     (ref) => CreateChatRoomUseCase(ref.read(chatRepositoryProvider)));

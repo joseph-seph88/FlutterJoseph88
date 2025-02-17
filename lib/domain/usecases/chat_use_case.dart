@@ -19,8 +19,18 @@ class GetChatMessagesUseCase {
 
   GetChatMessagesUseCase(this._repository);
 
-  Stream<List<ChatMessage>> call(String chatRoomId) {
-    return _repository.getChatMessages(chatRoomId);
+  Stream<List<ChatMessage>> call(String chatRoomId, int pageSize) {
+    return _repository.getChatMessages(chatRoomId, pageSize);
+  }
+}
+
+class FetchMoreMessagesUseCase {
+  final ChatRepository _repository;
+
+  FetchMoreMessagesUseCase(this._repository);
+
+  Future<List<ChatMessage>> call(String chatRoomId, DateTime last, int pageSize) {
+    return _repository.fetchMoreMessages(chatRoomId, last, pageSize);
   }
 }
 

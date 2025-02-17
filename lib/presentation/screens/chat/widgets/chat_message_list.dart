@@ -4,22 +4,60 @@ import 'package:o2/core/utils/date_util.dart';
 import 'package:o2/presentation/screens/chat/chat_message_list_view_model.dart';
 import 'package:o2/presentation/screens/chat/widgets/chat_message_item.dart';
 
-class ChatMessageList extends ConsumerWidget {
+class ChatMessageList extends ConsumerStatefulWidget {
   final String? chatRoomId;
   final String userId;
   final String otherUserId;
   final ChatMessageListViewModel viewModel;
 
-  const ChatMessageList(
-      {super.key,
-      required this.chatRoomId,
-      required this.userId,
-      required this.otherUserId,
-      required this.viewModel});
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => ChatMessageListState();
+
+  const ChatMessageList({super.key,
+    required this.chatRoomId,
+    required this.userId,
+    required this.otherUserId,
+    required this.viewModel});
+}
+
+class ChatMessageListState extends ConsumerState<ChatMessageList> {
+  final _scrollController = ScrollController();
+  late final String? chatRoomId;
+  late final String userId;
+  late final String otherUserId;
+  late final ChatMessageListViewModel viewModel;
+  bool _isLoading = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    chatRoomId = widget.chatRoomId;
+    userId = widget.userId;
+    otherUserId = widget.otherUserId;
+    viewModel = widget.viewModel;
+
+    _scrollController.addListener(() async {
+      if (!_isLoading && _scrollController.position.extentAfter < 100) {
+        _isLoading = true;
+        await viewModel.fetchMoreMessages();
+        _isLoading = false;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final messages = ref.watch(chatMessageListViewModelProvider(chatRoomId));
+
+    if (widget.chatRoomId != null) {
+      viewModel.markChatAsRead(widget.chatRoomId!, userId);
+    }
 
     return Align(
       alignment: Alignment.topCenter,
@@ -27,6 +65,7 @@ class ChatMessageList extends ConsumerWidget {
         reverse: true,
         shrinkWrap: true,
         padding: const EdgeInsets.all(12),
+        controller: _scrollController,
         findChildIndexCallback: (key) {
           return messages.indexWhere((element) => key == ValueKey(element.id));
         },

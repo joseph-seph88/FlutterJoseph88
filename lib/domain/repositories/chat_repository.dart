@@ -4,7 +4,9 @@ import 'package:o2/domain/entities/chat_room.dart';
 abstract interface class ChatRepository {
   Stream<List<ChatRoom>> getChatRooms(String userId);
 
-  Stream<List<ChatMessage>> getChatMessages(String chatRoomId);
+  Stream<List<ChatMessage>> getChatMessages(String chatRoomId, int pageSize);
+
+  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last, int pageSize);
 
   Future<String> createChatRoom(String otherUserId, String senderId, String productID);
 
