@@ -11,7 +11,7 @@ class MapState {
   final List<Map<String, dynamic>> staticCategory;
   final List<MapEntity> searchStoreDataList;
   final Set<NMarker> markersSet;
-  final List<int> betweenDistance;
+  final List<double> betweenDistance;
   final AsyncValue<String> asyncTransAddress;
   final AsyncValue<NLatLng> asyncTargetPosition;
   final AsyncValue<List<AutocompletePrediction>> asyncPredictionList;
@@ -38,7 +38,7 @@ class MapState {
     List<Map<String, dynamic>>? staticCategory,
     List<MapEntity>? searchStoreDataList,
     Set<NMarker>? markersSet,
-    List<int>? betweenDistance,
+    List<double>? betweenDistance,
     AsyncValue<String>? asyncTransAddress,
     AsyncValue<NLatLng>? asyncTargetPosition,
     AsyncValue<List<AutocompletePrediction>>? asyncPredictionList,
