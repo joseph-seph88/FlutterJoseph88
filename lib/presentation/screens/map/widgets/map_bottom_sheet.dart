@@ -17,6 +17,7 @@ class MapBottomSheet {
                 children: [
                   TextButton(
                     onPressed: () {
+                      ref.read(isStreamProvider.notifier).state = false;
                       ref.read(mapProvider.notifier).clearStateSearchData();
                       Navigator.of(context).pop();
                       context.push('/map/recommendShop');
@@ -33,6 +34,7 @@ class MapBottomSheet {
                   ),
                   TextButton(
                     onPressed: () {
+                      ref.read(isStreamProvider.notifier).state = false;
                       ref.read(mapProvider.notifier).clearStateSearchData();
                       Navigator.of(context).pop();
                       context.push('/map/addShop');

@@ -46,7 +46,7 @@ class RecommendedShopPage extends ConsumerWidget {
                     controller: _textController,
                     focusNode: _focusNode,
                     onChanged: (query) {
-                      ref.read(mapProvider.notifier).searchStoreData(query);
+                      ref.read(mapProvider.notifier).updateStoreList(query);
                     },
                     decoration: InputDecoration(
                         hintText: "업체명으로 검색",
@@ -140,7 +140,7 @@ class RecommendedShopPage extends ConsumerWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          '${distance}m',
+                          '${distance}km',
                           style: AppStyles.labelMedium
                               .copyWith(color: AppColors.textSecondary),
                         ),

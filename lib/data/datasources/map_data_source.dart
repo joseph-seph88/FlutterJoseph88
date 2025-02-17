@@ -29,10 +29,10 @@ class MapDataSource {
         return LatLng(
             lat: locations.first.latitude, lng: locations.first.longitude);
       }
+      return null;
     } catch (e) {
       rethrow;
     }
-    return null;
   }
 
   Future<List<AutocompletePrediction>> getPredictions(String input) async {
@@ -51,14 +51,15 @@ class MapDataSource {
           await _places.fetchPlace(placeId, fields: [PlaceField.Location]);
       return result.place?.latLng;
     } catch (e) {
-      return null;
+      rethrow;
     }
   }
 
   Future<String> addMarker(MapModel mapData) async {
     try {
-      final mapDoc = await _fireStore.collection(AppConstant.mapCollection).add(mapData.toMap());
-      print("추가성공");
+      final mapDoc = await _fireStore
+          .collection(AppConstant.mapCollection)
+          .add(mapData.toMap());
       return mapDoc.id;
     } catch (e) {
       rethrow;
@@ -67,7 +68,10 @@ class MapDataSource {
 
   Future<void> updateMarker(String mapId, MapModel mapData) async {
     try {
-      await _fireStore.collection(AppConstant.mapCollection).doc(mapId).update(mapData.toMap());
+      await _fireStore
+          .collection(AppConstant.mapCollection)
+          .doc(mapId)
+          .update(mapData.toMap());
     } catch (e) {
       rethrow;
     }
@@ -75,7 +79,10 @@ class MapDataSource {
 
   Future<void> removeMarker(String mapId) async {
     try {
-      await _fireStore.collection(AppConstant.mapCollection).doc(mapId).delete();
+      await _fireStore
+          .collection(AppConstant.mapCollection)
+          .doc(mapId)
+          .delete();
     } catch (e) {
       rethrow;
     }
@@ -83,39 +90,50 @@ class MapDataSource {
 
   Stream<List<MapModel?>> getMapDataWithIconStream(
       String category, GeoPoint position) {
-    final CollectionReference<Map<String, dynamic>> collectionReference =
-        _fireStore.collection(AppConstant.mapCollection);
-    final GeoFirePoint center =
-        GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+    try {
+      final CollectionReference<Map<String, dynamic>> collectionReference =
+          _fireStore.collection(AppConstant.mapCollection);
+      final GeoFirePoint center =
+          GeoFirePoint(GeoPoint(position.latitude, position.longitude));
 
-    GeoPoint geopointFrom(Map<String, dynamic> data) {
-      final geo = data['geo'] as Map<String, dynamic>;
-      final geoPoint = geo['geopoint'] as GeoPoint;
-      return geoPoint;
+      GeoPoint geopointFrom(Map<String, dynamic> data) {
+        final geo = data['geo'] as Map<String, dynamic>;
+        final geoPoint = geo['geopoint'] as GeoPoint;
+        return geoPoint;
+      }
+
+      return GeoCollectionReference<Map<String, dynamic>>(collectionReference)
+          .subscribeWithin(
+              center: center,
+              radiusInKm: 3 * 0.03,
+              field: 'geo',
+              geopointFrom: geopointFrom)
+          .map((docs) {
+        final filteredDocs = docs.where((doc) {
+
+          final data = doc.data();
+          final categoryFromDoc = (data != null &&
+                  data.containsKey('category') &&
+                  data['category'] is Map<String, dynamic>)
+              ? data['category']['category']
+              : null;
+
+          return categoryFromDoc == category;
+        }).toList();
+
+        final mapModels = filteredDocs
+            .map((doc) {
+              final data = doc.data();
+              return data != null ? MapModel.fromMap(data) : null;
+            })
+            .where((mapModel) => mapModel != null)
+            .toList();
+
+        return mapModels;
+      });
+    } catch (e) {
+      rethrow;
     }
-
-    return GeoCollectionReference<Map<String, dynamic>>(collectionReference)
-        .subscribeWithin(
-            center: center,
-            radiusInKm: 3 * 0.03,
-            field: 'geo',
-            geopointFrom: geopointFrom)
-        .map((docs) {
-      final filteredDocs = docs.where((doc) {
-        final categoryFromDoc = doc['category']['category'];
-        return categoryFromDoc == category;
-      }).toList();
-
-      final mapModels = filteredDocs
-          .map((doc) {
-            final data = doc.data();
-            return data != null ? MapModel.fromMap(data) : null;
-          })
-          .where((mapModel) => mapModel != null)
-          .toList();
-
-      return mapModels;
-    });
   }
 
   Future<List<MapModel>> searchStore(String queryText) async {
@@ -125,24 +143,24 @@ class MapDataSource {
           .where('storeName', isGreaterThanOrEqualTo: queryText)
           .where('storeName', isLessThan: '$queryText\uf8ff')
           .get();
-      print("검색디피 : ${searchData.size}");
       return searchData.docs
           .map((doc) => MapModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
-      throw Exception("DB서치에러");
+      throw Exception("DB 검색 오류: ${e.toString()}");
     }
   }
 
   Future<List<MapModel>> getAllMapData() async {
     try {
-      final searchData = await _fireStore.collection(AppConstant.mapCollection).get();
+      final searchData =
+          await _fireStore.collection(AppConstant.mapCollection).get();
 
       return searchData.docs
           .map((doc) => MapModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
-      throw Exception("DB서치에러");
+      throw Exception("DB 겟맵 오류: ${e.toString()}");
     }
   }
 
@@ -153,19 +171,30 @@ class MapDataSource {
           .collection(AppConstant.mapCollection)
           .doc(mapId)
           .update({'participant': participant, 'starRating': starRating});
-      final updateDoc = await _fireStore.collection(AppConstant.mapCollection).doc(mapId).get();
+      final updateDoc = await _fireStore
+          .collection(AppConstant.mapCollection)
+          .doc(mapId)
+          .get();
+
+      if (!updateDoc.exists) {
+        throw Exception("해당 문서를 찾을 수 없습니다.");
+      }
+
       return MapModel.fromMap(updateDoc.data()!);
     } catch (e) {
-      throw Exception("DB서치에러");
+      throw Exception("DB 평점 오류: ${e.toString()}");
     }
   }
 
-  Future<MapModel> getMapData(String mapId) async{
-    try{
-      final mapData = await _fireStore.collection(AppConstant.mapCollection).doc(mapId).get();
+  Future<MapModel> getMapData(String mapId) async {
+    try {
+      final mapData = await _fireStore
+          .collection(AppConstant.mapCollection)
+          .doc(mapId)
+          .get();
       return MapModel.fromMap(mapData.data()!);
-    }catch(e){
-      throw Exception("DB서치에러");
+    } catch (e) {
+      throw Exception("DB 맵데이터 오류: ${e.toString()}");
     }
   }
 
