@@ -60,7 +60,6 @@ class FCMService {
     final apnsToken = await _firebaseMessaging.getAPNSToken();
     if (apnsToken == null) {
       debugPrint("APNS 토큰을 받을 수 없습니다. 오류 발생.");
-      return;
     }
 
     final fcmToken = await _firebaseMessaging.getToken();
@@ -117,6 +116,14 @@ class FCMService {
     RemoteNotification? notification = message.notification;
 
     if (message.data['senderId'] == _auth.currentUser?.uid) return;
+
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      final router = GoRouter.of(context);
+      final isChatRoom = router.state.path?.startsWith('/chat_room') ?? false;
+
+      if (isChatRoom) return;
+    }
 
     if (notification == null) return;
 
