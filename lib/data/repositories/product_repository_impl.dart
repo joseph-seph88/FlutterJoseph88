@@ -109,6 +109,14 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<List<Product>> getSalesProducts(String userId) async {
+    final snapshots = await _dataSource.getSalesProducts(userId);
+    return snapshots
+        .map((doc) => Product.fromModel(ProductModel.fromFirebase(doc)))
+        .toList();
+  }
+
+  @override
   Future<bool> isFavoriteProduct(String userId, String productId) async {
     return await _dataSource.isFavoriteProduct(userId, productId);
   }

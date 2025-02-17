@@ -307,6 +307,15 @@ class ProductDataSource {
     return results;
   }
 
+  // 판매 내역 조회
+  Future<List<DocumentSnapshot>> getSalesProducts(String userId) async {
+    final querySnapshot = await _firestore
+        .collection(_collection)
+        .where('sellerId', isEqualTo: userId)
+        .get();
+    return querySnapshot.docs;
+  }
+
   // 상품별 관심 등록 사용자 목록 조회 (새로 추가)
   Future<List<String>> getProductFavoriteUsers(String productId) async {
     final snapshot = await _firestore

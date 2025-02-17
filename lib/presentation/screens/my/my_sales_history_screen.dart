@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/domain/entities/product.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/providers/product_provider.dart';
+import 'package:o2/presentation/screens/product/widgets/product_card.dart';
 
 class MySalesHistoryScreen extends ConsumerStatefulWidget {
   const MySalesHistoryScreen({super.key});
@@ -14,6 +18,12 @@ class MySalesHistoryScreen extends ConsumerStatefulWidget {
 class _MySalesHistoryScreenState extends ConsumerState<MySalesHistoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  final _tabStatus = [
+    ProductStatus.active,
+    ProductStatus.reserved,
+    ProductStatus.completed,
+  ];
 
   @override
   void initState() {
@@ -30,6 +40,8 @@ class _MySalesHistoryScreenState extends ConsumerState<MySalesHistoryScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = ref.watch(authProvider)!;
+    final salesAsync = ref.watch(salesProductsProvider(user.id));
 
     return Scaffold(
       appBar: AppBar(),
@@ -64,52 +76,81 @@ class _MySalesHistoryScreenState extends ConsumerState<MySalesHistoryScreen>
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.grey[200],
-                  child: const Icon(Icons.person_outline),
+                  backgroundImage: user.image != null && user.image!.isNotEmpty
+                      ? NetworkImage(user.image!)
+                      : null,
+                  child: user.image == null || user.image!.isEmpty
+                      ? const Icon(Icons.person_outline)
+                      : null,
                 ),
               ],
             ),
           ),
           TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(text: "판매중"),
-              Tab(text: "거래완료"),
-              Tab(text: "숨김"),
-            ],
+            tabs: _tabStatus.map((status) => Tab(text: status.label)).toList(),
           ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                Center(
-                  child: Text(
-                    "판매중인 게시글이 없어요.",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.text,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    "거래완료된 게시글이 없어요.",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.text,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    "숨기기한 게시글이 없어요.",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.text,
-                    ),
-                  ),
-                ),
-              ],
+              children: _tabStatus
+                  .map((status) => _buildAsyncContent(salesAsync, status))
+                  .toList(),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildAsyncContent(
+      AsyncValue<List<Product>> salesAsync, ProductStatus status) {
+    return salesAsync.when(
+      data: (products) => _buildProductList(products, status),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('에러가 발생했습니다: $error'),
+      ),
+    );
+  }
+
+  Widget _buildProductList(List<Product> products, ProductStatus status) {
+    final theme = Theme.of(context);
+    final filterProducts =
+        products.where((product) => product.status == status).toList();
+    return filterProducts.isEmpty
+        ? Center(
+            child: Text(
+              _getEmptyMessage(status),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.text,
+              ),
+            ),
+          )
+        : ListView.separated(
+            itemCount: filterProducts.length,
+            separatorBuilder: (_, __) => const Divider(
+              height: 1,
+              color: AppColors.divider,
+            ),
+            itemBuilder: (context, index) {
+              final product = filterProducts[index];
+              return ProductCard(
+                product: product,
+                onTap: () => context.push('/detail/${product.id}'),
+              );
+            },
+          );
+  }
+
+  String _getEmptyMessage(ProductStatus status) {
+    switch (status) {
+      case ProductStatus.active:
+        return "판매중인 게시글이 없어요.";
+      case ProductStatus.reserved:
+        return "예약중인 게시글이 없어요.";
+      case ProductStatus.completed:
+        return "거래완료된 게시글이 없어요.";
+    }
   }
 }
