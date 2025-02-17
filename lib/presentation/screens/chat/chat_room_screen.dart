@@ -148,7 +148,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Row(
                     children: [
                       Text(
-                        '${data.price.toPrice()} ',
+                        data.price.toPrice(),
                         style: const TextStyle(
                           color: AppColors.text,
                           fontWeight: FontWeight.bold,

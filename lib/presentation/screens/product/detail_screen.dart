@@ -20,6 +20,13 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  // 동 이름 추출 함수
+  String _extractDongName(String fullAddress) {
+    final dongMatch =
+        RegExp(r'([가-힣]+동|[가-힣]+읍|[가-힣]+면)').firstMatch(fullAddress);
+    return dongMatch?.group(1) ?? fullAddress;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -140,7 +147,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                           ),
                                     ),
                                     Text(
-                                      product.locationName,
+                                      _extractDongName(product.locationName),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -332,8 +339,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       child: Text(
                         product.price.toPrice(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: AppColors.text,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.text,
                             ),
                       ),
                     ),
@@ -390,7 +397,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${product.price}원',
+                              product.price.toPrice(),
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge

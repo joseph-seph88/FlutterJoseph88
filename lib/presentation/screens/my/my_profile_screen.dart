@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:o2/presentation/providers/auth_provider.dart';
+import 'package:o2/presentation/providers/image_provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -99,25 +99,32 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   }
 
   Future<void> updateProfile() async {
-    final filePath =
-        "Uploads/${DateTime.now().toIso8601String()}_${_selectedImage!.path.split('/').last}";
-    final storageRef = FirebaseStorage.instance.ref().child(filePath);
-    final uploadTask = storageRef.putFile(_selectedImage!);
-    final taskSnapshot = await uploadTask;
-    String url = await taskSnapshot.ref.getDownloadURL();
+    try {
+      String? url;
+      if (_selectedImage != null) {
+        final userId = ref.read(authProvider)!.id;
+        url =
+            await ref.read(uploadProfileImageProvider)(userId, _selectedImage!);
+      }
 
-    final userEntity = ref.read(authProvider)!.copyWith(
-          name: nameController.text,
-          image: url,
-          updatedAt: DateTime.now(),
-        );
+      final userEntity = ref.read(authProvider)!.copyWith(
+            name: nameController.text,
+            image: url ?? ref.read(authProvider)?.image,
+            updatedAt: DateTime.now(),
+          );
 
-    ref.read(authProvider.notifier).updateProfile(userEntity);
-    if (mounted) {
+      ref.read(authProvider.notifier).updateProfile(userEntity);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("프로필 수정이 완료되었습니다."),
+        ));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("프로필 수정이 완료되었습니다."),
+        content: Text("프로필 수정 중 오류가 발생했습니다."),
       ));
-      Navigator.pop(context);
     }
   }
 

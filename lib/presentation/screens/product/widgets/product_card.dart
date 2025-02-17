@@ -14,6 +14,13 @@ class ProductCard extends StatelessWidget {
     this.onTap,
   });
 
+  // 동 이름 추출 함수
+  String _extractDongName(String fullAddress) {
+    final dongMatch =
+        RegExp(r'([가-힣]+동|[가-힣]+읍|[가-힣]+면)').firstMatch(fullAddress);
+    return dongMatch?.group(1) ?? fullAddress;
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -63,13 +70,17 @@ class ProductCard extends StatelessWidget {
                     // 위치 · 시간
                     Row(
                       children: [
-                        Text(
-                          product.locationName,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 13,
-                                  ),
+                        Flexible(
+                          child: Text(
+                            _extractDongName(product.locationName),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         Text(
                           ' · ',

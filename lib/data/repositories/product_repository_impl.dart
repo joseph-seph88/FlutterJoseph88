@@ -45,6 +45,11 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<void> createProduct(ProductModel product) async {
+    await _dataSource.createProduct(product);
+  }
+
+  @override
   Future<void> addToFavorites(String userId, String productId) async {
     await _dataSource.addToFavorites(userId, productId);
   }

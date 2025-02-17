@@ -1,21 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/data/datasources/product_data_source.dart';
 import 'package:o2/domain/entities/product.dart';
-import 'package:o2/domain/repositories/product_repository.dart';
-import 'package:o2/domain/repositories/user_repository.dart';
 import 'package:o2/domain/usecases/product/get_products_usecase.dart';
 import 'package:o2/domain/usecases/product/get_product_detail_usecase.dart';
 import 'package:o2/domain/usecases/product/search_products_usecase.dart';
 import 'package:o2/domain/usecases/product/manage_product_usecase.dart';
-
-// Repository providers
-final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  throw UnimplementedError(); // DI 설정에서 실제 구현체를 주입해야 합니다.
-});
-
-final userRepositoryProvider = Provider<UserRepository>((ref) {
-  throw UnimplementedError(); // DI 설정에서 실제 구현체를 주입해야 합니다.
-});
+import 'package:o2/presentation/providers/providers.dart';
 
 // UseCases providers
 final getProductsUseCaseProvider = Provider<GetProductsUseCase>((ref) {
@@ -44,7 +34,7 @@ final productsProvider = FutureProvider<List<Product>>((ref) async {
 final productsByCategoryProvider =
     FutureProvider.family<List<Product>, String>((ref, category) async {
   final useCase = ref.watch(getProductsUseCaseProvider);
-  return useCase.execute(); // TODO: 카테고리 필터링 로직 추가 필요
+  return useCase.execute();
 });
 
 final productDetailProvider =
