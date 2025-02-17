@@ -180,6 +180,14 @@ final favoriteProductsProvider = FutureProvider.autoDispose
   return repository.getFavoriteProducts(userId);
 });
 
+// 판매 내역 Provider
+final salesProductsProvider = FutureProvider.autoDispose
+    .family<List<Product>, String>((ref, userId) async {
+  ref.watch(productsProvider);
+  final repository = ref.watch(productRepositoryProvider);
+  return repository.getSalesProducts(userId);
+});
+
 // 관심 상품 여부 확인 Provider
 final isFavoriteProductProvider = FutureProvider.autoDispose
     .family<bool, ({String userId, String productId})>((ref, params) async {

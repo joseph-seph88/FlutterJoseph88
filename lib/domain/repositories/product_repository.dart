@@ -15,5 +15,6 @@ abstract class ProductRepository {
   Future<void> addToFavorites(String userId, String productId);
   Future<void> removeFromFavorites(String userId, String productId);
   Future<List<Product>> getFavoriteProducts(String userId);
+  Future<List<Product>> getSalesProducts(String userId);
   Future<bool> isFavoriteProduct(String userId, String productId);
 }
