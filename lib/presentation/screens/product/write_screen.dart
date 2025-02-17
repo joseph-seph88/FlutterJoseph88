@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:o2/core/theme/app_theme.dart';
 import 'package:o2/presentation/providers/image_picker_provider.dart';
+import 'package:o2/presentation/widgets/select_location_modal.dart';
 
 class WriteScreen extends ConsumerStatefulWidget {
   const WriteScreen({super.key});
@@ -13,6 +14,7 @@ class WriteScreen extends ConsumerStatefulWidget {
 class _WriteScreenState extends ConsumerState<WriteScreen> {
   bool _isPriceOfferEnabled = false;
   bool _isSellingMode = true;
+  String? _selectedLocationName;
 
   Future<void> _pickImage() async {
     try {
@@ -286,6 +288,65 @@ class _WriteScreenState extends ConsumerState<WriteScreen> {
               ),
               const Divider(height: 1),
             ],
+            // 거래 희망 장소 섹션
+            Padding(
+              padding: AppStyles.defaultPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '거래 희망 장소',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.text,
+                    ),
+                  ),
+                  const SizedBox(height: AppStyles.smallSpacing),
+                  OutlinedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => SelectLocationModal(
+                          onLocationSelected: (locationName, position) {
+                            setState(() {
+                              _selectedLocationName = locationName;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.all(12),
+                      side: const BorderSide(color: AppColors.divider),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedLocationName ?? '장소를 선택해주세요',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: _selectedLocationName != null
+                                  ? AppColors.text
+                                  : AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: AppStyles.smallSpacing),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
             // 설명 입력
             Padding(
               padding: AppStyles.defaultPadding,
