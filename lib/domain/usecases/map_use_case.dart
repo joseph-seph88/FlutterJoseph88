@@ -48,7 +48,7 @@ class MapUseCaseImpl implements MapUseCase {
     try {
       return _repository.getMapDataWithIconStream(category, position);
     } catch (e) {
-      throw Exception("맵유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -58,7 +58,7 @@ class MapUseCaseImpl implements MapUseCase {
       final searchDataList = await _repository.searchStore(inputText);
       return searchDataList;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -68,7 +68,7 @@ class MapUseCaseImpl implements MapUseCase {
       final dataList = await _repository.getAllMapData();
       return dataList;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -104,10 +104,10 @@ class MapUseCaseImpl implements MapUseCase {
       if (positionData != null) {
         return positionData;
       }
+      return null;
     } catch (e) {
       rethrow;
     }
-    return null;
   }
 
   @override
@@ -133,7 +133,7 @@ class MapUseCaseImpl implements MapUseCase {
           await _repository.updateStarRating(mapId, participant, starRating);
       return result;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 
@@ -143,7 +143,7 @@ class MapUseCaseImpl implements MapUseCase {
       final mapData = await _repository.getMapData(mapId);
       return mapData;
     } catch (e) {
-      throw Exception("유스에러 $e");
+      throw Exception("맵유스에러 ${e.toString()}");
     }
   }
 

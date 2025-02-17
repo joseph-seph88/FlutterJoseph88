@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/domain/usecases/map_use_case.dart';
+import '../../core/theme/app_theme.dart';
 import '../../data/datasources/map_data_source.dart';
 import '../../data/repositories/map_repository_impl.dart';
 import '../../domain/entities/map_entity.dart';
@@ -13,6 +15,12 @@ import '../screens/map/widgets/map_bottom_sheet.dart';
 
 // 바텀 시트
 final bottomSheetProvider = Provider((ref) => MapBottomSheet());
+
+// 업체 검색 관리
+final isStoreSearchProvider = StateProvider<bool>((ref) => false);
+
+// 스트림 검색 관리
+final isStreamProvider = StateProvider<bool>((ref) => false);
 
 // 초기화 관련 시점 관리
 final isInitProvider = StateProvider<bool>((ref) => false);
@@ -107,11 +115,11 @@ class MapNotifier extends StateNotifier<MapState> {
     state = state.copyWith(error: '');
     try {
       final dataList = await _mapUseCase.getAllMapData();
-      List<int> distanceList = [];
+      List<double> distanceList = [];
 
       for (var mapData in dataList) {
         var storePoint = mapData.position;
-        int distance = transPositionToDistance(
+        double distance = transPositionToDistance(
             nLatLng, NLatLng(storePoint.latitude, storePoint.longitude));
         distanceList.add(distance);
       }
@@ -120,7 +128,7 @@ class MapNotifier extends StateNotifier<MapState> {
           state.copyWith(mapDataList: dataList, betweenDistance: distanceList);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
@@ -138,7 +146,7 @@ class MapNotifier extends StateNotifier<MapState> {
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception("프로바이더 에러 ${e.toString()}");
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -174,21 +182,21 @@ class MapNotifier extends StateNotifier<MapState> {
       state = state.copyWith(markersSet: newMarkers);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
 // 맵 마커 state 등록
-  Future<NMarker?> setMapMarker(MapEntity marker) async {
+  Future<NMarker> setMapMarker(MapEntity marker) async {
     state = state.copyWith(error: '');
     try {
       final markerData = NMarker(
           id: marker.mapId ?? '1',
           position:
               NLatLng(marker.position.latitude, marker.position.longitude),
-          icon: NOverlayImage.fromAssetImage(marker.category['iconPath']),
-          iconTintColor: marker.category['iconColor'],
-          size: const NSize(20, 20));
+          icon: const NOverlayImage.fromAssetImage(AppConstant.locationPath),
+          iconTintColor: AppColors.primary,
+          size: const NSize(50, 50));
 
       markerData.setOnTapListener((overlay) async {
         final infoWindow = NInfoWindow.onMarker(
@@ -204,27 +212,24 @@ class MapNotifier extends StateNotifier<MapState> {
       return markerData;
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
 // 등록된 업체 중 쿼리
-  void searchStoreData(String query) {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(seconds: 1), () async {
-      state = state.copyWith(error: '');
-      try {
-        final queryWithoutSpace = query.replaceAll(' ', '');
-        final searchData = state.mapDataList.where((mapData) {
-          final storeName = mapData.storeName.replaceAll(' ', '');
-          return storeName.contains(queryWithoutSpace);
-        }).toList();
-        state = state.copyWith(searchStoreDataList: searchData);
-      } catch (e) {
-        state = state.copyWith(error: e.toString());
-        throw Exception("프로바이더 에러");
-      }
-    });
+  void updateStoreList(String query) {
+    state = state.copyWith(error: '');
+    try {
+      final queryWithoutSpace = query.replaceAll(' ', '');
+      final searchData = state.mapDataList.where((mapData) {
+        final storeName = mapData.storeName.replaceAll(' ', '');
+        return storeName.contains(queryWithoutSpace);
+      }).toList();
+      state = state.copyWith(searchStoreDataList: searchData);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
+    }
   }
 
 // state에 별점 업데이트
@@ -257,7 +262,7 @@ class MapNotifier extends StateNotifier<MapState> {
       state = state.copyWith(mapDataList: updatedList);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
@@ -288,7 +293,7 @@ class MapNotifier extends StateNotifier<MapState> {
           asyncTransAddress: AsyncValue.data(transAddress));
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
@@ -302,7 +307,7 @@ class MapNotifier extends StateNotifier<MapState> {
       await transPositionToAddress(targetPosition);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
@@ -318,7 +323,7 @@ class MapNotifier extends StateNotifier<MapState> {
             state.copyWith(asyncPredictionList: AsyncValue.data(predictions));
       } catch (e) {
         state = state.copyWith(error: e.toString());
-        throw Exception("프로바이더 에러");
+        throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
       }
     });
   }
@@ -330,20 +335,22 @@ class MapNotifier extends StateNotifier<MapState> {
       return _mapUseCase.getLatLng(placeId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 
 // 내 위치와 등록된 업체 간 거리 가져오기
-  int transPositionToDistance(NLatLng myPosition, NLatLng storePosition) {
+  double transPositionToDistance(NLatLng myPosition, NLatLng storePosition) {
     state = state.copyWith(error: '');
     try {
       final betweenDistance = myPosition.distanceTo(storePosition);
-      final distance = betweenDistance.toInt();
-      return distance;
+      double distanceToKm = betweenDistance * 0.001;
+      String formattedDistance = distanceToKm.toStringAsFixed(2);
+      double distanceKm = double.parse(formattedDistance);
+      return distanceKm;
     } catch (e) {
       state = state.copyWith(error: e.toString());
-      throw Exception("프로바이더 에러");
+      throw Exception('[MAP:NOTIFIER_맵프로 에러] ${e.toString()}');
     }
   }
 }
