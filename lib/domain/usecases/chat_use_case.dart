@@ -29,8 +29,8 @@ class FetchMoreMessagesUseCase {
 
   FetchMoreMessagesUseCase(this._repository);
 
-  Future<List<ChatMessage>> call(String chatRoomId, DateTime last) {
-    return _repository.fetchMoreMessages(chatRoomId, last);
+  Future<List<ChatMessage>> call(String chatRoomId, DateTime last, int pageSize) {
+    return _repository.fetchMoreMessages(chatRoomId, last, pageSize);
   }
 }
 

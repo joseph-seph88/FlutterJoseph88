@@ -3,7 +3,6 @@ import 'package:o2/data/models/chat_message_model.dart';
 
 class ChatRemoteDataSource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final int pageSize = 20;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getChatRooms(String userId) {
     return _firestore
@@ -27,7 +26,8 @@ class ChatRemoteDataSource {
         .snapshots();
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchMoreMessages(String chatRoomId, Timestamp last) {
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchMoreMessages(
+      String chatRoomId, Timestamp last, int pageSize) {
     return _firestore
         .collection('chats')
         .doc(chatRoomId)

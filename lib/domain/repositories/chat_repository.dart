@@ -6,7 +6,7 @@ abstract interface class ChatRepository {
 
   Stream<List<ChatMessage>> getChatMessages(String chatRoomId, int pageSize);
 
-  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last);
+  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last, int pageSize);
 
   Future<String> createChatRoom(String otherUserId, String senderId, String productID);
 

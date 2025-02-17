@@ -27,6 +27,7 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
   final GetUserDataUseCase getUserDataUseCase;
   final GetProductDetailUseCase getProductDetailUseCase;
   final MapUseCase mapUseCase;
+  final pageSize = 20;
   StreamSubscription? _subscription;
 
   ChatMessageListViewModel(
@@ -43,7 +44,7 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
     this.getProductDetailUseCase,
     this.mapUseCase,
   ) : super([]) {
-    _listenChatMessageStream(20);
+    _listenChatMessageStream(pageSize);
   }
 
   @override
@@ -80,8 +81,8 @@ class ChatMessageListViewModel extends StateNotifier<List<ChatMessage>> {
       return;
     }
 
-    final newMessages =
-        await fetchMoreMessagesUseCase(chatRoomId!, state.last.sentTime);
+    final newMessages = await fetchMoreMessagesUseCase(
+        chatRoomId!, state.last.sentTime, pageSize);
     state = [...state, ...newMessages];
 
     _listenChatMessageStream(state.length);

@@ -31,9 +31,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last) {
+  Future<List<ChatMessage>> fetchMoreMessages(String chatRoomId, DateTime last, int pageSize) {
     return _dataSource
-        .fetchMoreMessages(chatRoomId, Timestamp.fromDate(last))
+        .fetchMoreMessages(chatRoomId, Timestamp.fromDate(last), pageSize)
         .then((snapshot) => snapshot.docs
             .map((doc) => ChatMessageModel.fromJson(doc.id, doc.data()))
         .map((e) => e.toEntity()).toList());
