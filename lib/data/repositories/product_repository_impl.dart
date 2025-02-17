@@ -50,6 +50,11 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<void> updateStatus(String id, ProductStatus status) async {
+    await _dataSource.updateStatus(id, status.code);
+  }
+
+  @override
   Future<void> addToFavorites(String userId, String productId) async {
     await _dataSource.addToFavorites(userId, productId);
   }
@@ -70,5 +75,10 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<bool> isFavoriteProduct(String userId, String productId) async {
     return await _dataSource.isFavoriteProduct(userId, productId);
+  }
+
+  @override
+  Future<void> deleteProduct(String id) async {
+    await _dataSource.deleteProduct(id);
   }
 }

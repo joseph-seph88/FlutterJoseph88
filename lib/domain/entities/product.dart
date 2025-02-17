@@ -1,5 +1,22 @@
 import 'package:o2/data/models/product_model.dart';
 
+enum ProductStatus {
+  active('active', '판매중'),
+  reserved('reserved', '예약중'),
+  completed('completed', '거래완료');
+
+  final String code;
+  final String label;
+  const ProductStatus(this.code, this.label);
+
+  factory ProductStatus.fromCode(String code) {
+    return ProductStatus.values.firstWhere(
+      (status) => status.code == code,
+      orElse: () => ProductStatus.active,
+    );
+  }
+}
+
 class Product {
   final String id;
   final String title;
@@ -15,7 +32,7 @@ class Product {
   final DateTime createdAt;
   final String sellerId;
   final bool isOfferEnabled;
-  final String status;
+  final ProductStatus status;
   final int chatCount;
   final bool isLiked; // 현재 사용자의 관심 상품 여부
   final List<String> searchKeywords;
@@ -59,7 +76,7 @@ class Product {
       createdAt: model.createdAt.toDate(),
       sellerId: model.sellerId,
       isOfferEnabled: model.isOfferEnabled,
-      status: model.status,
+      status: ProductStatus.fromCode(model.status),
       chatCount: model.chatCount,
       isLiked: isLiked,
       searchKeywords: model.searchKeywords,
@@ -82,7 +99,7 @@ class Product {
     DateTime? createdAt,
     String? sellerId,
     bool? isOfferEnabled,
-    String? status,
+    ProductStatus? status,
     int? chatCount,
     bool? isLiked,
     List<String>? searchKeywords,

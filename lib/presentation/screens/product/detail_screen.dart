@@ -66,10 +66,109 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             icon: const Icon(Icons.share_outlined),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          if (user != null)
+            productAsync.when(
+              data: (product) {
+                if (product == null || user.id != product.sellerId) {
+                  return const SizedBox.shrink();
+                }
+                return PopupMenuButton(
+                  offset: const Offset(0, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: const Row(
+                        children: [
+                          Icon(Icons.delete_outline,
+                              color: Colors.red, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            '삭제하기',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        final currentContext = context;
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          if (!mounted || !currentContext.mounted) return;
+                          showModalBottomSheet(
+                            context: currentContext,
+                            builder: (context) => Container(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    '정말 삭제하시겠습니까?',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.text,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('취소'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          final currentContext = context;
+                                          Navigator.pop(currentContext);
+                                          try {
+                                            await ref
+                                                .read(
+                                                    productNotifierProvider(id)
+                                                        .notifier)
+                                                .deleteProduct(id);
+                                            if (!currentContext.mounted) return;
+                                            currentContext.pop();
+                                            if (!currentContext.mounted) return;
+                                            ScaffoldMessenger.of(currentContext)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text('상품이 삭제되었습니다')),
+                                            );
+                                          } catch (e) {
+                                            if (!currentContext.mounted) return;
+                                            ScaffoldMessenger.of(currentContext)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      '상품 삭제 중 오류가 발생했습니다')),
+                                            );
+                                          }
+                                        },
+                                        child: const Text(
+                                          '삭제',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
         ],
       ),
       body: productAsync.when(
@@ -101,53 +200,75 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     // 판매자 정보
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: FutureBuilder(
-                        future: ref.read(sellerProvider)(product.sellerId),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator(
-                              color: AppColors.primary,
-                            ));
-                          }
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final sellerAsync =
+                              ref.watch(sellerProvider(product.sellerId));
 
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: Text(
-                                    '판매자 정보를 불러올 수 없습니다: ${snapshot.error}'));
-                          }
-
-                          final seller = snapshot.data;
-                          return Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.grey[200],
-                                backgroundImage: seller?.image != null
-                                    ? NetworkImage(seller!.image!)
-                                    : null,
-                                child: seller?.image == null
-                                    ? const Icon(Icons.person_outline)
-                                    : null,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          return sellerAsync.when(
+                            data: (seller) => Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: seller?.image != null
+                                      ? NetworkImage(seller!.image!)
+                                      : null,
+                                  child: seller?.image == null
+                                      ? const Icon(Icons.person_outline)
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        seller?.name ?? '알 수 없음',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.text,
+                                            ),
+                                      ),
+                                      Text(
+                                        _extractDongName(product.locationName),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      seller?.name ?? '알 수 없음',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.text,
-                                          ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '36.5°C',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                color: Colors.orange,
+                                              ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.sentiment_satisfied_alt,
+                                          color: Colors.orange,
+                                        ),
+                                      ],
                                     ),
                                     Text(
-                                      _extractDongName(product.locationName),
+                                      '매너온도',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -157,45 +278,148 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     ),
                                   ],
                                 ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '36.5°C',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              color: Colors.orange,
-                                            ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      const Icon(
-                                        Icons.sentiment_satisfied_alt,
-                                        color: Colors.orange,
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    '매너온도',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
+                            loading: () => const Center(
+                                child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                            )),
+                            error: (error, _) => Center(
+                                child: Text('판매자 정보를 불러올 수 없습니다: $error')),
                           );
                         },
                       ),
                     ),
                     const Divider(height: 1),
+                    // 판매자가 자신의 상품일 경우 상태 변경 섹션 추가
+                    if (product.sellerId == ref.read(authProvider)?.id) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status ==
+                                            ProductStatus.active
+                                        ? null
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.active);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor:
+                                          product.status == ProductStatus.active
+                                              ? AppColors.primary
+                                              : null,
+                                    ),
+                                    child: Text(
+                                      ProductStatus.active.label,
+                                      style: TextStyle(
+                                        color: product.status ==
+                                                ProductStatus.active
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status ==
+                                            ProductStatus.reserved
+                                        ? null
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.reserved);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: product.status ==
+                                              ProductStatus.reserved
+                                          ? AppColors.primary
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      ProductStatus.reserved.label,
+                                      style: TextStyle(
+                                        color: product.status ==
+                                                ProductStatus.reserved
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: product.status ==
+                                            ProductStatus.completed
+                                        ? null
+                                        : () async {
+                                            try {
+                                              await ref
+                                                  .read(productNotifierProvider(
+                                                          product.id)
+                                                      .notifier)
+                                                  .updateStatus(product.id,
+                                                      ProductStatus.completed);
+                                              if (!mounted) return;
+                                              _showSnackBar('상태가 변경되었습니다.');
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showSnackBar('상태 변경에 실패했습니다.');
+                                            }
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: product.status ==
+                                              ProductStatus.completed
+                                          ? AppColors.primary
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      ProductStatus.completed.label,
+                                      style: TextStyle(
+                                        color: product.status ==
+                                                ProductStatus.completed
+                                            ? Colors.white
+                                            : AppColors.text,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
                     // 상품 정보
                     Padding(
                       padding: const EdgeInsets.all(16),
@@ -206,7 +430,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             product.title,
                             style: Theme.of(context)
                                 .textTheme
-                                .titleLarge
+                                .titleMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.text,
