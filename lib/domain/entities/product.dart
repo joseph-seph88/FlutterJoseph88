@@ -37,6 +37,7 @@ class Product {
   final bool isLiked; // 현재 사용자의 관심 상품 여부
   final List<String> searchKeywords;
   final String titleLower;
+  final Map<String, DateTime>? favorites; // 추가: favorites 데이터
 
   const Product({
     required this.id,
@@ -58,6 +59,7 @@ class Product {
     this.isLiked = false,
     required this.searchKeywords,
     required this.titleLower,
+    this.favorites,
   });
 
   factory Product.fromModel(ProductModel model, {bool isLiked = false}) {
@@ -81,6 +83,9 @@ class Product {
       isLiked: isLiked,
       searchKeywords: model.searchKeywords,
       titleLower: model.titleLower,
+      favorites: model.favorites?.map(
+        (key, value) => MapEntry(key, value.toDate()),
+      ),
     );
   }
 
@@ -104,6 +109,7 @@ class Product {
     bool? isLiked,
     List<String>? searchKeywords,
     String? titleLower,
+    Map<String, DateTime>? favorites,
   }) {
     return Product(
       id: id ?? this.id,
@@ -125,6 +131,7 @@ class Product {
       isLiked: isLiked ?? this.isLiked,
       searchKeywords: searchKeywords ?? this.searchKeywords,
       titleLower: titleLower ?? this.titleLower,
+      favorites: favorites ?? this.favorites,
     );
   }
 }

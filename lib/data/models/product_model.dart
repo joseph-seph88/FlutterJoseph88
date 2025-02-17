@@ -19,6 +19,7 @@ class ProductModel {
   final int chatCount;
   final List<String> searchKeywords;
   final String titleLower;
+  final Map<String, Timestamp>? favorites;
 
   ProductModel({
     required this.id,
@@ -38,6 +39,7 @@ class ProductModel {
     required this.chatCount,
     List<String>? searchKeywords,
     String? titleLower,
+    this.favorites,
   })  : searchKeywords = searchKeywords ??
             SearchUtils.generateSearchKeywords(title, description),
         titleLower = titleLower ?? title.toLowerCase();
@@ -63,6 +65,9 @@ class ProductModel {
       searchKeywords: List<String>.from(data['searchKeywords'] ?? []),
       titleLower: data['titleLower'] as String? ??
           data['title'].toString().toLowerCase(),
+      favorites: (data['favorites'] as Map<String, dynamic>?)?.map(
+        (key, value) => MapEntry(key, value as Timestamp),
+      ),
     );
   }
 
@@ -84,6 +89,7 @@ class ProductModel {
       'chatCount': chatCount,
       'searchKeywords': searchKeywords,
       'titleLower': titleLower,
+      if (favorites != null) 'favorites': favorites,
     };
   }
 
@@ -105,6 +111,7 @@ class ProductModel {
     int? chatCount,
     List<String>? searchKeywords,
     String? titleLower,
+    Map<String, Timestamp>? favorites,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -124,6 +131,7 @@ class ProductModel {
       chatCount: chatCount ?? this.chatCount,
       searchKeywords: searchKeywords ?? this.searchKeywords,
       titleLower: titleLower ?? this.titleLower,
+      favorites: favorites ?? this.favorites,
     );
   }
 }

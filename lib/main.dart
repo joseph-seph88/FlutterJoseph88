@@ -30,9 +30,6 @@ void main() async {
   ]);
   await FCMService().initialize();
 
-  // 더미 데이터 업로드
-  // await uploadDummyData();
-
   runApp(
     const ProviderScope(
       child: MyApp(),
