@@ -18,7 +18,7 @@ class MapStateListener extends ConsumerWidget {
       (previous, next) {
         next.when(
           data: (newData) async {
-            if(isStream){
+            if (isStream) {
               await streamUpdateMarkers(newData);
             }
           },
@@ -27,10 +27,6 @@ class MapStateListener extends ConsumerWidget {
         );
       },
     );
-
-    if (mapState.isLoading) {
-      return const CircularProgressIndicator();
-    }
 
     if (mapState.error.isNotEmpty) {
       return Text("Error: ${mapState.error}");

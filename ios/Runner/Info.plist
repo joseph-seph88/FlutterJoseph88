@@ -62,7 +62,7 @@
 	<true/>
 	<key>NSAllowsArbitraryLoads</key>
 	<true/>
-
-	
+	<key>UIStatusBarHidden</key>
+	<false/>	
 </dict>
 </plist>

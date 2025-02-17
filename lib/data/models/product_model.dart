@@ -86,4 +86,44 @@ class ProductModel {
       'titleLower': titleLower,
     };
   }
+
+  ProductModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    int? price,
+    String? locationName,
+    GeoPoint? location,
+    String? category,
+    List<String>? images,
+    int? viewCount,
+    int? favoriteCount,
+    Timestamp? createdAt,
+    String? sellerId,
+    bool? isOfferEnabled,
+    String? status,
+    int? chatCount,
+    List<String>? searchKeywords,
+    String? titleLower,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      locationName: locationName ?? this.locationName,
+      location: location ?? this.location,
+      category: category ?? this.category,
+      images: images ?? this.images,
+      viewCount: viewCount ?? this.viewCount,
+      favoriteCount: favoriteCount ?? this.favoriteCount,
+      createdAt: createdAt ?? this.createdAt,
+      sellerId: sellerId ?? this.sellerId,
+      isOfferEnabled: isOfferEnabled ?? this.isOfferEnabled,
+      status: status ?? this.status,
+      chatCount: chatCount ?? this.chatCount,
+      searchKeywords: searchKeywords ?? this.searchKeywords,
+      titleLower: titleLower ?? this.titleLower,
+    );
+  }
 }

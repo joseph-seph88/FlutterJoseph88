@@ -1,11 +1,16 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:o2/core/constants/auth_provider_type.dart';
 import 'package:o2/data/datasources/auth_kakao_data_source.dart';
 
 class AuthDataSource {
   final _firebaseAuth = FirebaseAuth.instance;
+  final _googleSignIn = GoogleSignIn();
+  final _facebookAuth = FacebookAuth.instance;
+  final _kakaoAuth = AuthKakaoDataSource();
 
   // 회원가입
   Future<User?> signUp(String email, String password) async {
@@ -35,14 +40,14 @@ class AuthDataSource {
 
   // 로그아웃
   Future<void> signOut() async {
-    final isGoogleLoggedIn = await GoogleSignIn().isSignedIn();
+    final isGoogleLoggedIn = await _googleSignIn.isSignedIn();
     if (isGoogleLoggedIn) {
-      await GoogleSignIn().signOut();
+      await _googleSignIn.signOut();
     }
 
-    final isFacebookLoggedIn = await FacebookAuth.instance.accessToken != null;
+    final isFacebookLoggedIn = await _facebookAuth.accessToken != null;
     if (isFacebookLoggedIn) {
-      await FacebookAuth.instance.logOut();
+      await _facebookAuth.logOut();
     }
 
     final isNaverLoggedIn = await FlutterNaverLogin.isLoggedIn;
@@ -50,7 +55,7 @@ class AuthDataSource {
       await FlutterNaverLogin.logOut();
     }
 
-    await AuthKakaoDataSource().logOut();
+    await _kakaoAuth.logOut();
 
     await _firebaseAuth.signOut();
   }
@@ -63,25 +68,52 @@ class AuthDataSource {
   // 회원 탈퇴
   Future<void> withdraw(String password) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _firebaseAuth.currentUser;
       if (user == null) return;
 
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: password,
-      );
+      final providerData = user.providerData;
+      final providerId =
+          providerData.isEmpty ? "naver.com" : providerData[0].providerId;
 
-      await user.reauthenticateWithCredential(credential);
+      switch (providerId) {
+        case "password":
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: password,
+          );
+          await user.reauthenticateWithCredential(credential);
+          break;
+        case "google.com":
+          await _googleSignIn.signOut();
+          break;
+        case "facebook.com":
+          await _facebookAuth.logOut();
+          break;
+        case "oidc.kakao_o2":
+          await _kakaoAuth.logOut();
+          break;
+        case "naver.com":
+          await FlutterNaverLogin.logOut();
+          break;
+        default:
+          throw "지원하지 않는 인증 방식입니다.";
+      }
+
       await user.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw '최근에 로그인한 사용자만 회원 탈퇴가 가능합니다. 다시 로그인해주세요.';
+      }
+      throw e.message ?? '회원 탈퇴 중 오류가 발생했습니다.';
     } catch (e) {
-      rethrow;
+      throw '회원 탈퇴 중 오류가 발생했습니다.';
     }
   }
 
   // 구글 로그인
   Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth =
@@ -104,7 +136,7 @@ class AuthDataSource {
   // 페이스북 로그인
   Future<User?> signInWithFacebook() async {
     try {
-      final result = await FacebookAuth.instance.login(
+      final result = await _facebookAuth.login(
         permissions: ['email'],
       );
 
@@ -118,7 +150,11 @@ class AuthDataSource {
       }
       return null;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? "페이스북 로그인 오류";
+      if (e.code == "account-exists-with-different-credential") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw e.message ?? "페이스북 로그인 오류";
+      }
     } catch (e) {
       throw "페이스북 로그인 중 오류가 발생했습니다";
     }
@@ -126,36 +162,33 @@ class AuthDataSource {
 
   Future<User?> signInWithNaver() async {
     try {
+      final functions = FirebaseFunctions.instance;
       final result = await FlutterNaverLogin.logIn();
       if (result.status == NaverLoginStatus.loggedIn) {
-        final naverUser = result.account;
+        final httpsCallableResult =
+            await functions.httpsCallable("createCustomToken").call({
+          "id": result.account.id,
+          "email": result.account.email,
+          "name": result.account.name,
+        });
 
-        try {
-          final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-            email: naverUser.email,
-            password: "Naver_${naverUser.id}",
-          );
-          return userCredential.user;
-        } on FirebaseAuthException catch (e) {
-          if (e.code == "user-not-found" || e.code == "invalid-credential") {
-            final userCredential =
-                await _firebaseAuth.createUserWithEmailAndPassword(
-              email: naverUser.email,
-              password: "Naver_${naverUser.id}",
-            );
+        final customToken = httpsCallableResult.data["customToken"];
 
-            await userCredential.user?.updateDisplayName(naverUser.name);
-            await userCredential.user?.reload();
+        final userCredential = await _firebaseAuth.signInWithCustomToken(
+          customToken,
+        );
 
-            return FirebaseAuth.instance.currentUser;
-          }
-        } catch (e) {
-          rethrow;
-        }
+        return userCredential.user;
       }
       return null;
     } on FirebaseAuthException catch (e) {
       throw e.message ?? "네이버 로그인 오류";
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == "already-exists") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw "네이버 로그인 중 오류가 발생했습니다";
+      }
     } catch (e) {
       throw "네이버 로그인 중 오류가 발생했습니다";
     }
@@ -163,14 +196,41 @@ class AuthDataSource {
 
   Future<User?> signInWithKakao() async {
     try {
-      final credential = await AuthKakaoDataSource().signInWithKakao();
+      final credential = await _kakaoAuth.signInWithKakao();
       final userCredential =
           await _firebaseAuth.signInWithCredential(credential);
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? "카카오 로그인 오류";
+      if (e.code == "account-exists-with-different-credential") {
+        throw "다른 인증 방식을 통해 가입한 이메일입니다.";
+      } else {
+        throw e.message ?? "카카오 로그인 오류";
+      }
     } catch (e) {
       throw "카카오 로그인 중 오류가 발생했습니다";
+    }
+  }
+
+  Future<User?> signInWithProvider(
+    AuthProviderType authProviderType, {
+    String? email,
+    String? password,
+  }) async {
+    try {
+      switch (authProviderType) {
+        case AuthProviderType.email:
+          return await signIn(email!, password!);
+        case AuthProviderType.google:
+          return await signInWithGoogle();
+        case AuthProviderType.facebook:
+          return await signInWithFacebook();
+        case AuthProviderType.naver:
+          return await signInWithNaver();
+        case AuthProviderType.kakao:
+          return await signInWithKakao();
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }
