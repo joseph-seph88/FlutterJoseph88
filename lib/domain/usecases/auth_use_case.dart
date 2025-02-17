@@ -1,3 +1,4 @@
+import 'package:o2/core/constants/auth_provider_type.dart';
 import 'package:o2/domain/entities/user_entity.dart';
 
 import '../repositories/auth_repository.dart';
@@ -10,11 +11,6 @@ class AuthUseCase {
   // 회원가입
   Future<UserEntity?> signUp(UserEntity userEntity, String password) async {
     return await _authRepository.signUp(userEntity, password);
-  }
-
-  // 로그인
-  Future<UserEntity?> signIn(String email, String password) async {
-    return await _authRepository.signIn(email, password);
   }
 
   // 로그아웃
@@ -35,22 +31,26 @@ class AuthUseCase {
   }
 
   Future<void> withdraw(String userId, String password) async {
-    return await _authRepository.withdraw(userId, password);
+    try {
+      return await _authRepository.withdraw(userId, password);
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  Future<UserEntity?> signInWithGoogle() async {
-    return await _authRepository.signInWithGoogle();
-  }
-
-  Future<UserEntity?> signInWithFacebook() async {
-    return await _authRepository.signInWithFacebook();
-  }
-
-  Future<UserEntity?> signInWithNaver() async {
-    return await _authRepository.signInWithNaver();
-  }
-
-  Future<UserEntity?> signInWithKakao() async {
-    return await _authRepository.signInWithKakao();
+  Future<UserEntity?> signInWithProvider(
+    AuthProviderType authProviderType, {
+    String? email,
+    String? password,
+  }) async {
+    try {
+      return await _authRepository.signInWithProvider(
+        authProviderType,
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }

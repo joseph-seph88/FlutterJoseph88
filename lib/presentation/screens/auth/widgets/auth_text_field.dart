@@ -35,11 +35,15 @@ class AuthTextField extends StatelessWidget {
         icon = Icons.people_alt;
         break;
       case "password":
-        hintText = "Password";
+        hintText = "비밀번호를 입력해주세요.";
+        icon = Icons.lock;
+        break;
+      case "passwordConfirm":
+        hintText = "비밀번호를 다시 입력해주세요.";
         icon = Icons.lock;
         break;
       case "name":
-        hintText = "name";
+        hintText = "이름을 입력해주세요.";
         icon = Icons.person;
         break;
     }
