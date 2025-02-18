@@ -112,54 +112,57 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         if (!snapshot.hasData) return const SizedBox.shrink();
 
         final data = snapshot.data!;
-        return Padding(
-          padding: AppStyles.defaultPadding,
-          child: Row(
-            children: [
-              Image.network(
-                data.images.first,
-                width: imageSize,
-                height: imageSize,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(width: AppStyles.defaultSpacing),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${data.status.label} ',
-                        style: const TextStyle(
-                          color: AppColors.text,
-                          fontWeight: FontWeight.bold,
+        return InkWell(
+          onTap: () => context.push('/detail/${data.id}'),
+          child: Padding(
+            padding: AppStyles.defaultPadding,
+            child: Row(
+              children: [
+                Image.network(
+                  data.images.first,
+                  width: imageSize,
+                  height: imageSize,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(width: AppStyles.defaultSpacing),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${data.status.label} ',
+                          style: const TextStyle(
+                            color: AppColors.text,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        data.title,
-                        style: const TextStyle(color: AppColors.text),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        data.price.toPrice(),
-                        style: const TextStyle(
-                          color: AppColors.text,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          data.title,
+                          style: const TextStyle(color: AppColors.text),
                         ),
-                      ),
-                      Text(
-                        data.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
-                        style: const TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          data.price.toPrice(),
+                          style: const TextStyle(
+                            color: AppColors.text,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          data.isOfferEnabled ? '(가격제안가능)' : '(가격제안불가)',
+                          style: const TextStyle(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
