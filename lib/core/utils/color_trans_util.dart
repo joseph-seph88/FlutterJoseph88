@@ -7,6 +7,8 @@ class ColorTransUtil {
     'indigoColor': Colors.indigo,
     'lightGreenColor': Colors.lightGreen,
     'deepPurpleColor': Colors.deepPurple,
+    'pinkColor': Colors.pinkAccent,
+    'greenColor': Colors.green,
   };
 
   static Color transStringToColor(String colorString) {
