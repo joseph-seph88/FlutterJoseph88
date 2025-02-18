@@ -200,6 +200,16 @@ class MapDataSource {
 
   final List<Map<String, dynamic>> _staticCategoryData = [
     {
+      "category": AppConstant.store,
+      "iconPath": AppConstant.storePath,
+      "iconColor": AppConstant.greenColor
+    },
+    {
+      "category": AppConstant.beauty,
+      "iconPath": AppConstant.beautyPath,
+      "iconColor": AppConstant.pinkColor,
+    },
+    {
       "category": AppConstant.coffee,
       "iconPath": AppConstant.coffeePath,
       "iconColor": AppConstant.brownColor

@@ -43,6 +43,7 @@ class RecommendedShopPage extends ConsumerWidget {
           children: [
             Text(
               "${authState?.name ?? "탈퇴한 사용자"}님이 추천하고 싶은 업체는 어디인가요?",
+              overflow: TextOverflow.visible,
               style:
                   AppStyles.labelLarge.copyWith(color: AppColors.textSecondary),
             ),
@@ -167,10 +168,13 @@ class RecommendedShopPage extends ConsumerWidget {
                                 ),
                                 title: Row(
                                   children: [
-                                    Text(
-                                      "업체명: ${searchData.storeName}",
-                                      style: AppStyles.labelLarge
-                                          .copyWith(color: AppColors.primary),
+                                    Expanded(
+                                      child: Text(
+                                        searchData.storeName,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.labelLarge
+                                            .copyWith(color: AppColors.primary),
+                                      ),
                                     ),
                                     const SizedBox(width: 10),
                                     Text(
@@ -180,7 +184,10 @@ class RecommendedShopPage extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                                subtitle: Text("주소: ${searchData.address}"),
+                                subtitle: Text(
+                                  "주소: ${searchData.address}",
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               );
                             },
                           ),

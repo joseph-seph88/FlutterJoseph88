@@ -198,8 +198,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               options: _initMap(),
               onMapReady: (controller) => _onMapReady(controller),
               onCameraIdle: _onCameraIdle),
-
-          // if(ref.watch(isStreamProvider))
           MapStateListener((List<MapEntity> mapDataList) async {
             streamUpdateMarkers(mapDataList);
           }),

@@ -45,9 +45,11 @@ class StoreSearchResult extends ConsumerWidget {
                     return ListTile(
                       title: Row(
                         children: [
-                          Text(storeData.storeName,
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.primary)),
+                          Expanded(
+                            child: Text(storeData.storeName,
+                                style: AppStyles.labelLarge
+                                    .copyWith(color: AppColors.primary, overflow: TextOverflow.ellipsis)),
+                          ),
                           const SizedBox(width: 10),
                           Text('${distance}km',
                               style: AppStyles.labelMedium
