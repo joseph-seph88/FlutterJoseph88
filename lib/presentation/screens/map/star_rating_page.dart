@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:o2/core/constants/app_constant.dart';
 import 'package:o2/core/theme/app_theme.dart';
+import 'package:o2/presentation/providers/auth_provider.dart';
 import 'package:o2/presentation/providers/map_provider.dart';
 import 'package:o2/presentation/providers/review_provider.dart';
 import 'package:o2/presentation/widgets/custom_snack_bar.dart';
@@ -178,6 +179,8 @@ class StarRatingPage extends ConsumerWidget {
                 return reviewState.asyncStoreReviewList.when(
                   data: (data) {
                     final review = data[index];
+                    final reviewName = ref.read(authProvider)?.name ?? "탈퇴한 사용자";
+
                     return Card(
                       elevation: 4,
                       color: Colors.lightGreen[100],
@@ -192,7 +195,7 @@ class StarRatingPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${review.email} 님',
+                              '$reviewName 님',
                               style: AppStyles.bodyLarge.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,

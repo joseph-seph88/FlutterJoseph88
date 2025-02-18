@@ -100,6 +100,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                     options: initMap(),
                     onMapReady: (controller) => _onMapReady(controller),
                     onCameraIdle: _onCameraIdle),
+                _buildCenterMarker(),
                 Positioned(
                     top: 10,
                     left: 20,
@@ -114,7 +115,6 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                         ],
                       ],
                     )),
-                _buildCenterMarker(),
                 Positioned(
                   bottom: 55,
                   left: 20,
@@ -414,7 +414,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
 
     return Container(
       height: 200,
-      color: AppColors.surface.withAlpha(200),
+      color: AppColors.surface.withAlpha(220),
       child: mapState.asyncPredictionList.when(
         data: (data) {
           return ListView.builder(
