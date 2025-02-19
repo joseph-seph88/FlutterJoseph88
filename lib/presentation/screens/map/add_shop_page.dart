@@ -28,55 +28,7 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
   Color? categoryColor;
 
   @override
-  void dispose() {
-    if (_mapController != null) {
-      _mapController?.dispose();
-    }
-    _searchController.dispose();
-    _storeTextController.dispose();
-    super.dispose();
-  }
-
-  NaverMapViewOptions initMap() {
-    return const NaverMapViewOptions(
-      extent: NLatLngBounds(
-        southWest: NLatLng(31.43, 122.37),
-        northEast: NLatLng(44.35, 132.0),
-      ),
-    );
-  }
-
-  void _zoomIn() {
-    _mapController?.updateCamera(NCameraUpdate.zoomIn());
-  }
-
-  void _zoomOut() {
-    _mapController?.updateCamera(NCameraUpdate.zoomOut());
-  }
-
-  void _onMapReady(NaverMapController controller) {
-    _mapController = controller;
-    if (_mapController != null) {
-      final nLatLng = _mapController!.nowCameraPosition.target;
-      final overlay = controller.getLocationOverlay();
-      overlay.setIsVisible(true);
-      ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
-    }
-  }
-
-  void _onCameraIdle() {
-    if (_mapController != null) {
-      ref
-          .read(mapProvider.notifier)
-          .updateTargetPosition(_mapController!.nowCameraPosition.target);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final mapState = ref.watch(mapProvider);
-    final categories = mapState.staticCategory;
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 40,
@@ -174,57 +126,63 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: PopupMenuButton(
-                        onSelected: (index) {
-                          setState(() {
-                            selectedIndex = index;
-                          });
-                          category = {
-                            'category': categories[index]['category'],
-                            'iconPath': categories[index]['iconPath'],
-                            'iconColor': categories[index]['iconColor'],
-                          };
-                        },
-                        itemBuilder: (context) {
-                          return List.generate(
-                            categories.length,
-                            (index) {
-                              category = categories[index];
-                              categoryColor = ColorTransUtil.transStringToColor(
-                                  category['iconColor']);
-                              return PopupMenuItem(
-                                  value: index,
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        category['iconPath'],
-                                        width: 20,
-                                        height: 20,
-                                        color: categoryColor,
-                                      ),
-                                    ],
-                                  ));
+                    Consumer(
+                      builder: (context, ref, child){
+                        final categories = ref.read(mapProvider).staticCategory;
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: PopupMenuButton(
+                            onSelected: (index) {
+                              setState(() {
+                                selectedIndex = index;
+                              });
+                              category = {
+                                'category': categories[index]['category'],
+                                'iconPath': categories[index]['iconPath'],
+                                'iconColor': categories[index]['iconColor'],
+                              };
                             },
-                          );
-                        },
-                        child: selectedIndex != null
-                            ? ImageIcon(
-                                AssetImage(
-                                    categories[selectedIndex!]['iconPath']),
-                                color: ColorTransUtil.transStringToColor(
-                                    categories[selectedIndex!]['iconColor']),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Text(
-                                  "카테고리",
-                                  style: AppStyles.labelMedium.copyWith(
-                                      color: AppColors.primary.withAlpha(200)),
-                                ),
+                            itemBuilder: (context) {
+                              return List.generate(
+                                categories.length,
+                                    (index) {
+                                  category = categories[index];
+                                  categoryColor = ColorTransUtil.transStringToColor(
+                                      category['iconColor']);
+                                  return PopupMenuItem(
+                                      value: index,
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            category['iconPath'],
+                                            width: 20,
+                                            height: 20,
+                                            color: categoryColor,
+                                          ),
+                                        ],
+                                      ));
+                                },
+                              );
+                            },
+                            child: selectedIndex != null
+                                ? ImageIcon(
+                              AssetImage(
+                                  categories[selectedIndex!]['iconPath']),
+                              color: ColorTransUtil.transStringToColor(
+                                  categories[selectedIndex!]['iconColor']),
+                            )
+                                : Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                "카테고리",
+                                style: AppStyles.labelMedium.copyWith(
+                                    color: AppColors.primary.withAlpha(200)),
                               ),
-                      ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     Expanded(
                       child: Container(
@@ -255,8 +213,8 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
                       onPressed: () async {
                         if (selectedIndex != null &&
                             _storeTextController.text.isNotEmpty) {
-                          final position = mapState.asyncTargetPosition;
-                          final address = mapState.asyncTransAddress;
+                          final position = ref.watch(mapProvider).asyncTargetPosition;
+                          final address = ref.watch(mapProvider).asyncTransAddress;
                           final storeName = _storeTextController.text;
 
                           position.when(data: (data) async {
@@ -456,5 +414,50 @@ class _AddShopPageState extends ConsumerState<AddShopPage> {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    if (_mapController != null) {
+      _mapController?.dispose();
+    }
+    _searchController.dispose();
+    _storeTextController.dispose();
+    super.dispose();
+  }
+
+  NaverMapViewOptions initMap() {
+    return const NaverMapViewOptions(
+      extent: NLatLngBounds(
+        southWest: NLatLng(31.43, 122.37),
+        northEast: NLatLng(44.35, 132.0),
+      ),
+    );
+  }
+
+  void _zoomIn() {
+    _mapController?.updateCamera(NCameraUpdate.zoomIn());
+  }
+
+  void _zoomOut() {
+    _mapController?.updateCamera(NCameraUpdate.zoomOut());
+  }
+
+  void _onMapReady(NaverMapController controller) {
+    _mapController = controller;
+    if (_mapController != null) {
+      final nLatLng = _mapController!.nowCameraPosition.target;
+      final overlay = controller.getLocationOverlay();
+      overlay.setIsVisible(true);
+      ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
+    }
+  }
+
+  void _onCameraIdle() {
+    if (_mapController != null) {
+      ref
+          .read(mapProvider.notifier)
+          .updateTargetPosition(_mapController!.nowCameraPosition.target);
+    }
   }
 }

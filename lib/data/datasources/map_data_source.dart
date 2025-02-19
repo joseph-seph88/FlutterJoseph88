@@ -207,6 +207,8 @@ class MapDataSource {
     {
       "category": AppConstant.beauty,
       "iconPath": AppConstant.beautyPath,
+
+
       "iconColor": AppConstant.pinkColor,
     },
     {

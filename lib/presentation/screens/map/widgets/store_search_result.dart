@@ -47,8 +47,9 @@ class StoreSearchResult extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Text(storeData.storeName,
-                                style: AppStyles.labelLarge
-                                    .copyWith(color: AppColors.primary, overflow: TextOverflow.ellipsis)),
+                                style: AppStyles.labelLarge.copyWith(
+                                    color: AppColors.primary,
+                                    overflow: TextOverflow.ellipsis)),
                           ),
                           const SizedBox(width: 10),
                           Text('${distance}km',

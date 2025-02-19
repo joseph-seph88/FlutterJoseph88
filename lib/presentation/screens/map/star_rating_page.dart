@@ -16,12 +16,9 @@ class StarRatingPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mapData = ref.read(selectedMapDataProvider);
-    int starIndex = ref.watch(starIndexProvider);
-    final reviewState = ref.watch(reviewProvider);
 
-    Future<void> onPressedBtn(int index, String mapId) async {
-      ref.read(starRatingProvider.notifier).state = index + 1.0;
+    Future<void> onPressedBtn(int starIndex, String mapId) async {
+      ref.read(starRatingProvider.notifier).state = starIndex + 1.0;
       await ref.read(mapProvider.notifier).updateStarRating(mapId, starIndex);
       Map<String, dynamic> storeReview = {
         'mapId': mapId,
@@ -37,10 +34,13 @@ class StarRatingPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-            "${mapData?.storeName}",
-            style: AppStyles.titleLarge.copyWith(color: AppColors.primary),
-          ),
+          title: Consumer(builder: (context, ref, child) {
+            final mapData = ref.read(selectedMapDataProvider);
+            return Text(
+              "${mapData?.storeName}",
+              style: AppStyles.titleLarge.copyWith(color: AppColors.primary),
+            );
+          }),
           centerTitle: true,
           leading: IconButton(
               onPressed: () {
@@ -66,11 +66,14 @@ class StarRatingPage extends ConsumerWidget {
                   const SizedBox(width: 20),
                   Row(
                     children: [
-                      Text(
-                        "${mapData?.starRating}",
-                        style: AppStyles.bodySuper
-                            .copyWith(color: AppColors.primary),
-                      ),
+                      Consumer(builder: (context, ref, child) {
+                        final mapData = ref.read(selectedMapDataProvider);
+                        return Text(
+                          "${mapData?.starRating}",
+                          style: AppStyles.bodySuper
+                              .copyWith(color: AppColors.primary),
+                        );
+                      }),
                       const SizedBox(width: 5),
                       Text(
                         "(평점)",
@@ -80,11 +83,15 @@ class StarRatingPage extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(width: 60),
-                  Text(
-                    "리뷰 ${mapData?.participant}",
-                    style:
-                        AppStyles.bodyLarge.copyWith(color: AppColors.primary),
-                  ),
+                  Consumer(builder: (context, ref, child) {
+                    final mapData = ref.read(selectedMapDataProvider);
+
+                    return Text(
+                      "리뷰 ${mapData?.participant}",
+                      style: AppStyles.bodyLarge
+                          .copyWith(color: AppColors.primary),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -97,30 +104,44 @@ class StarRatingPage extends ConsumerWidget {
                     children: List.generate(
                       5,
                       (index) {
-                        return IconButton(
-                          onPressed: () {
-                            if (starIndex == index + 1) {
-                              ref.read(starIndexProvider.notifier).state =
-                                  starIndex - 1;
-                            } else {
-                              ref.read(starIndexProvider.notifier).state =
-                                  index + 1;
-                            }
+                        int starIndex = ref.watch(starIndexProvider);
+
+                        return Consumer(
+                          builder: (context, ref, child) {
+                            return IconButton(
+                              onPressed: () {
+                                if (starIndex == index + 1) {
+                                  ref.read(starIndexProvider.notifier).state =
+                                      starIndex - 1;
+                                } else {
+                                  ref.read(starIndexProvider.notifier).state =
+                                      index + 1;
+                                }
+                              },
+                              icon: Icon(
+                                index < starIndex
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: AppConstant.amber,
+                                size: 40,
+                              ),
+                            );
                           },
-                          icon: Icon(
-                            index < starIndex ? Icons.star : Icons.star_border,
-                            color: AppConstant.amber,
-                            size: 40,
-                          ),
                         );
                       },
                     ),
                   ),
                 ),
-                Text(
-                  '내 별점: $starIndex 점',
-                  style:
-                      AppStyles.labelMedium.copyWith(color: AppColors.primary),
+                Consumer(
+                  builder: (context, ref, child) {
+                    int starIndex = ref.watch(starIndexProvider);
+
+                    return Text(
+                      '내 별점: $starIndex 점',
+                      style: AppStyles.labelMedium
+                          .copyWith(color: AppColors.primary),
+                    );
+                  },
                 ),
                 Container(
                     padding: const EdgeInsets.all(20),
@@ -145,11 +166,14 @@ class StarRatingPage extends ConsumerWidget {
             ),
             ElevatedButton(
                 onPressed: () async {
+                  final mapData = ref.read(selectedMapDataProvider);
+
                   if (mapData!.mapId != null &&
                       _textController.text.isNotEmpty) {
                     final isUse = await ref
                         .read(reviewProvider.notifier)
                         .isDuplicateStoreReview(mapData.mapId);
+                    int starIndex = ref.read(starIndexProvider);
                     if (isUse) {
                       await onPressedBtn(starIndex, mapData.mapId!);
                     } else {
@@ -168,57 +192,64 @@ class StarRatingPage extends ConsumerWidget {
                     style: AppStyles.bodyLarge
                         .copyWith(color: AppColors.surface))),
             const SizedBox(height: 30),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: reviewState.asyncStoreReviewList.when(
-                data: (data) => data.length,
-                loading: () => 0,
-                error: (error, stackTrace) => 0,
-              ),
-              itemBuilder: (context, index) {
-                return reviewState.asyncStoreReviewList.when(
-                  data: (data) {
-                    final review = data[index];
-                    final reviewName = ref.read(authProvider)?.name ?? "탈퇴한 사용자";
+            Consumer(
+              builder: (context, ref, child) {
+                final reviewState = ref.watch(reviewProvider);
 
-                    return Card(
-                      elevation: 4,
-                      color: Colors.lightGreen[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$reviewName 님',
-                              style: AppStyles.bodyLarge.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: reviewState.asyncStoreReviewList.when(
+                    data: (data) => data.length,
+                    loading: () => 0,
+                    error: (error, stackTrace) => 0,
+                  ),
+                  itemBuilder: (context, index) {
+                    return reviewState.asyncStoreReviewList.when(
+                      data: (data) {
+                        final review = data[index];
+                        final reviewName =
+                            ref.read(authProvider)?.name ?? "탈퇴한 사용자";
+
+                        return Card(
+                          elevation: 4,
+                          color: Colors.lightGreen[100],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$reviewName 님',
+                                  style: AppStyles.bodyLarge.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '리뷰 내용 : ${review.storeReview?['comment'] ?? '아직 후기가 없습니다.'}',
+                                  style: AppStyles.bodyMedium.copyWith(
+                                    color: AppColors.text,
+                                    height: 2,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              '리뷰 내용 : ${review.storeReview?['comment'] ?? '아직 후기가 없습니다.'}',
-                              style: AppStyles.bodyMedium.copyWith(
-                                color: AppColors.text,
-                                height: 2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
+                      loading: () {
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      error: (error, stackTrace) {
+                        return Center(child: Text('에러 발생: $error'));
+                      },
                     );
-                  },
-                  loading: () {
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                  error: (error, stackTrace) {
-                    return Center(child: Text('에러 발생: $error'));
                   },
                 );
               },

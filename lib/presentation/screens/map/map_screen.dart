@@ -28,168 +28,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   NLatLng myPosition = const NLatLng(37.5547, 126.9706);
 
   @override
-  void initState() {
-    super.initState();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: AppColors.backgroundTransparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
-    _sheetController = DraggableScrollableController();
-    _sheetController.addListener(() {
-      setState(() {
-        double sheetHeight = MediaQuery.of(context).size.height;
-        _buttonOffset = 10 + (_sheetController.size * sheetHeight);
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _sheetController.dispose();
-    _mapController?.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-
-
-  void _zoomIn() {
-    _mapController?.updateCamera(NCameraUpdate.zoomIn());
-  }
-
-  void _zoomOut() {
-    _mapController?.updateCamera(NCameraUpdate.zoomOut());
-  }
-
-  NaverMapViewOptions _initMap() {
-    return NaverMapViewOptions(
-      initialCameraPosition: NCameraPosition(target: myPosition, zoom: 15),
-      extent: const NLatLngBounds(
-        southWest: NLatLng(31.43, 122.37),
-        northEast: NLatLng(44.35, 132.0),
-      ),
-    );
-  }
-
-  void _onMapReady(NaverMapController controller) {
-    _mapController = controller;
-    if (_mapController != null) {
-      final nLatLng = _mapController!.nowCameraPosition.target;
-      final overlay = controller.getLocationOverlay();
-      overlay.setIsVisible(true);
-      ref.read(mapProvider.notifier).getAllMapData(nLatLng);
-      ref.read(mapProvider.notifier).getStaticCategoryData;
-      ref.read(mapProvider.notifier).updateTargetPosition(myPosition);
-      ref.read(isStreamProvider.notifier).state = false;
-    }
-  }
-
-  void _onCameraIdle() {
-    if (_mapController != null) {
-      _mapController?.clearOverlays(type: NOverlayType.circleOverlay);
-      final nPosition = _mapController?.nowCameraPosition.target;
-      ref.read(mapProvider.notifier).updateTargetPosition(nPosition!);
-      if (ref.read(isStreamProvider)) {
-        addCircleOverlay(nPosition);
-        final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
-        final category = ref.read(categoryProvider);
-        final param = {'category': category, 'position': geoPosition};
-        ref.read(mapParamProvider.notifier).state = param;
-      }
-    }
-  }
-
-  void _textFieldOnChanged(String value) {
-    if (value.isEmpty) {
-      setState(() {
-        _isSearching = false;
-      });
-      return;
-    }
-    setState(() {
-      _isSearching = _searchController.text.isNotEmpty;
-    });
-    ref.read(mapProvider.notifier).updateStoreList(value);
-  }
-
-  Future<void> _searchResultOnTap(MapEntity storeData) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-    ref.read(isStreamProvider.notifier).state = false;
-    _searchController.clear();
-
-    final nLatLng =
-        NLatLng(storeData.position.latitude, storeData.position.longitude);
-    final nMarker =
-        await ref.read(mapProvider.notifier).setMapMarker(storeData);
-    await _mapController?.addOverlay(nMarker);
-
-    ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
-    final cameraUpdate = NCameraUpdate.withParams(target: nLatLng)
-      ..setAnimation(animation: NCameraAnimation.fly);
-    _mapController?.updateCamera(cameraUpdate);
-
-    setState(() {
-      _isSearching = false;
-    });
-  }
-
-  void _moveMyPosition() {
-    if (_mapController != null) {
-      final cameraUpdate = NCameraUpdate.withParams(target: myPosition)
-        ..setAnimation(animation: NCameraAnimation.fly);
-
-      _mapController?.updateCamera(cameraUpdate);
-    }
-  }
-
-  Future<void> _radiusSearchOnButton(
-      String category, ScrollController scrollController) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-    final nPosition = _mapController?.nowCameraPosition.target;
-    if (nPosition != null) {
-      final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
-      final param = {'category': category, 'position': geoPosition};
-      ref.read(isInitProvider.notifier).state = true;
-      ref.read(mapParamProvider.notifier).state = param;
-      await addCircleOverlay(nPosition);
-
-      setState(() {
-        _sheetController.animateTo(0,
-            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-        scrollController.animateTo(0,
-            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-      });
-    }
-  }
-
-  Future<void> addCircleOverlay(NLatLng latLng) async {
-    const double radius = 220.0;
-    final circleOverlay = NCircleOverlay(
-      id: "circle",
-      center: latLng,
-      radius: radius,
-      color: AppColors.textSecondary.withAlpha(80),
-    );
-    await _mapController?.addOverlay(circleOverlay);
-  }
-
-  Future<void> streamUpdateMarkers(List<MapEntity> mapDataList) async {
-    await _mapController?.clearOverlays(type: NOverlayType.marker);
-    ref.read(mapProvider.notifier).clearMapMarkers();
-
-    await ref.read(mapProvider.notifier).setMapMarkers(mapDataList);
-    final markerSetData = ref.read(mapProvider).markersSet;
-
-    if (markerSetData.isNotEmpty) {
-      await _mapController?.addOverlayAll(markerSetData);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    ref.watch(locationPermissionProvider);
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -201,7 +40,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           MapStateListener((List<MapEntity> mapDataList) async {
             streamUpdateMarkers(mapDataList);
           }),
-
           Positioned(
             top: 50,
             left: 20,
@@ -341,5 +179,163 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: AppColors.backgroundTransparent,
+      statusBarIconBrightness: Brightness.dark,
+    ));
+    _sheetController = DraggableScrollableController();
+    _sheetController.addListener(() {
+      setState(() {
+        double sheetHeight = MediaQuery.of(context).size.height;
+        _buttonOffset = 10 + (_sheetController.size * sheetHeight);
+      });
+    });
+    ref.read(locationPermissionProvider);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _sheetController.dispose();
+    _mapController?.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _zoomIn() {
+    _mapController?.updateCamera(NCameraUpdate.zoomIn());
+  }
+
+  void _zoomOut() {
+    _mapController?.updateCamera(NCameraUpdate.zoomOut());
+  }
+
+  NaverMapViewOptions _initMap() {
+    return NaverMapViewOptions(
+      initialCameraPosition: NCameraPosition(target: myPosition, zoom: 15),
+      extent: const NLatLngBounds(
+        southWest: NLatLng(31.43, 122.37),
+        northEast: NLatLng(44.35, 132.0),
+      ),
+    );
+  }
+
+  void _onMapReady(NaverMapController controller) {
+    _mapController = controller;
+    if (_mapController != null) {
+      final nLatLng = _mapController!.nowCameraPosition.target;
+      final overlay = controller.getLocationOverlay();
+      overlay.setIsVisible(true);
+      ref.read(mapProvider.notifier).getAllMapData(nLatLng);
+      ref.read(mapProvider.notifier).getStaticCategoryData;
+      ref.read(mapProvider.notifier).updateTargetPosition(myPosition);
+      ref.read(isStreamProvider.notifier).state = false;
+    }
+  }
+
+  void _onCameraIdle() {
+    if (_mapController != null) {
+      _mapController?.clearOverlays(type: NOverlayType.circleOverlay);
+      final nPosition = _mapController?.nowCameraPosition.target;
+      ref.read(mapProvider.notifier).updateTargetPosition(nPosition!);
+      if (ref.read(isStreamProvider)) {
+        addCircleOverlay(nPosition);
+        final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
+        final category = ref.read(categoryProvider);
+        final param = {'category': category, 'position': geoPosition};
+        ref.read(mapParamProvider.notifier).state = param;
+      }
+    }
+  }
+
+  void _textFieldOnChanged(String value) {
+    if (value.isEmpty) {
+      setState(() {
+        _isSearching = false;
+      });
+      return;
+    }
+    setState(() {
+      _isSearching = _searchController.text.isNotEmpty;
+    });
+    ref.read(mapProvider.notifier).updateStoreList(value);
+  }
+
+  Future<void> _searchResultOnTap(MapEntity storeData) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    ref.read(isStreamProvider.notifier).state = false;
+    _searchController.clear();
+
+    final nLatLng =
+    NLatLng(storeData.position.latitude, storeData.position.longitude);
+    final nMarker =
+    await ref.read(mapProvider.notifier).setMapMarker(storeData);
+    await _mapController?.addOverlay(nMarker);
+
+    ref.read(mapProvider.notifier).updateTargetPosition(nLatLng);
+    final cameraUpdate = NCameraUpdate.withParams(target: nLatLng)
+      ..setAnimation(animation: NCameraAnimation.fly);
+    _mapController?.updateCamera(cameraUpdate);
+
+    setState(() {
+      _isSearching = false;
+    });
+  }
+
+  void _moveMyPosition() {
+    if (_mapController != null) {
+      final cameraUpdate = NCameraUpdate.withParams(target: myPosition)
+        ..setAnimation(animation: NCameraAnimation.fly);
+
+      _mapController?.updateCamera(cameraUpdate);
+    }
+  }
+
+  Future<void> _radiusSearchOnButton(
+      String category, ScrollController scrollController) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    final nPosition = _mapController?.nowCameraPosition.target;
+    if (nPosition != null) {
+      final geoPosition = GeoPoint(nPosition.latitude, nPosition.longitude);
+      final param = {'category': category, 'position': geoPosition};
+      ref.read(isInitProvider.notifier).state = true;
+      ref.read(mapParamProvider.notifier).state = param;
+      await addCircleOverlay(nPosition);
+
+      setState(() {
+        _sheetController.animateTo(0,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        scrollController.animateTo(0,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      });
+    }
+  }
+
+  Future<void> addCircleOverlay(NLatLng latLng) async {
+    const double radius = 220.0;
+    final circleOverlay = NCircleOverlay(
+      id: "circle",
+      center: latLng,
+      radius: radius,
+      color: AppColors.textSecondary.withAlpha(80),
+    );
+    await _mapController?.addOverlay(circleOverlay);
+  }
+
+  Future<void> streamUpdateMarkers(List<MapEntity> mapDataList) async {
+    await _mapController?.clearOverlays(type: NOverlayType.marker);
+    ref.read(mapProvider.notifier).clearMapMarkers();
+
+    await ref.read(mapProvider.notifier).setMapMarkers(mapDataList);
+    final markerSetData = ref.read(mapProvider).markersSet;
+
+    if (markerSetData.isNotEmpty) {
+      await _mapController?.addOverlayAll(markerSetData);
+    }
   }
 }

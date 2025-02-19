@@ -13,8 +13,6 @@ class ScrollViewInBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mapState = ref.watch(mapProvider);
-
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -62,10 +60,16 @@ class ScrollViewInBottomSheet extends ConsumerWidget {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                              mapState.transAddress,
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.primary),
+                            child: Consumer(
+                              builder: (context, ref, child) {
+                                final mapState = ref.watch(mapProvider);
+
+                                return Text(
+                                  mapState.transAddress,
+                                  style: AppStyles.labelLarge
+                                      .copyWith(color: AppColors.primary),
+                                );
+                              },
                             ),
                           )
                         ],
@@ -73,83 +77,96 @@ class ScrollViewInBottomSheet extends ConsumerWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10.0,
-                            mainAxisSpacing: 10.0,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: mapState.staticCategory.length,
-                          itemBuilder: (context, index) {
-                            final categoryData = mapState.staticCategory[index];
-                            final categoryColor =
-                                ColorTransUtil.transStringToColor(
-                                    categoryData['iconColor']);
-            
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withAlpha(200),
-                                    offset: const Offset(-5, 7),
-                                    blurRadius: 7,
-                                  ),
-                                ],
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final mapState = ref.watch(mapProvider);
+
+                          return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const ClampingScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 10.0,
+                                mainAxisSpacing: 10.0,
+                                childAspectRatio: 1.0,
                               ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  ref.read(isStreamProvider.notifier).state = true;
-                                  ref.read(categoryProvider.notifier).state =
-                                      categoryData['category'];
-                                  onButtonPressed(categoryData['category']);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                  side: const BorderSide(
-                                      color: AppColors.primary, width: 0.5),
-                                  shape: RoundedRectangleBorder(
+                              itemCount: mapState.staticCategory.length,
+                              itemBuilder: (context, index) {
+                                final categoryData =
+                                    mapState.staticCategory[index];
+                                final categoryColor =
+                                    ColorTransUtil.transStringToColor(
+                                        categoryData['iconColor']);
+
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary.withAlpha(200),
+                                        offset: const Offset(-5, 7),
+                                        blurRadius: 7,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 12),
-                                        decoration: BoxDecoration(
-                                          color: categoryColor.withAlpha(50),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: ImageIcon(
-                                          AssetImage(categoryData['iconPath']),
-                                          size: 50,
-                                          color: categoryColor,
-                                        ),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(isStreamProvider.notifier)
+                                          .state = true;
+                                      ref
+                                          .read(categoryProvider.notifier)
+                                          .state = categoryData['category'];
+                                      onButtonPressed(categoryData['category']);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      side: const BorderSide(
+                                          color: AppColors.primary, width: 0.5),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    Text(
-                                      categoryData['category'],
-                                      style: AppStyles.labelLarge.copyWith(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      textAlign: TextAlign.center,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 12),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  categoryColor.withAlpha(50),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ImageIcon(
+                                              AssetImage(
+                                                  categoryData['iconPath']),
+                                              size: 50,
+                                              color: categoryColor,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          categoryData['category'],
+                                          style: AppStyles.labelLarge.copyWith(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
+                                  ),
+                                );
+                              });
+                        },
+                      ),
                     ),
                   ],
                 ),

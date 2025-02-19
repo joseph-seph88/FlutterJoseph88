@@ -16,8 +16,6 @@ class RecommendedShopPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mapState = ref.watch(mapProvider);
-    final authState = ref.watch(authProvider);
 
     void onTap(MapEntity searchData) {
       ref.read(selectedMapDataProvider.notifier).state = searchData;
@@ -41,11 +39,16 @@ class RecommendedShopPage extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text(
-              "${authState?.name ?? "탈퇴한 사용자"}님이 추천하고 싶은 업체는 어디인가요?",
-              overflow: TextOverflow.visible,
-              style:
-                  AppStyles.labelLarge.copyWith(color: AppColors.textSecondary),
+            Consumer(
+              builder: (context, ref, child) {
+                final authState = ref.watch(authProvider);
+                return Text(
+                  "${authState?.name ?? "탈퇴한 사용자"}님이 추천하고 싶은 업체는 어디인가요?",
+                  overflow: TextOverflow.visible,
+                  style: AppStyles.labelLarge
+                      .copyWith(color: AppColors.textSecondary),
+                );
+              },
             ),
             Container(
                 padding: AppStyles.defaultPadding,
@@ -71,127 +74,135 @@ class RecommendedShopPage extends ConsumerWidget {
                 style: AppStyles.labelMedium
                     .copyWith(color: AppColors.textSecondary)),
             const SizedBox(height: 15),
-            mapState.isLoading
-                ? const Center(
-                    child: SizedBox(
-                      width: 70,
-                      height: 70,
-                      child: LoadingIndicator(
-                        indicatorType: Indicator.pacman,
-                        colors: [AppColors.primary],
-                      ),
-                    ),
-                  )
-                : SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    child: (mapState.searchStoreDataList.isEmpty &&
-                            _textController.text.isNotEmpty)
-                        ? Center(
-                            child: Text(
-                              '해당 업체는 등록되지 않은 업체입니다.',
-                              style: AppStyles.labelLarge
-                                  .copyWith(color: AppColors.textSecondary),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: mapState.searchStoreDataList.isEmpty
-                                ? mapState.mapDataList.length
-                                : mapState.searchStoreDataList.length,
-                            itemBuilder: (context, index) {
-                              final searchData =
-                                  mapState.searchStoreDataList.isEmpty
-                                      ? mapState.mapDataList[index]
-                                      : mapState.searchStoreDataList[index];
+            Consumer(
+              builder: (context, ref, child) {
+                final mapState = ref.watch(mapProvider);
 
-                              final distance = mapState.betweenDistance[index];
+                return mapState.isLoading
+                    ? const Center(
+                        child: SizedBox(
+                          width: 70,
+                          height: 70,
+                          child: LoadingIndicator(
+                            indicatorType: Indicator.pacman,
+                            colors: [AppColors.primary],
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        child: (mapState.searchStoreDataList.isEmpty &&
+                                _textController.text.isNotEmpty)
+                            ? Center(
+                                child: Text(
+                                  '해당 업체는 등록되지 않은 업체입니다.',
+                                  style: AppStyles.labelLarge
+                                      .copyWith(color: AppColors.textSecondary),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: mapState.searchStoreDataList.isEmpty
+                                    ? mapState.mapDataList.length
+                                    : mapState.searchStoreDataList.length,
+                                itemBuilder: (context, index) {
+                                  final searchData =
+                                      mapState.searchStoreDataList.isEmpty
+                                          ? mapState.mapDataList[index]
+                                          : mapState.searchStoreDataList[index];
 
-                              return ListTile(
-                                onTap: () {
-                                  onTap(searchData);
-                                },
-                                leading: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: Colors.black12,
-                                      radius: 40,
-                                      child: ClipOval(
-                                        child: Image.asset(
-                                          searchData.category['iconPath'],
-                                          width: 40,
-                                          height: 40,
-                                          fit: BoxFit.cover,
-                                          color:
-                                              searchData.category['iconColor'],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: AppColors.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.star,
-                                          color: Colors.yellow,
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: -5,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              AppColors.primary.withAlpha(150),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          '${searchData.starRating}',
-                                          style: const TextStyle(
-                                            color: AppColors.surface,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
+                                  final distance =
+                                      mapState.betweenDistance[index];
+
+                                  return ListTile(
+                                    onTap: () {
+                                      onTap(searchData);
+                                    },
+                                    leading: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: Colors.black12,
+                                          radius: 40,
+                                          child: ClipOval(
+                                            child: Image.asset(
+                                              searchData.category['iconPath'],
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              color: searchData
+                                                  .category['iconColor'],
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: AppColors.primary,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.star,
+                                              color: Colors.yellow,
+                                              size: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: -5,
+                                          right: 0,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary
+                                                  .withAlpha(150),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              '${searchData.starRating}',
+                                              style: const TextStyle(
+                                                color: AppColors.surface,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        searchData.storeName,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppStyles.labelLarge
-                                            .copyWith(color: AppColors.primary),
-                                      ),
+                                    title: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            searchData.storeName,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: AppStyles.labelLarge
+                                                .copyWith(
+                                                    color: AppColors.primary),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          '${distance}km',
+                                          style: AppStyles.labelMedium.copyWith(
+                                              color: AppColors.textSecondary),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      '${distance}km',
-                                      style: AppStyles.labelMedium.copyWith(
-                                          color: AppColors.textSecondary),
+                                    subtitle: Text(
+                                      "주소: ${searchData.address}",
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  "주소: ${searchData.address}",
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            },
-                          ),
-                  ),
+                                  );
+                                },
+                              ),
+                      );
+              },
+            ),
           ],
         ),
       ),
