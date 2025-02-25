@@ -59,10 +59,12 @@ class FCMService {
   Future<void> _setupFCM() async {
     await _requestNotificationPermission();
 
-    final apnsToken = await _firebaseMessaging.getAPNSToken();
-    if (apnsToken == null) {
-      debugPrint("APNS 토큰을 받을 수 없습니다. 오류 발생.");
-    }
+    // final apnsToken = await _firebaseMessaging.getAPNSToken();
+    //
+    // if (apnsToken == null) {
+    //   debugPrint("APNS 토큰을 받을 수 없습니다. 오류 발생.");
+    //   return;
+    // }
 
     final fcmToken = await _firebaseMessaging.getToken();
     await _updateToken(fcmToken);
@@ -71,6 +73,8 @@ class FCMService {
 
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+
+
   }
 
   Future<void> _updateToken(String? token) async {
