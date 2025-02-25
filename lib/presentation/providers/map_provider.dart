@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,7 +63,8 @@ final fireStoreProvider = Provider((ref) => FirebaseFirestore.instance);
 
 // 플레이스 SDK
 final placesSdkProvider = Provider<FlutterGooglePlacesSdk>((ref) {
-  return FlutterGooglePlacesSdk('AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk',
+  final geoKey = dotenv.env['GEO_KEY'] ?? '';
+  return FlutterGooglePlacesSdk(geoKey,
       locale: const Locale('ko', 'KR'));
 });
 
