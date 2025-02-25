@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:web_project/core/app_theme.dart';
-import 'package:web_project/data/firebase_data_source.dart';
-import 'package:web_project/data/schedule_repository.dart';
+import 'package:web_project/core/theme/app_theme.dart';
+import 'package:web_project/data/data_source/firebase_data_source.dart';
 import 'package:web_project/presentation/controller/schedule_controller.dart';
-import 'package:web_project/presentation/view/new_schedule_view.dart';
+import 'package:web_project/presentation/view/schedule_view.dart';
+import 'data/repositories/schedule_repository_impl.dart';
+import 'domain/schedule_repository.dart';
 import 'domain/schedule_use_case.dart';
 import 'firebase_options.dart';
 
@@ -38,10 +39,10 @@ class MyApp extends StatelessWidget {
     
     return GetMaterialApp(
       theme: AppTheme.light(),
-      // darkTheme: AppTheme.dark(),
+      darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: NewScheduleView(),
+      home: ScheduleView(),
     );
   }
 }

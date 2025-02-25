@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_project/core/app_style.dart';
+import 'package:web_project/core/theme/app_style.dart';
 import 'package:web_project/presentation/controller/schedule_controller.dart';
 import 'package:web_project/presentation/widgets/custom_snack_bar.dart';
 

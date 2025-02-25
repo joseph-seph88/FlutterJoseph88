@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:web_project/data/schedule.dart';
+import 'package:web_project/data/model/schedule.dart';
 
 class FirebaseDataSource extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

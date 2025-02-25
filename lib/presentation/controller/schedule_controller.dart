@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../data/schedule.dart';
+import '../../data/model/schedule.dart';
 import '../../domain/schedule_use_case.dart';
 
 class ScheduleController extends GetxController {
@@ -31,7 +31,6 @@ class ScheduleController extends GetxController {
   void getAllSchedule() async {
     try {
       totalSchedule.value = await _scheduleUseCase.getAllSchedule();
-
       getProgressSchedule();
       getFinishedSchedule();
       getSelectSchedule();

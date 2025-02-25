@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:web_project/data/schedule_repository.dart';
-import '../data/schedule.dart';
+import 'package:web_project/domain/schedule_repository.dart';
+import '../data/model/schedule.dart';
 
 abstract class ScheduleUseCase {
   Future<String> addSchedule(String content, Timestamp makeTime);

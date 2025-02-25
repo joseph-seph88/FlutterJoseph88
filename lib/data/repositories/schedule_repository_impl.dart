@@ -1,19 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/firebase_data_source.dart';
-import '../data/schedule.dart';
+import '../../domain/schedule_repository.dart';
+import '../data_source/firebase_data_source.dart';
+import '../model/schedule.dart';
 
-abstract class ScheduleRepository {
-  Future<String> addSchedule(String content, Timestamp makeTime);
 
-  Future<List<Schedule>> getSchedule(DateTime focusedDay);
-
-  Future<List<Schedule>> getSelectSchedule(DateTime selectDay);
-
-  Future<List<Schedule>> getAllSchedule();
-
-  Future<void> updateScheduleStatus(
-      String? id, bool isProgress, Timestamp finishTime);
-}
 
 class ScheduleRepositoryImpl implements ScheduleRepository {
   final FirebaseDataSource _firebaseDataSource;

@@ -1,435 +1,263 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:intl/intl.dart';
-// import 'package:table_calendar/table_calendar.dart';
-// import 'package:web_project/core/app_style.dart';
-// import 'package:web_project/data/schedule_event.dart';
-// import 'package:web_project/presentation/controller/schedule_controller.dart';
-//
-// class ScheduleView extends GetView<ScheduleController> {
-//   const ScheduleView({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(
-//           // title: Text('내 웹 스케줄러'),
-//           actions: [
-//             IconButton(
-//               icon: Icon(Icons.calendar_today),
-//               onPressed: () {
-//                 controller.calendarFormat.value =
-//                     controller.calendarFormat.value == CalendarFormat.month
-//                         ? CalendarFormat.week
-//                         : CalendarFormat.month;
-//               },
-//             ),
-//           ],
-//         ),
-//         body: Row(
-//           children: [
-//             Container(
-//               width: 300,
-//               height: 500,
-//               color: Colors.grey.shade100,
-//               child: Column(
-//                 children: [
-//                   Padding(
-//                     padding: const EdgeInsets.all(16),
-//                     child: Text('일정 요약', style: AppStyle.blackMediumBody()),
-//                   ),
-//                   Expanded(child: Obx(() {
-//                     final allEvents = <ScheduleEvent>[];
-//                     controller.events.forEach((day, events) {
-//                       allEvents.addAll(events);
-//                     });
-//
-//                     final upcomingEvents = allEvents
-//                         .where((e) => e.startTime.isAfter(DateTime.now()))
-//                         .toList()
-//                       ..sort((a, b) => a.startTime.compareTo(b.startTime));
-//
-//                     return ListView.builder(
-//                         itemCount: upcomingEvents.length,
-//                         itemBuilder: (context, index) {
-//                           final event = upcomingEvents[index];
-//                           return ListTile(
-//                             leading: Container(
-//                                 width: 12,
-//                                 height: 12,
-//                                 decoration: BoxDecoration(
-//                                     color: event.color,
-//                                     shape: BoxShape.circle)),
-//                             title: Text('event.title222', style: AppStyle.blackTitle(),),
-//                             subtitle: Text(DateFormat('MM/dd HH:mm')
-//                                 .format(event.startTime)),
-//                             onTap: () {
-//                               _showEventDetails(context, event);
-//                             },
-//                           );
-//                         });
-//                   })),
-//
-//                   // 메인 캘린더 영역
-//                   Expanded(
-//                       child: Column(children: [
-//                     // 캘린더 위젯
-//                     Obx(() => TableCalendar(
-//                           firstDay: DateTime.utc(2020, 1, 1),
-//                           lastDay: DateTime.utc(2030, 12, 31),
-//                           focusedDay: controller.focusedDay.value,
-//                           calendarFormat: controller.calendarFormat.value,
-//                           selectedDayPredicate: (day) {
-//                             return isSameDay(controller.selectedDay.value, day);
-//                           },
-//                           eventLoader: controller.getEventsForDay,
-//                           onDaySelected: (selectedDay, focusedDay) {
-//                             controller.selectedDay.value = selectedDay;
-//                             controller.focusedDay.value = focusedDay;
-//                           },
-//                           onFormatChanged: (format) {
-//                             controller.calendarFormat.value = format;
-//                           },
-//                           onPageChanged: (focusedDay) {
-//                             controller.focusedDay.value = focusedDay;
-//                           },
-//                           calendarStyle: CalendarStyle(
-//                             todayDecoration: BoxDecoration(
-//                               color: Colors.indigo.withOpacity(0.5),
-//                               shape: BoxShape.circle,
-//                             ),
-//                             selectedDecoration: BoxDecoration(
-//                               color: Colors.indigo,
-//                               shape: BoxShape.circle,
-//                             ),
-//                             markerDecoration: BoxDecoration(
-//                               color: Colors.red,
-//                               shape: BoxShape.circle,
-//                             ),
-//                           ),
-//                         )),
-//                     Divider(),
-//                     Expanded(
-//                       child: Obx(() {
-//                         final dayEvents = controller
-//                             .getEventsForDay(controller.selectedDay.value);
-//                         return Column(
-//                           children: [
-//                             Padding(
-//                               padding: const EdgeInsets.all(8.0),
-//                               child: Text(
-//                                 DateFormat('yyyy년 MM월 dd일')
-//                                     .format(controller.selectedDay.value),
-//                                 style: TextStyle(
-//                                     fontSize: 18, fontWeight: FontWeight.bold),
-//                               ),
-//                             ),
-//                             Expanded(
-//                               child: dayEvents.isEmpty
-//                                   ? Center(child: Text('일정이 없습니다.'))
-//                                   : ListView.builder(
-//                                       itemCount: dayEvents.length,
-//                                       itemBuilder: (context, index) {
-//                                         final event = dayEvents[index];
-//                                         return Card(
-//                                           margin: EdgeInsets.symmetric(
-//                                             horizontal: 16.0,
-//                                             vertical: 4.0,
-//                                           ),
-//                                           child: ListTile(
-//                                             leading: Container(
-//                                               width: 12,
-//                                               height: 12,
-//                                               decoration: BoxDecoration(
-//                                                 color: event.color,
-//                                                 shape: BoxShape.circle,
-//                                               ),
-//                                             ),
-//                                             title: Text(event.title),
-//                                             subtitle: Text(
-//                                               '${DateFormat('HH:mm').format(event.startTime)} - '
-//                                               '${DateFormat('HH:mm').format(event.endTime)}\n'
-//                                               '${event.description}',
-//                                             ),
-//                                             trailing: IconButton(
-//                                               icon: Icon(Icons.delete_outline),
-//                                               onPressed: () {
-//                                                 controller
-//                                                     .removeEvent(event.id);
-//                                               },
-//                                             ),
-//                                           ),
-//                                         );
-//                                       },
-//                                     ),
-//                             ),
-//                           ],
-//                         );
-//                       }),
-//                     ),
-//                   ])),
-//                 ],
-//               ),
-//             )
-//           ],
-//         ),
-//         floatingActionButton: FloatingActionButton(
-//           child: Icon(Icons.add),
-//           onPressed: () => _showAddEventDialog(context),
-//         ));
-//   }
-//
-//   // 일정 추가 다이얼로그
-//   void _showAddEventDialog(BuildContext context) {
-//     final titleController = TextEditingController();
-//     final descController = TextEditingController();
-//     final startDate = DateTime.now();
-//     final endDate = startDate.add(Duration(hours: 1));
-//
-//     final startDateController = Rx<DateTime>(startDate);
-//     final endDateController = Rx<DateTime>(endDate);
-//     final selectedColor = Rx<Color>(Colors.blue);
-//
-//     Get.dialog(
-//       Dialog(
-//         child: Container(
-//           width: 500,
-//           padding: EdgeInsets.all(16.0),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Text('새 일정 추가',
-//                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-//               SizedBox(height: 16),
-//               TextField(
-//                 controller: titleController,
-//                 decoration: InputDecoration(
-//                   labelText: '제목',
-//                   border: OutlineInputBorder(),
-//                 ),
-//               ),
-//               SizedBox(height: 16),
-//               TextField(
-//                 controller: descController,
-//                 decoration: InputDecoration(
-//                   labelText: '설명',
-//                   border: OutlineInputBorder(),
-//                 ),
-//                 maxLines: 3,
-//               ),
-//               SizedBox(height: 16),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: Obx(() => ListTile(
-//                           title: Text('시작 시간'),
-//                           subtitle: Text(DateFormat('yyyy-MM-dd HH:mm')
-//                               .format(startDateController.value)),
-//                           onTap: () async {
-//                             final date = await showDatePicker(
-//                               context: context,
-//                               initialDate: startDateController.value,
-//                               firstDate: DateTime(2020),
-//                               lastDate: DateTime(2030),
-//                             );
-//
-//                             if (date != null) {
-//                               final time = await showTimePicker(
-//                                 context: context,
-//                                 initialTime: TimeOfDay.fromDateTime(
-//                                     startDateController.value),
-//                               );
-//
-//                               if (time != null) {
-//                                 startDateController.value = DateTime(
-//                                   date.year,
-//                                   date.month,
-//                                   date.day,
-//                                   time.hour,
-//                                   time.minute,
-//                                 );
-//                               }
-//                             }
-//                           },
-//                         )),
-//                   ),
-//                   Expanded(
-//                     child: Obx(() => ListTile(
-//                           title: Text('종료 시간'),
-//                           subtitle: Text(DateFormat('yyyy-MM-dd HH:mm')
-//                               .format(endDateController.value)),
-//                           onTap: () async {
-//                             final date = await showDatePicker(
-//                               context: context,
-//                               initialDate: endDateController.value,
-//                               firstDate: DateTime(2020),
-//                               lastDate: DateTime(2030),
-//                             );
-//
-//                             if (date != null) {
-//                               final time = await showTimePicker(
-//                                 context: context,
-//                                 initialTime: TimeOfDay.fromDateTime(
-//                                     endDateController.value),
-//                               );
-//
-//                               if (time != null) {
-//                                 endDateController.value = DateTime(
-//                                   date.year,
-//                                   date.month,
-//                                   date.day,
-//                                   time.hour,
-//                                   time.minute,
-//                                 );
-//                               }
-//                             }
-//                           },
-//                         )),
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 16),
-//               Row(
-//                 children: [
-//                   Text('색상: '),
-//                   SizedBox(width: 8),
-//                   ...Colors.primaries.take(8).map((color) => Padding(
-//                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-//                         child: Obx(() => GestureDetector(
-//                               onTap: () {
-//                                 selectedColor.value = color;
-//                               },
-//                               child: CircleAvatar(
-//                                 radius: 12,
-//                                 backgroundColor: color,
-//                                 child: selectedColor.value == color
-//                                     ? Icon(Icons.check,
-//                                         size: 16, color: Colors.white)
-//                                     : null,
-//                               ),
-//                             )),
-//                       )),
-//                 ],
-//               ),
-//               SizedBox(height: 24),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.end,
-//                 children: [
-//                   TextButton(
-//                     onPressed: () => Get.back(),
-//                     child: Text('취소'),
-//                   ),
-//                   SizedBox(width: 16),
-//                   ElevatedButton(
-//                     onPressed: () {
-//                       if (titleController.text.isEmpty) {
-//                         Get.snackbar('오류', '제목을 입력해주세요.');
-//                         return;
-//                       }
-//
-//                       if (endDateController.value
-//                           .isBefore(startDateController.value)) {
-//                         Get.snackbar('오류', '종료 시간은 시작 시간 이후여야 합니다.');
-//                         return;
-//                       }
-//
-//                       final newEvent = ScheduleEvent(
-//                         id: DateTime.now().millisecondsSinceEpoch.toString(),
-//                         title: titleController.text,
-//                         description: descController.text,
-//                         startTime: startDateController.value,
-//                         endTime: endDateController.value,
-//                         color: selectedColor.value,
-//                       );
-//
-//                       controller.addEvent(newEvent);
-//                       Get.back();
-//                     },
-//                     child: Text('저장'),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   // 이벤트 상세 정보 다이얼로그
-//   void _showEventDetails(BuildContext context, ScheduleEvent event) {
-//     Get.dialog(
-//       Dialog(
-//         child: Container(
-//           width: 400,
-//           padding: EdgeInsets.all(16.0),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Row(
-//                 children: [
-//                   Container(
-//                     width: 16,
-//                     height: 16,
-//                     decoration: BoxDecoration(
-//                       color: event.color,
-//                       shape: BoxShape.circle,
-//                     ),
-//                   ),
-//                   SizedBox(width: 8),
-//                   Expanded(
-//                     child: Text(
-//                       event.title,
-//                       style:
-//                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               Divider(),
-//               SizedBox(height: 8),
-//               Text(
-//                 '시간:',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//               SizedBox(height: 4),
-//               Text(
-//                 '${DateFormat('yyyy년 MM월 dd일 HH:mm').format(event.startTime)} - '
-//                 '${DateFormat('HH:mm').format(event.endTime)}',
-//               ),
-//               SizedBox(height: 16),
-//               Text(
-//                 '설명:',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//               SizedBox(height: 4),
-//               Text(event.description.isEmpty ? '(없음)' : event.description),
-//               SizedBox(height: 24),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.end,
-//                 children: [
-//                   TextButton(
-//                     onPressed: () {
-//                       controller.removeEvent(event.id);
-//                       Get.back();
-//                     },
-//                     child: Text('삭제'),
-//                     style: TextButton.styleFrom(
-//                       foregroundColor: Colors.red,
-//                     ),
-//                   ),
-//                   SizedBox(width: 16),
-//                   ElevatedButton(
-//                     onPressed: () => Get.back(),
-//                     child: Text('닫기'),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:web_project/core/theme/widget_style.dart';
+import 'package:web_project/presentation/controller/schedule_controller.dart';
+import '../../core/theme/app_style.dart';
+import '../../data/model/schedule.dart';
+import '../widgets/custom_bottom_bar.dart';
+import '../widgets/custom_floating_button.dart';
+import '../widgets/custom_show_dialog.dart';
+
+class ScheduleView extends GetView<ScheduleController> {
+  const ScheduleView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        title: Text('Mark2 Scheduler', style: AppStyle.blackTitle()),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.calendar_today),
+              onPressed: controller.changeCalendarFormat),
+        ],
+      ),
+      body: RefreshIndicator(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+                child: Column(
+              children: [
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: TextButton(
+                        onPressed: controller.onOffSummary,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(width: 28),
+                              Obx(() => controller.isProgress.value
+                                  ? Text('진행중 목록',
+                                      style: AppStyle.greyMediumBody())
+                                  : Text('완료 목록',
+                                      style: AppStyle.greyMediumBody())),
+                              SizedBox(width: 202),
+                              IconButton(
+                                  onPressed: () => controller.onOffProgress(),
+                                  icon: Icon(Icons.format_list_bulleted,
+                                      size: 24, color: Colors.grey))
+                            ]))),
+              ],
+            )),
+            Obx(() => controller.isSummary.value
+                ? controller.isProgress.value
+                    ? _buildSummary(controller.progressSchedule)
+                    : _buildSummary(controller.finishSchedule)
+                : SliverToBoxAdapter()),
+            SliverToBoxAdapter(
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(14, 30, 14, 8),
+                    child: Divider())),
+            SliverToBoxAdapter(
+              child: Obx(() {
+                return _buildTableCalendar();
+              }),
+            ),
+            SliverToBoxAdapter(
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(14, 12, 14, 30),
+                    child: Divider())),
+            Obx(() => _buildSchedule(controller.scheduleToday)),
+          ],
+        ),
+        onRefresh: () async {},
+      ),
+      bottomNavigationBar: CustomBottomBar(),
+      floatingActionButton: CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildSummary(List<Schedule> dataList) {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 315,
+        child: PageView.builder(
+          controller: PageController(viewportFraction: 0.9),
+          itemCount: (dataList.length / 3).ceil(),
+          itemBuilder: (context, pageIndex) {
+            int startIndex = pageIndex * 3;
+            int endIndex = startIndex + 3;
+
+            List<Schedule> pageData = dataList.sublist(startIndex,
+                endIndex > dataList.length ? dataList.length : endIndex);
+
+            return Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: WidgetStyle().whiteShadowBoxDecoration(),
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(8, 3, 8, 3),
+                      itemCount: pageData.length,
+                      itemBuilder: (context, index) {
+                        final data = pageData[index];
+                        String formattedDate =
+                            controller.transTimeFormat(data.makeTime);
+                        final itemColors = [
+                          Color(0xFFFFF8E7),
+                          Color(0xFFF0F7FF),
+                          Color(0xFFFFF0F0),
+                        ];
+
+                        return GestureDetector(
+                          onLongPress: () {
+                            if (controller.isProgress.value) {
+                              CustomShowDialog().showDialog(
+                                  context,
+                                  '완료 목록으로 변경하시겠습니까?',
+                                  () => controller.completeSchedule(data));
+                            } else {
+                              CustomShowDialog().showDialog(
+                                  context,
+                                  '진행중 목록으로 변경하시겠습니까?',
+                                  () => controller.restoreSchedule(data));
+                            }
+                          },
+                          child: SizedBox(
+                            height: 100,
+                            child: Card(
+                              elevation: 5,
+                              color: itemColors[index],
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        data.content,
+                                        overflow: TextOverflow.visible,
+                                        style:
+                                            AppStyle.blueGraySmallMediumBody(),
+                                      ),
+                                    ),
+                                    Text(formattedDate,
+                                        style: AppStyle.greySmallBody()),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCalendar() {
+    return TableCalendar(
+      focusedDay: controller.focusedDay.value,
+      firstDay: DateTime.utc(2025, 1, 1),
+      lastDay: DateTime.utc(2025, 12, 31),
+      calendarFormat: controller.calendarFormat.value,
+      eventLoader: (value) => controller.getEventLoader(value),
+      onDaySelected: (selectedDay, focusedDay) {
+        controller.selectedDay.value = selectedDay;
+        controller.focusedDay.value = focusedDay;
+        controller.getSelectSchedule();
+      },
+      selectedDayPredicate: (day) =>
+          isSameDay(controller.selectedDay.value, day),
+      availableCalendarFormats: {
+        CalendarFormat.month: '주간 보기',
+        CalendarFormat.twoWeeks: '월간 보기',
+        CalendarFormat.week: '2주 보기',
+      },
+      onFormatChanged: (format) => controller.calendarFormat.value = format,
+      onPageChanged: (focusedDay) {
+        controller.focusedDay.value = focusedDay;
+        controller.getMonthSchedule();
+      },
+      calendarStyle: CalendarStyle(
+        todayDecoration: BoxDecoration(
+            color: Colors.teal.withAlpha(100), shape: BoxShape.circle),
+        selectedDecoration:
+            BoxDecoration(color: Colors.teal[400], shape: BoxShape.circle),
+        markerDecoration:
+            BoxDecoration(color: Colors.teal[200], shape: BoxShape.circle),
+      ),
+    );
+  }
+
+  Widget _buildSchedule(List<Schedule> dataList) {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 350,
+        child: PageView.builder(
+          controller: PageController(viewportFraction: 0.9),
+          itemCount: (dataList.length / 3).ceil(),
+          itemBuilder: (context, pageIndex) {
+            int startIndex = pageIndex * 3;
+            int endIndex = startIndex + 3;
+
+            List<Schedule> pageData = dataList.sublist(startIndex,
+                endIndex > dataList.length ? dataList.length : endIndex);
+
+            return ListView.builder(
+              physics: BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              itemCount: pageData.length,
+              itemBuilder: (context, index) {
+                final data = pageData[index];
+                final makeTime = controller.transTimeFormat(data.makeTime);
+
+                return Card(
+                  elevation: 5,
+                  color: Colors.teal.shade50,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Stack(children: [
+                    Obx(() {
+                      final isProgress = controller.checkProgress(data);
+                      return isProgress
+                          ? Icon(Icons.check_box_outlined, color: Colors.grey)
+                          : Icon(Icons.check_circle, color: Colors.green);
+                    }),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(15, 30, 15, 30),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(data.content,
+                              overflow: TextOverflow.visible,
+                              style: AppStyle.blueGraySmallMediumBody()),
+                          Text(makeTime, style: AppStyle.greySmallBody()),
+                        ],
+                      ),
+                    ),
+                  ]),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
