@@ -48,10 +48,10 @@
             android:value="2" />
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
-            android:value="upjgr3km4l" />
+            android:value="${NAVER_MAP_KEY}" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCWjE7YvMlqTO-Tyb4mSez58w0T1CSwrMk"/> 
+            android:value="${GEO_KEY}"/>
         <activity
             android:name="com.navercorp.nid.oauth.NidOAuthBridgeActivity"
             android:exported="true"
@@ -61,7 +61,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data 
-                    android:scheme="neverA8ZlcgGYpe2dXuq8AOlQ"
+                    android:scheme="${NAVER_OAUTH_KEY}"
                     android:host="oauth"/>
             </intent-filter>
         </activity>
@@ -76,7 +76,7 @@
 
                 <!-- "kakao${YOUR_NATIVE_APP_KEY}://oauth" 형식의 앱 실행 스킴 설정 -->
                 <!-- 카카오 로그인 Redirect URI -->
-                <data android:scheme="kakaofd8bc2a5195423426dd1f4d504378a9b" android:host="oauth"/>
+                <data android:scheme="${KAKAO_OAUTH_KEY}" android:host="oauth"/>
             </intent-filter>
         </activity>
         <activity

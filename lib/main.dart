@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +19,11 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  KakaoSdk.init(nativeAppKey: 'fd8bc2a5195423426dd1f4d504378a9b');
+  await dotenv.load(fileName: ".env");
+  final localProperties = File('android/local.properties');
+  String content = localProperties.readAsStringSync();
+  content += '\nGEO_KEY=${dotenv.env['GEO_KEY'] ?? ''}';
+  localProperties.writeAsStringSync(content);
 
   // flutter_image_compress 초기화
   FlutterImageCompress.validator.ignoreCheckExtName = true;
@@ -29,6 +35,8 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     ),
   ]);
+
+  KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_KEY'] ?? '');
 
   final prefs = await SharedPreferences.getInstance();
   final notificationEnabled = prefs.getBool('notificationEnabled') ?? true;
