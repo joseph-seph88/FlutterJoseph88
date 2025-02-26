@@ -100,9 +100,7 @@ flutter:
   assets:
     - assets/images/
     - assets/lotties/
-    - assets/glb/static/
-    - assets/glb/dynamic/
-
+    - .env
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

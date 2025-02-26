@@ -49,3 +49,5 @@ macos/
 windows/
 linux/
 web/
+
+.env
