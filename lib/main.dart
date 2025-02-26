@@ -3,13 +3,15 @@ import 'package:chatbots/presentation/controller/tf_chat_view_controller.dart';
 import 'package:chatbots/presentation/view/tf_chat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:get/get.dart';
 import 'core/theme/app_theme.dart';
 
-
 void main() async {
-  Gemini.init(apiKey: apiKey);
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
+  Gemini.init(apiKey: dotenv.env['Gemini_Api_Key'] ?? 'default_value');
   Get.lazyPut(() => ChatMockDataSource());
   Get.lazyPut(() => TfChatViewController());
 
