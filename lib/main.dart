@@ -15,15 +15,12 @@ import 'package:o2/firebase_options.dart';
 import 'package:o2/presentation/providers/route_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  await dotenv.load(fileName: ".env");
-  final localProperties = File('android/local.properties');
-  String content = localProperties.readAsStringSync();
-  content += '\nGEO_KEY=${dotenv.env['GEO_KEY'] ?? ''}';
-  localProperties.writeAsStringSync(content);
+  await dotenv.load();
 
   // flutter_image_compress 초기화
   FlutterImageCompress.validator.ignoreCheckExtName = true;
