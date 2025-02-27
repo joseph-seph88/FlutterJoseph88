@@ -61,7 +61,6 @@ class NotificationService extends GetxService {
     }
   }
 
-
   Future<void> showInstanceNotification(
       String title, String body, int index) async {
     NotificationDetails notificationDetails = NotificationDetails(

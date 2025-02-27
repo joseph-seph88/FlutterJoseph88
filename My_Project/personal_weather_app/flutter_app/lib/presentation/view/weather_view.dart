@@ -76,15 +76,13 @@ class WeatherView extends GetView<WeatherController> {
           Row(
             children: [
               IconButton(
-                  onPressed: () async{
-                    controller.sendMessage();
-                  },
+                  onPressed: controller.sendMessage,
                   icon: Icon(Icons.schedule_send)),
               PopupMenuButton<String>(
                 onSelected: (value) {
                   final cityName = controller.transCityNameEng(value);
                   controller.selectedCity = cityName;
-                  controller.changeWeatherData(cityName);
+                  controller.getWeatherDataWithCity(cityName);
                 },
                 itemBuilder: (BuildContext context) {
                   return controller.cityList.map((String city) {
@@ -111,7 +109,7 @@ class WeatherView extends GetView<WeatherController> {
           Container();
         }
         final weatherData = controller.todayWeatherData.value;
-        final weatherIcon = weatherData?.weatherIcon ?? Icons.sunny;
+        final weatherIcon = weatherData?.weatherIcon ?? Icons.wb_sunny;
 
         return Column(
           children: [
@@ -155,7 +153,7 @@ class WeatherView extends GetView<WeatherController> {
                     SizedBox(height: 8),
                     Icon(weather.weatherIcon, color: Colors.yellow, size: 24),
                     SizedBox(height: 8),
-                    Text('${weather.temperature}°',
+                    Text('${weather.rainDescription}',
                         style: CustomTextStyle.bodyVerySmallWhite()),
                   ],
                 ),
@@ -172,27 +170,21 @@ class WeatherView extends GetView<WeatherController> {
       margin: EdgeInsets.only(top: 32),
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(28),
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-      ),
+          color: Colors.white.withAlpha(28),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30), topRight: Radius.circular(30))),
       child: Obx(
         () {
           final weatherDetail = controller.todayWeatherData.value;
-          final tempDesc = weatherDetail?.tempDescription ?? '따뜻함';
-          final humDesc = weatherDetail?.humidityDescription ?? '습함';
-          final windDesc = weatherDetail?.windDescription ?? '선섬함';
-          final uvDesc = weatherDetail?.uvDescription ?? '자외선 강함';
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('날씨 상세 정보', style: CustomTextStyle.bodyLargeWhite()),
               SizedBox(height: 16),
-              _buildDetailRow('체감 온도', tempDesc),
-              _buildDetailRow('습도', humDesc),
-              _buildDetailRow('풍속', windDesc),
-              _buildDetailRow('자외선', uvDesc),
+              _buildDetailRow('체감 온도', weatherDetail?.tempDescription ?? '따뜻함'),
+              _buildDetailRow('습도', weatherDetail?.humidityDescription ?? '습함'),
+              _buildDetailRow('풍속', weatherDetail?.windDescription ?? '선섬함'),
+              _buildDetailRow('자외선', weatherDetail?.uvDescription ?? '자외선 강함'),
             ],
           );
         },
