@@ -83,7 +83,7 @@ class ChatScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Container(
-            decoration: WidgetStyle.greyBtnDecoration(),
+            decoration: WidgetStyle.gradientGreyBtnDecoration(),
             child: IconButton(
                 onPressed: () => selectedImage(context),
                 icon: Icon(Icons.image,

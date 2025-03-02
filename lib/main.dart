@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:personal_select_chat/bloc/chat/chat_bloc.dart';
-import 'package:personal_select_chat/presentation/screens/chat_screen.dart';
+import 'package:personal_select_chat/router/app_router.dart';
+import 'package:personal_select_chat/router/router_bloc.dart';
+import 'package:personal_select_chat/router/router_state.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider(create: (context)=>RouterBloc()),
+    BlocProvider(create: (context)=>ChatBloc())
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,14 +20,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
+        SystemUiOverlayStyle(systemNavigationBarColor: Colors.black));
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: BlocProvider(
-        create: (context) => ChatBloc(),
-        child: ChatScreen(),
-      ),
-    );
+    return BlocBuilder<RouterBloc, RouterState>(builder: (context, state) {
+      final routerBloc = context.read<RouterBloc>();
+      final router = AppRouter.createRouter(routerBloc);
+
+      return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: router,
+      );
+    });
   }
 }
