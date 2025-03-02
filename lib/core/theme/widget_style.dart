@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 
 abstract class WidgetStyle {
+  static BoxDecoration generalGreyBtnDecoration() {
+    return BoxDecoration(
+      color: Colors.grey.shade100,
+      borderRadius: BorderRadius.circular(50),
+    );
+  }
 
-  static BoxDecoration greyBtnDecoration(){
+  static BoxDecoration generalWhiteLabelDecoration (){
+    return BoxDecoration(
+      color: Colors.white.withAlpha(50),
+      borderRadius: BorderRadius.circular(16),
+    );
+  }
+
+  static BoxDecoration gradientGreyBtnDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
         colors: [Colors.grey.shade100, Colors.grey.shade200],
@@ -20,13 +33,10 @@ abstract class WidgetStyle {
     );
   }
 
-  static BoxDecoration indigoBtnDecoration(){
+  static BoxDecoration indigoBtnDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
-        colors: [
-          Colors.indigo.shade100,
-          Colors.indigo.shade500
-        ],
+        colors: [Colors.indigo.shade100, Colors.indigo.shade500],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -41,7 +51,7 @@ abstract class WidgetStyle {
     );
   }
 
-  static BoxDecoration greyTextFieldDecoration(){
+  static BoxDecoration greyTextFieldDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
         colors: [Colors.grey.shade100, Colors.grey.shade200],
@@ -59,4 +69,6 @@ abstract class WidgetStyle {
       ],
     );
   }
+
+
 }
