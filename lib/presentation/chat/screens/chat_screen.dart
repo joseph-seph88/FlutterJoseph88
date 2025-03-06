@@ -22,7 +22,9 @@ class ChatScreen extends StatelessWidget {
         "${dateFormat.year}년 ${dateFormat.month}월 ${dateFormat.day}일";
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
         toolbarHeight: 40,
       ),

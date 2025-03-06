@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:personal_select_chat/presentation/screens/chat_screen.dart';
-import 'package:personal_select_chat/presentation/screens/favorite_screen.dart';
-import 'package:personal_select_chat/presentation/screens/profile_screen.dart';
+import 'package:personal_select_chat/presentation/chat/screens/chat_screen.dart';
+import 'package:personal_select_chat/presentation/favorite/favorite_screen.dart';
+import 'package:personal_select_chat/presentation/profile/profile_screen.dart';
 import '../../core/utils/app_constant.dart';
-import 'home_screen.dart';
+import '../home/screens/home_screen.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class EntryScreen extends StatefulWidget {
+  const EntryScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<EntryScreen> createState() => _EntryScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _EntryScreenState extends State<EntryScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -45,13 +45,13 @@ class _MainScreenState extends State<MainScreen> {
       type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(
-            icon: Icon(Icons.explore), label: AppConstant.explore),
+            icon: Icon(Icons.explore), label: AppString.explore),
         BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border), label: AppConstant.favorite),
+            icon: Icon(Icons.favorite_border), label: AppString.favorite),
         BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline), label: AppConstant.message),
+            icon: Icon(Icons.chat_bubble_outline), label: AppString.message),
         BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline), label: AppConstant.profile),
+            icon: Icon(Icons.person_outline), label: AppString.profile),
       ],
     );
   }

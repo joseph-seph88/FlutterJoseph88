@@ -23,7 +23,7 @@ class MessageBubble extends StatelessWidget {
           message.isMine
               ? SizedBox.shrink()
               : CircleAvatar(
-                  backgroundImage: AssetImage(AppConstant.batman), radius: 16),
+                  backgroundImage: AssetImage(AppImage.batman), radius: 16),
           SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
