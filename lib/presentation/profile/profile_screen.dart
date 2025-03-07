@@ -13,6 +13,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          key: Key('profileScrollView'),
           child: Column(
             children: [
               _buildProfile(context),
@@ -219,6 +220,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildLogout(BuildContext context) {
     return Center(
       child: TextButton.icon(
+        key: Key('logoutButton'),
         onPressed: () {
           context.go(AppRouter.login);
         },
