@@ -28,6 +28,7 @@ jobs:
             - name: 코드 포맷 검사
               run: |
                 dart format --set-exit-if-changed .
+                git add .
                 git diff 
 
             - name: 분석 (Lint)
