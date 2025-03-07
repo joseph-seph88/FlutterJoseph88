@@ -42,20 +42,19 @@ jobs:
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim  # GPU 활성화
           disable-animations: true
           script: |
+            # ADB 서버 초기화
             adb kill-server
             adb start-server
 
+            # 에뮬레이터 준비까지 기다리기
             adb devices
             adb wait-for-device
 
-            # Flutter 장치 확인
+            # Flutter 장치 연결 확인
             flutter devices
 
-            # 통합 테스트 실행
+            # 통합 테스트 실행 (integration_test 폴더에 있는 파일 경로로 설정)
             flutter drive --target=integration_test/app_flow_test.dart
-
-
-
 
 
 
