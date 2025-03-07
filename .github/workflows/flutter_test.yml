@@ -25,6 +25,15 @@ jobs:
             - name: 의존성 설치
               run: flutter pub get
 
+            - name: Android Emulator 실행
+              run: |
+                echo "y" | sdkmanager "system-images;android-30;google_apis;x86_64"
+                avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X"
+                emulator -avd test -no-audio -no-window &
+
+            - name: ADB 연결 확인
+              run: adb devices
+
             - name: 코드 포맷 검사
               run: dart format --set-exit-if-changed .
 
