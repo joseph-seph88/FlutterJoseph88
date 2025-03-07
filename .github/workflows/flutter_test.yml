@@ -33,3 +33,6 @@ jobs:
 
             - name: 유닛 테스트 & 위젯 테스트 실행
               run: flutter test test/login/login_widget_test.dart
+
+            - name: 통합 테스트
+              run: flutter test integration_test/app_flow_test.dart
