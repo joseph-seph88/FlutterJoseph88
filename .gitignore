@@ -50,7 +50,6 @@ app.*.map.json
 # OS
 linux/
 macos/
-web/
 windows/
 
 # Firebase 설정 파일

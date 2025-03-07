@@ -9,6 +9,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('App Flow Test', (tester) async {
+    debugPrint("[1] App Flow Test 시작");
+
     await tester.pumpWidget(AppBlocProviders(child: MyApp()));
     await tester.pumpAndSettle();
 
@@ -61,5 +63,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("로그인"), findsOneWidget);
+    debugPrint("[1] App Flow Test 종료");
   });
 }
