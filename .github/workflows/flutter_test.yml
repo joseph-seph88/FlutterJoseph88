@@ -60,13 +60,13 @@ jobs:
       - name: Android 통합 테스트 실행
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
-          api-level: 29
-          target: default
+          api-level: 34
+          target: google_apis
           arch: x86_64
-          profile: Nexus 6
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          profile: pixel_6
+          emulator-options: -no-snapshot -no-window -gpu off -noaudio -no-boot-anim
           disable-animations: true
           script: |
+            adb devices
             flutter devices
             flutter test integration_test/app_flow_test.dart -d emulator-5554
-          emulator-build: 7425822
