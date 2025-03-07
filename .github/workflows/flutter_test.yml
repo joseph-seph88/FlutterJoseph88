@@ -1,73 +1,135 @@
 name: Flutter CI
 
 on:
-    push:
-        branches: 
-            - '*'
-    pull_request:
-        branches:
-            - personal_select_chat
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - personal_select_chat
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
+  widget_test:
+    name: 위젯 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
 
-        steps:
-            - name: 저장소 체크아웃
-              uses: actions/checkout@v4
+      - name: Flutter 설정
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.1
+          cache: true
 
-            - name: Flutter 설정
-              uses: subosito/flutter-action@v2
-              with:
-                  flutter-version: 3.27.1
-                  cache: true
+      - name: 의존성 설치
+        run: flutter pub get
 
-            - name: 의존성 설치
-              run: flutter pub get
+      - name: 코드 포맷 검사
+        run: dart format --set-exit-if-changed .
 
-            - name: Android SDK 설치
-              run: |
-                sudo apt-get update
-                sudo apt-get install -y wget unzip openjdk-11-jdk
-                mkdir -p $HOME/Android/Sdk
-                cd $HOME/Android/Sdk
-                wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
-                unzip commandlinetools-linux-7583922_latest.zip
-                rm commandlinetools-linux-7583922_latest.zip
-                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --update
-                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "platform-tools" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
+      - name: 분석 (Lint)
+        run: flutter analyze
 
-            - name: ADB 환경 변수 설정
-              run: |
-                echo "$HOME/Android/Sdk/platform-tools" >> $GITHUB_PATH
-                echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
-                echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+      - name: 위젯 테스트 실행
+        run: flutter test test/login/login_widget_test.dart
 
-            - name: 경로 확인
-              run: |
-                echo "PATH=$PATH"
-                ls -la $HOME/Android/Sdk/platform-tools
+  integration_test:
+    name: 통합 테스트
+    needs: widget_test
+    runs-on: macos-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
 
-            - name: Android Emulator 설정
-              run: |
-                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "system-images;android-30;google_apis;x86_64"
-                echo "no" | $HOME/Android/Sdk/cmdline-tools/bin/avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X" --force
-                $HOME/Android/Sdk/emulator/emulator -avd test -no-audio -no-window -no-snapshot -gpu swiftshader_indirect &
-                sleep 60
+      - name: Flutter 설정
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.1
+          cache: true
 
-            - name: ADB 연결 확인
-              run: |
-                $HOME/Android/Sdk/platform-tools/adb devices
-    
+      - name: 의존성 설치
+        run: flutter pub get
 
-            - name: 코드 포맷 검사
-              run: dart format --set-exit-if-changed .
+      - name: Android 통합 테스트 실행
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 5X
+          script: flutter test integration_test/app_flow_test.dart
 
-            - name: 분석 (Lint)
-              run: flutter analyze
 
-            - name: 유닛 테스트 & 위젯 테스트 실행
-              run: flutter test test/login/login_widget_test.dart
-
-            - name: 통합 테스트
-              run: flutter test integration_test/app_flow_test.dart
+#name: Flutter CI
+#
+#on:
+#    push:
+#        branches:
+#            - '*'
+#    pull_request:
+#        branches:
+#            - personal_select_chat
+#
+#jobs:
+#    test:
+#        runs-on: ubuntu-latest
+#
+#        steps:
+#            - name: 저장소 체크아웃
+#              uses: actions/checkout@v4
+#
+#            - name: Flutter 설정
+#              uses: subosito/flutter-action@v2
+#              with:
+#                  flutter-version: 3.27.1
+#                  cache: true
+#
+#            - name: 의존성 설치
+#              run: flutter pub get
+#
+#            - name: Android SDK 설치
+#              run: |
+#                sudo apt-get update
+#                sudo apt-get install -y wget unzip openjdk-11-jdk
+#                mkdir -p $HOME/Android/Sdk
+#                cd $HOME/Android/Sdk
+#                wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+#                unzip commandlinetools-linux-7583922_latest.zip
+#                rm commandlinetools-linux-7583922_latest.zip
+#                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --update
+#                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "platform-tools" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
+#
+#            - name: ADB 환경 변수 설정
+#              run: |
+#                echo "$HOME/Android/Sdk/platform-tools" >> $GITHUB_PATH
+#                echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
+#                echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+#
+#            - name: 경로 확인
+#              run: |
+#                echo "PATH=$PATH"
+#                ls -la $HOME/Android/Sdk/platform-tools
+#
+#            - name: Android Emulator 설정
+#              run: |
+#                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "system-images;android-30;google_apis;x86_64"
+#                echo "no" | $HOME/Android/Sdk/cmdline-tools/bin/avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X" --force
+#                $HOME/Android/Sdk/emulator/emulator -avd test -no-audio -no-window -no-snapshot -gpu swiftshader_indirect &
+#                sleep 60
+#
+#            - name: ADB 연결 확인
+#              run: |
+#                $HOME/Android/Sdk/platform-tools/adb devices
+#
+#            - name: 코드 포맷 검사
+#              run: dart format --set-exit-if-changed .
+#
+#            - name: 분석 (Lint)
+#              run: flutter analyze
+#
+#            - name: 유닛 테스트 & 위젯 테스트 실행
+#              run: flutter test test/login/login_widget_test.dart
+#
+#            - name: 통합 테스트
+#              run: flutter test integration_test/app_flow_test.dart
