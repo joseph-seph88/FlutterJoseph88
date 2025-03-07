@@ -35,6 +35,7 @@ jobs:
                 unzip commandlinetools-linux-7583922_latest.zip
                 rm commandlinetools-linux-7583922_latest.zip
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --update
+                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "platform-tools" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
 
             - name: Android Emulator 설정
               run: |
@@ -43,7 +44,9 @@ jobs:
                 emulator -avd test -no-audio -no-window &
 
             - name: ADB 연결 확인
-              run: adb devices
+              run: |
+                sleep 30
+                adb devices
 
             - name: 코드 포맷 검사
               run: dart format --set-exit-if-changed .
