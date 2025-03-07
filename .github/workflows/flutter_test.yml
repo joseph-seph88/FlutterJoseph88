@@ -26,7 +26,9 @@ jobs:
               run: flutter pub get
 
             - name: 코드 포맷 검사
-              run: dart format --set-exit-if-changed .
+              run: |
+                dart format --set-exit-if-changed .
+                git diff 
 
             - name: 분석 (Lint)
               run: flutter analyze
