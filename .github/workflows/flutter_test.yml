@@ -9,7 +9,7 @@ on:
       - personal_select_chat
 
 jobs:
-  widget_test:
+  flutter_test:
     name: 위젯 테스트
     runs-on: ubuntu-latest
     steps:
