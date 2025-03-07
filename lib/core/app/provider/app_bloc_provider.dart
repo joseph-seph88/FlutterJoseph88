@@ -4,7 +4,7 @@ import 'package:personal_select_chat/bloc/home/home_bloc.dart';
 import 'package:personal_select_chat/bloc/login/login_bloc.dart';
 import 'package:personal_select_chat/core/app/router/router_bloc.dart';
 import 'package:flutter/material.dart';
-  
+
 class AppBlocProviders extends StatelessWidget {
   const AppBlocProviders({super.key, required this.child});
 

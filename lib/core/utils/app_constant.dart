@@ -2,7 +2,8 @@ class AppImage {
   static const String _image = 'assets/images/';
 
   static const String pictureRandom = "https://picsum.photos/201";
-  static const String person200 = 'https://images.unsplash.com/photo-1581403341630-a6e0b9d2d257';
+  static const String person200 =
+      'https://images.unsplash.com/photo-1581403341630-a6e0b9d2d257';
 
   static const String batman = '${_image}batman.png';
   static const String totoro = '${_image}toto.png';

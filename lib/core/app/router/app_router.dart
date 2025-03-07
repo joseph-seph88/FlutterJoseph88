@@ -18,7 +18,6 @@ class AppRouter {
   static const String chat = '/chat';
   static const String profile = '/profile';
 
-
   static GoRouter createRouter(RouterBloc routerBloc) {
     return GoRouter(
       initialLocation: routerBloc.state is RouterAuthenticated ? login : login,

@@ -19,7 +19,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       ));
     });
 
-    on<ResetLoginFormEvent>((event, emit){
+    on<ResetLoginFormEvent>((event, emit) {
       emit(LoginFormState());
     });
   }

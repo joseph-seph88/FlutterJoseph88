@@ -117,7 +117,7 @@ class RegisterScreen extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     return Row(children: [
       IconButton(
-        key: Key('backButton'),
+          key: Key('backButton'),
           onPressed: () {
             controllerClear(context);
             context.pop();
@@ -171,9 +171,7 @@ class RegisterScreen extends StatelessWidget {
       controller: _nameController,
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
       decoration: InputDecoration(
-          labelText: '이름',
-          prefixIcon: Icon(Icons.person),
-          hintText: '이름 입력..'),
+          labelText: '이름', prefixIcon: Icon(Icons.person), hintText: '이름 입력..'),
       validator: (value) {
         final isEmptyResult = Validator.isEmptyValidator(value, '이름을 입력해주세요');
         if (isEmptyResult != null) {

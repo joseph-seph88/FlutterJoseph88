@@ -190,7 +190,7 @@ class ProfileScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(20),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),

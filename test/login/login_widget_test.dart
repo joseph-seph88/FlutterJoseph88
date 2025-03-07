@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:personal_select_chat/bloc/login/login_bloc.dart';
-import 'package:personal_select_chat/bloc/login/login_event.dart';
-import 'package:personal_select_chat/bloc/login/login_state.dart';
 import 'package:personal_select_chat/core/app/provider/app_bloc_provider.dart';
 import 'package:personal_select_chat/core/app/router/app_router.dart';
 import 'package:personal_select_chat/presentation/entry/entry_screen.dart';
@@ -425,8 +422,8 @@ void main() {
 
       await tester.pumpWidget(AppBlocProviders(
           child: MaterialApp(
-            home: LoginScreen(),
-          )));
+        home: LoginScreen(),
+      )));
 
       final passwordField = find.byKey(Key('passwordField'));
       await tester.enterText(passwordField, '123456');
@@ -448,8 +445,8 @@ void main() {
 
       await tester.pumpWidget(AppBlocProviders(
           child: MaterialApp(
-            home: LoginScreen(),
-          )));
+        home: LoginScreen(),
+      )));
 
       final passwordField = find.byKey(Key('passwordField'));
       await tester.enterText(passwordField, '123456');
