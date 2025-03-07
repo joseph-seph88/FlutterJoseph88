@@ -37,6 +37,10 @@ jobs:
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --update
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "platform-tools" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
 
+            - name: ADB 환경 변수 설정
+              run: echo "export PATH=\$PATH:$HOME/Android/Sdk/platform-tools" >> $GITHUB_ENV
+
+
             - name: Android Emulator 설정
               run: |
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "system-images;android-30;google_apis;x86_64"
