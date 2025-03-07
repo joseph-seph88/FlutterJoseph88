@@ -58,7 +58,7 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.27.1
-      - run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > ./android/app/google-services.json
+      - run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
       - run: flutter pub get
       - run: flutter clean
       - run: flutter build appbundle
