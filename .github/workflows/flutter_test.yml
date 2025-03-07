@@ -25,10 +25,21 @@ jobs:
             - name: 의존성 설치
               run: flutter pub get
 
-            - name: Android Emulator 실행
+            - name: Android SDK 설치
               run: |
-                echo "y" | sdkmanager "system-images;android-30;google_apis;x86_64"
-                avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X"
+                sudo apt-get update
+                sudo apt-get install -y wget unzip openjdk-11-jdk
+                mkdir -p $HOME/Android/Sdk
+                cd $HOME/Android/Sdk
+                wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+                unzip commandlinetools-linux-7583922_latest.zip
+                rm commandlinetools-linux-7583922_latest.zip
+                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --update
+
+            - name: Android Emulator 설정
+              run: |
+                yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "system-images;android-30;google_apis;x86_64"
+                $HOME/Android/Sdk/cmdline-tools/bin/avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X" --force
                 emulator -avd test -no-audio -no-window &
 
             - name: ADB 연결 확인
