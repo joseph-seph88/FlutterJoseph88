@@ -38,19 +38,27 @@ jobs:
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "platform-tools" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
 
             - name: ADB 환경 변수 설정
-              run: echo "export PATH=\$PATH:$HOME/Android/Sdk/platform-tools" >> $GITHUB_ENV
+              run: |
+                echo "$HOME/Android/Sdk/platform-tools" >> $GITHUB_PATH
+                echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
+                echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
 
+            - name: 경로 확인
+              run: |
+                echo "PATH=$PATH"
+                ls -la $HOME/Android/Sdk/platform-tools
 
             - name: Android Emulator 설정
               run: |
                 yes | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/Sdk "system-images;android-30;google_apis;x86_64"
-                $HOME/Android/Sdk/cmdline-tools/bin/avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X" --force
-                emulator -avd test -no-audio -no-window &
+                echo "no" | $HOME/Android/Sdk/cmdline-tools/bin/avdmanager create avd --name test --package "system-images;android-30;google_apis;x86_64" --device "Nexus 5X" --force
+                $HOME/Android/Sdk/emulator/emulator -avd test -no-audio -no-window -no-snapshot -gpu swiftshader_indirect &
+                sleep 60
 
             - name: ADB 연결 확인
               run: |
-                sleep 30
-                adb devices
+                $HOME/Android/Sdk/platform-tools/adb devices
+    
 
             - name: 코드 포맷 검사
               run: dart format --set-exit-if-changed .
