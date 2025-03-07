@@ -52,7 +52,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'  # Java 버전을 17로 업데이트
 
       - name: 의존성 설치
         run: flutter pub get
@@ -64,7 +64,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          emulator-options: -no-snapshot -no-window -gpu off -noaudio -no-boot-anim
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim  # GPU 활성화
           disable-animations: true
           script: |
             adb devices
