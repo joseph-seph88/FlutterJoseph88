@@ -8,10 +8,11 @@ on:
     branches:
       - personal_select_chat
 
-
 jobs:
-  build:
-    runs-on: macos-latest
+  integration_test:
+    name: 통합 테스트
+    needs: widget_test
+    runs-on: ubuntu-latest
     steps:
       - name: CheckOut
         uses: actions/checkout@v4
@@ -31,11 +32,62 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --debug --build-name=1.0.0 --build-number=1
+      - name: Android 통합 테스트 실행
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim  # GPU 활성화
+          disable-animations: true
+          script: |
+            adb kill-server
+            adb start-server
+
+            adb devices
+            adb wait-for-device
+
+            # Flutter 장치 확인
+            flutter devices
+
+            # 통합 테스트 실행
+            flutter drive --target=integration_test/app_flow_test.dart
 
 
 
+
+
+
+
+
+#jobs:
+#  build:
+#    runs-on: macos-latest
+#    steps:
+#      - name: CheckOut
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Java
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: '17'
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          channel: stable
+#          flutter-version: 3.27.1
+#
+#      - name: Install Dependencies
+#        run: flutter pub get
+#
+#      - name: Build APK
+#        run: flutter build apk --debug --build-name=1.0.0 --build-number=1
+#
+#
+#
 
 #
 #jobs:
@@ -63,57 +115,3 @@ jobs:
 #
 #      - name: 위젯 테스트 실행
 #        run: flutter test test/login/login_widget_test.dart
-#
-#  integration_test:
-#    name: 통합 테스트
-#    needs: widget_test
-#    runs-on: macos-latest
-#    steps:
-#      - name: CheckOut
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Java
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: 'zulu'
-#          java-version: '17'
-#
-#      - name: Setup Flutter
-#        uses: subosito/flutter-action@v2
-#        with:
-#          channel: stable
-#          flutter-version: 3.27.1
-#
-#      - name: Install Dependencies
-#        run: flutter pub get
-#
-#      - name: Build APK
-#        run: flutter build apk --debug --build-name=1.0.0 --build-number=1
-#
-#
-#
-#
-#
-#
-
-#      - name: Android 통합 테스트 실행
-#        uses: ReactiveCircus/android-emulator-runner@v2
-#        with:
-#          api-level: 31
-#          target: google_apis
-#          arch: x86_64
-#          profile: pixel_6
-#          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim  # GPU 활성화
-#          disable-animations: true
-#          script: |
-#            adb kill-server
-#            adb start-server
-#
-#            adb devices
-#            adb wait-for-device
-#
-#            # Flutter 장치 확인
-#            flutter devices
-#
-#            # 통합 테스트 실행
-#            flutter drive --target=integration_test/app_flow_test.dart
