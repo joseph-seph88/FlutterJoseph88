@@ -38,9 +38,7 @@ class RegisterScreen extends StatelessWidget {
       },
     );
     if (picked != null && context.mounted) {
-      context
-          .read<LoginBloc>()
-          .add(LoginFormEvent(selectedDateTime: picked));
+      context.read<LoginBloc>().add(LoginFormEvent(selectedDateTime: picked));
     }
   }
 
@@ -58,6 +56,7 @@ class RegisterScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          key: Key("scrollView"),
           child: Column(
             children: [
               _buildTitle(context),
@@ -118,6 +117,7 @@ class RegisterScreen extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     return Row(children: [
       IconButton(
+        key: Key('backButton'),
           onPressed: () {
             controllerClear(context);
             context.pop();
@@ -167,12 +167,13 @@ class RegisterScreen extends StatelessWidget {
 
   Widget _buildName(BuildContext context) {
     return TextFormField(
+      key: Key('nameField'),
       controller: _nameController,
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
       decoration: InputDecoration(
           labelText: '이름',
           prefixIcon: Icon(Icons.person),
-          hintText: '이름을 입력해주세요'),
+          hintText: '이름 입력..'),
       validator: (value) {
         final isEmptyResult = Validator.isEmptyValidator(value, '이름을 입력해주세요');
         if (isEmptyResult != null) {
@@ -185,13 +186,14 @@ class RegisterScreen extends StatelessWidget {
 
   Widget _buildEmail(BuildContext context) {
     return TextFormField(
+      key: Key('emailField'),
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
       decoration: InputDecoration(
           labelText: '이메일',
           prefixIcon: Icon(Icons.email),
-          hintText: 'example@email.com'),
+          hintText: '이메일 입력..'),
       validator: (value) {
         final isEmptyResult = Validator.isEmptyValidator(value, '이메일을 입력해주세요');
         final isFormatResult = Validator.emailValidator(value);
@@ -207,12 +209,13 @@ class RegisterScreen extends StatelessWidget {
 
   Widget _buildBirthDate(BuildContext context) {
     return InkWell(
+      key: Key('birthDate'),
       onTap: () => _selectDate(context),
       child: InputDecorator(
         decoration: InputDecoration(
             labelText: '생년월일',
             prefixIcon: Icon(Icons.cake),
-            hintText: '생년월일을 선택해주세요',
+            hintText: '생년월일 선택..',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
             filled: true,
             fillColor: Colors.grey[100]),
@@ -289,6 +292,7 @@ class RegisterScreen extends StatelessWidget {
       return false;
     }, builder: (context, isVisible) {
       return TextFormField(
+        key: Key('passwordField'),
         controller: _passwordController,
         obscureText: !isVisible,
         onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -298,8 +302,9 @@ class RegisterScreen extends StatelessWidget {
           suffixIcon: IconButton(
             icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
-              context.read<LoginBloc>().add(
-                  LoginFormEvent(isRegisterPasswordVisible: !isVisible));
+              context
+                  .read<LoginBloc>()
+                  .add(LoginFormEvent(isRegisterPasswordVisible: !isVisible));
             },
           ),
         ),
@@ -326,6 +331,7 @@ class RegisterScreen extends StatelessWidget {
       return false;
     }, builder: (context, isConfirmVisible) {
       return TextFormField(
+        key: Key('confirmPasswordField'),
         controller: _confirmPasswordController,
         obscureText: !isConfirmVisible,
         onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -337,8 +343,8 @@ class RegisterScreen extends StatelessWidget {
             icon: Icon(
                 isConfirmVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
-              context.read<LoginBloc>().add(LoginFormEvent(
-                  isConfirmPasswordVisible: !isConfirmVisible));
+              context.read<LoginBloc>().add(
+                  LoginFormEvent(isConfirmPasswordVisible: !isConfirmVisible));
             },
           ),
         ),
@@ -427,6 +433,7 @@ class RegisterScreen extends StatelessWidget {
       String? gender = formState?.gender;
 
       return ElevatedButton(
+        key: Key('signUp'),
         onPressed: () {
           if (_formKey.currentState!.validate() &&
               date != null &&
@@ -435,12 +442,11 @@ class RegisterScreen extends StatelessWidget {
             controllerClear(context);
             CustomSnackBar().showCustomSnackBar(context, '회원가입 성공');
             context.pop();
-
-          } else if (date == null) {
+          } else if (_formKey.currentState!.validate() && date == null) {
             CustomSnackBar().showCustomSnackBar(context, '생년월일을 선택해주세요');
-          } else if (gender == null) {
+          } else if (_formKey.currentState!.validate() && gender == null) {
             CustomSnackBar().showCustomSnackBar(context, '성별을 선택해주세요');
-          } else if (!agreeTerms) {
+          } else if (_formKey.currentState!.validate() && !agreeTerms) {
             CustomSnackBar().showCustomSnackBar(context, '이용약관에 동의해주세요');
           }
         },

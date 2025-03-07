@@ -5,8 +5,8 @@ import 'package:personal_select_chat/presentation/home/screens/home_screen.dart'
 import 'package:personal_select_chat/presentation/login/screens/login_screen.dart';
 import 'package:personal_select_chat/presentation/entry/entry_screen.dart';
 import 'package:personal_select_chat/presentation/login/screens/register_screen.dart';
-import 'package:personal_select_chat/router/router_state.dart';
-import '../presentation/chat/screens/chat_screen.dart';
+import 'package:personal_select_chat/core/app/router/router_state.dart';
+import '../../../presentation/chat/screens/chat_screen.dart';
 import 'router_bloc.dart';
 
 class AppRouter {

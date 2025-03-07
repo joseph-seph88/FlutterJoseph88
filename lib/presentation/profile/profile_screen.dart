@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:personal_select_chat/core/theme/app_style.dart';
 import 'package:personal_select_chat/core/utils/app_constant.dart';
-import 'package:personal_select_chat/router/app_router.dart';
+import 'package:personal_select_chat/core/app/router/app_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:personal_select_chat/bloc/chat/chat_bloc.dart';
-import 'package:personal_select_chat/bloc/home/home_bloc.dart';
-import 'package:personal_select_chat/bloc/login/login_bloc.dart';
-import 'package:personal_select_chat/router/app_router.dart';
-import 'package:personal_select_chat/router/router_bloc.dart';
-import 'package:personal_select_chat/router/router_state.dart';
+import 'package:personal_select_chat/core/app/provider/app_bloc_provider.dart';
+import 'package:personal_select_chat/core/app/router/app_router.dart';
+import 'package:personal_select_chat/core/app/router/router_bloc.dart';
+import 'package:personal_select_chat/core/app/router/router_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MultiBlocProvider(providers: [
-    BlocProvider(create: (context) => RouterBloc()),
-    BlocProvider(create: (context) => ChatBloc()),
-    BlocProvider(create: (context) => LoginBloc()),
-    BlocProvider(create: (context) => HomeBloc()),
-  ], child: MyApp()));
+  runApp(AppBlocProviders(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -24,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(systemNavigationBarColor: Colors.black));
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
     return BlocBuilder<RouterBloc, RouterState>(builder: (context, state) {

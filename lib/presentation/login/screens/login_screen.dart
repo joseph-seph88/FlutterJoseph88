@@ -6,7 +6,7 @@ import 'package:personal_select_chat/bloc/login/login_event.dart';
 import 'package:personal_select_chat/bloc/login/login_state.dart';
 import 'package:personal_select_chat/core/theme/app_style.dart';
 import 'package:personal_select_chat/core/utils/validator.dart';
-import 'package:personal_select_chat/router/app_router.dart';
+import 'package:personal_select_chat/core/app/router/app_router.dart';
 
 class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -89,6 +89,7 @@ class LoginScreen extends StatelessWidget {
 
   Widget _buildEmail(BuildContext context) {
     return TextFormField(
+      key: Key('emailField'),
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       decoration:
@@ -115,6 +116,7 @@ class LoginScreen extends StatelessWidget {
       },
       builder: (context, isVisible) {
         return TextFormField(
+          key: Key('passwordField'),
           controller: _passwordController,
           obscureText: !isVisible,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -125,8 +127,7 @@ class LoginScreen extends StatelessWidget {
                   icon:
                       Icon(isVisible ? Icons.visibility : Icons.visibility_off),
                   onPressed: () => context.read<LoginBloc>().add(
-                      LoginFormEvent(
-                          isLoginPasswordVisible: !isVisible)))),
+                      LoginFormEvent(isLoginPasswordVisible: !isVisible)))),
           validator: (value) {
             final String? isEmptyResult =
                 Validator.isEmptyValidator(value, "비밀번호를 입력해주세요");
