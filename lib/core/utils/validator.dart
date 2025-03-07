@@ -27,7 +27,7 @@ class Validator {
 
       if (value.length < 8) {
         return '비밀번호는 최소 8자 이상이어야 합니다';
-      }else if (!hasCase || !hasDigits || !hasSpecialChar) {
+      } else if (!hasCase || !hasDigits || !hasSpecialChar) {
         return '비밀번호는 영문, 숫자, 특수문자가 각각 1개 이상 포함되어야 합니다';
       }
     }
@@ -36,7 +36,7 @@ class Validator {
 
   static String? confirmPasswordValidator(String? value, String password) {
     if (value != null && value.isNotEmpty) {
-      if(value != password){
+      if (value != password) {
         return '비밀번호가 서로 다릅니다';
       }
     }

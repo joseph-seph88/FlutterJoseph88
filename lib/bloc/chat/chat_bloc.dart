@@ -5,7 +5,6 @@ import 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatBloc() : super(InitialChatState()) {
-
     on<SendMessageEvent>((event, emit) {
       final ChatModel chatMsg =
           ChatModel(text: event.message.text, isMine: true);
@@ -21,7 +20,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
 
     on<SendImageEvent>((event, emit) async {
-      final List<ChatModel> chatImages = event.imagePaths.map((image){
+      final List<ChatModel> chatImages = event.imagePaths.map((image) {
         return ChatModel(imagePaths: [image], isMine: true);
       }).toList();
 

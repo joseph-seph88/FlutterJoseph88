@@ -18,10 +18,7 @@ abstract class AppStyle {
 
   static TextStyle generalLargeTitle() {
     return TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      letterSpacing: 3
-    );
+        fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 3);
   }
 
   // Grey
@@ -46,32 +43,26 @@ abstract class AppStyle {
     );
   }
 
-
   static TextStyle generalLargeSubBody() {
     return TextStyle(
-      fontSize: 18,
-      color: Colors.grey[600],
-      fontWeight: FontWeight.w500
-    );
+        fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w500);
   }
 
   // White
   static TextStyle generalWhiteLargeBody() {
     return TextStyle(
-      color: Colors.white,
-      fontSize: 28,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 3
-    );
+        color: Colors.white,
+        fontSize: 28,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 3);
   }
 
   static TextStyle generalWhiteMediumBody() {
     return TextStyle(
-      color: Colors.white,
-      fontSize: 20,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 1
-    );
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 1);
   }
 
   static TextStyle generalWhite70SubBody() {

@@ -8,7 +8,7 @@ abstract class WidgetStyle {
     );
   }
 
-  static BoxDecoration generalWhiteLabelDecoration (){
+  static BoxDecoration generalWhiteLabelDecoration() {
     return BoxDecoration(
       color: Colors.white.withAlpha(50),
       borderRadius: BorderRadius.circular(16),
@@ -43,7 +43,7 @@ abstract class WidgetStyle {
       borderRadius: BorderRadius.circular(50),
       boxShadow: [
         BoxShadow(
-          color: Colors.blue.shade200.withOpacity(0.5),
+          color: Colors.blue.shade200.withAlpha(100),
           offset: Offset(0, 2),
           blurRadius: 4.0,
         ),
@@ -69,6 +69,4 @@ abstract class WidgetStyle {
       ],
     );
   }
-
-
 }

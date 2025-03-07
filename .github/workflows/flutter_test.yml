@@ -1,0 +1,35 @@
+name: Flutter CI
+
+on:
+    push:
+        branches: 
+            - '*'
+    pull_request:
+        branches:
+            - personal_select_chat
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 저장소 체크아웃
+              uses: actions/checkout@v4
+
+            - name: Flutter 설정
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: 3.27.1
+                  cache: true
+
+            - name: 의존성 설치
+              run: flutter pub get
+
+            - name: 코드 포맷 검사
+              run: dart format --set-exit-if-changed .
+
+            - name: 분석 (Lint)
+              run: flutter analyze
+
+            - name: 유닛 테스트 & 위젯 테스트 실행
+              run: flutter test test/login/login_widget_test.dart

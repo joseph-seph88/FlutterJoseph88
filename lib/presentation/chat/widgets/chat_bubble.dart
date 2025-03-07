@@ -50,8 +50,10 @@ class MessageBubble extends StatelessWidget {
                         : SizedBox(),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                child: Text(formattedTime, style: AppStyle.generalSmallSubBody()),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+                child:
+                    Text(formattedTime, style: AppStyle.generalSmallSubBody()),
               ),
             ],
           ),
