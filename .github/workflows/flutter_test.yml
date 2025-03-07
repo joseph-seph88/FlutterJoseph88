@@ -60,7 +60,7 @@ jobs:
       - name: Android 통합 테스트 실행
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 31
           target: google_apis
           arch: x86_64
           profile: pixel_6
