@@ -8,6 +8,9 @@ workflows:
       branch_patterns:
         - pattern: '*'
           include: true
+    environment:
+      groups:
+        - my
 
 jobs:
   flutter_test:
