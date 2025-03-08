@@ -16,7 +16,11 @@ workflows:
       flutter: 3.27.1
       xcode: latest
     scripts:
-      - echo "$GOOGLE_SERVICES_JSON"
+      - |
+        if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+          echo "GOOGLE_SERVICES_JSON is not set"
+          exit 1
+        fi
       - echo "$GOOGLE_SERVICES_JSON" | base64 -d > ./android/app/google-services.json  # base64 디코딩 후 파일로 출력
       - flutter pub get
       - flutter build apk --release
