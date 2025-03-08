@@ -8,10 +8,13 @@ workflows:
       branch_patterns:
         - pattern: '*'
           include: true
+    environment:
+      groups:
+        - my_environment_variables
 
 jobs:
   flutter_test:
-    name: 위젯 테스트
+    name: Widget Test
     instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
