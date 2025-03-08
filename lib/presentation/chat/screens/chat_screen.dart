@@ -97,6 +97,7 @@ class ChatScreen extends StatelessWidget {
           decoration: WidgetStyle.greyTextFieldDecoration(),
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: TextField(
+              key: Key("chatTextField"),
               controller: _textEditingController,
               decoration: InputDecoration(
                 hintText: "메시지 입력..",
@@ -114,6 +115,7 @@ class ChatScreen extends StatelessWidget {
           child: Container(
             decoration: WidgetStyle.indigoBtnDecoration(),
             child: IconButton(
+                key: Key("chatSendButton"),
                 onPressed: () {
                   final inputMsg = _textEditingController.text;
                   if (inputMsg.isNotEmpty) {

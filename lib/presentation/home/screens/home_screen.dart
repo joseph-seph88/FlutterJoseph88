@@ -63,6 +63,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> userName = ['유진', '미소', '사라', '제인', '수잔'];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -104,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                         },
                         physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
-                          return _buildProfileCard();
+                          return _buildProfileCard(userName[index]);
                         }),
                   ),
                   _buildSwipeActions(context),
@@ -147,12 +149,14 @@ class HomeScreen extends StatelessWidget {
               final filterType = filterTypeList[index];
 
               return GestureDetector(
+                key: Key('chips_$index'),
                 onTap: () {
                   context
                       .read<HomeBloc>()
                       .add(HomeFormEvent(selectedIndex: index));
                 },
                 child: Container(
+                  key: Key('chipContainer_$index'),
                   margin: EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     color: selectedIndex == index
@@ -177,7 +181,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(String userName) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -218,7 +222,8 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text('유진, 27', style: AppStyle.generalWhiteLargeBody()),
+                      Text('$userName, 27',
+                          style: AppStyle.generalWhiteLargeBody()),
                       SizedBox(width: 8),
                       Icon(Icons.verified, color: Colors.blue, size: 24),
                     ],
@@ -272,6 +277,7 @@ class HomeScreen extends StatelessWidget {
             return 0;
           }, builder: (context, pageIndex) {
             return ActionButton(
+              key: Key('closeButton'),
               iconData: Icons.close,
               iconColor: Colors.white,
               backgroundColor: Colors.red,
@@ -280,6 +286,7 @@ class HomeScreen extends StatelessWidget {
           }),
           SizedBox(width: 16),
           ActionButton(
+              key: Key('starButton'),
               iconData: Icons.star,
               iconColor: Colors.white,
               backgroundColor: Colors.blue,
@@ -293,6 +300,7 @@ class HomeScreen extends StatelessWidget {
             return 0;
           }, builder: (context, pageIndex) {
             return ActionButton(
+              key: Key('favoriteButton'),
               iconData: Icons.favorite,
               iconColor: Colors.white,
               backgroundColor: Color(0xFFFF4D67),
