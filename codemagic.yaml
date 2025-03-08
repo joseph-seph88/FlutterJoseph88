@@ -1,0 +1,43 @@
+workflows:
+  default:
+    name: Flutter CI/CD
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: '*'
+          include: true
+    environment:
+      groups:
+        - keystore_credentials
+      flutter: 3.27.1
+      xcode: latest
+    scripts:
+      - echo $CM_GOOGLE_SERVICES_JSON | base64 --decode > ./android/app/google-services.json
+      - echo $CM_GOOGLE_SERVICES_PLIST | base64 --decode > ./ios/Runner/GoogleService-Info.plist
+      - flutter pub get
+      - dart format --set-exit-if-changed .
+      - flutter analyze
+
+      - name: Widget test or Unit test
+        script: flutter test
+
+      - name: Emulator test setup
+        script: |
+          flutter config --enable-web
+          flutter emulators --launch emulator-5554 &
+          adb wait-for-device
+
+      - name: Run integration test on Emulator
+        script: |
+          flutter -d emulator-5554 test integration_test/
+
+      - flutter build apk --release
+      - flutter build ios --release --no-codesign
+      - flutter build web
+
+    artifacts:
+      - ./build/app/outputs/flutter-apk/app-release.apk
+      - ./build/ios/iphoneos/Runner.app
+      - ./build/web
