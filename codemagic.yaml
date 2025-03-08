@@ -13,9 +13,10 @@ workflows:
         - google
       vars:
         GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
-      flutter: stable
+      flutter: 3.27.1
       xcode: latest
     scripts:
+      - echo "$GOOGLE_SERVICES_JSON"
+      - echo "$GOOGLE_SERVICES_JSON" | base64 --decode > ./android/app/google-services.json
       - flutter pub get
-      - echo '$GOOGLE_SERVICES_JSON' | base64 --decode > ./android/app/google-services.json
       - flutter build apk --release
