@@ -17,11 +17,6 @@ workflows:
       flutter: 3.27.1
       xcode: latest
     scripts:
-      - |
-        if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-          echo "GOOGLE_SERVICES_JSON is not set"
-          exit 1
-        fi
       - echo "$CM_KEYSTORE" | base64 -d > ./android/app/google-services.json
       - flutter pub get
       - flutter build apk --release
