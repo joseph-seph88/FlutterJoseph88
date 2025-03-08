@@ -37,7 +37,7 @@ jobs:
       - name: Checkout code
         script: git clone https://github.com/your/repository.git
       - name: Decode and write GoogleService-Info.plist
-        script: echo "${GOOGLE_SERVICES_PLIST}" | base64 --decode > ./ios/Runner/GoogleService-Info.plist
+        script: echo '${GOOGLE_SERVICES_PLIST}' | base64 --decode > ./ios/Runner/GoogleService-Info.plist
       - name: Install dependencies
         script: flutter pub get
       - name: Clean and build iOS
@@ -54,7 +54,7 @@ jobs:
       - name: Checkout code
         script: git clone https://github.com/your/repository.git
       - name: Decode and write google-services.json
-        script: echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > ./android/app/google-services.json
+        script: echo '${GOOGLE_SERVICES_JSON}' | base64 --decode > ./android/app/google-services.json
       - name: Install dependencies
         script: flutter pub get
       - name: Clean and build Android
