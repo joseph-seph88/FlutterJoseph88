@@ -10,9 +10,10 @@ workflows:
           include: true
     environment:
       groups:
-        - google
+        - keystore_credentials
       vars:
-        GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
+        CM_KEYSTORE: $CM_KEYSTORE
+#        GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
       flutter: 3.27.1
       xcode: latest
     scripts:
@@ -21,6 +22,6 @@ workflows:
           echo "GOOGLE_SERVICES_JSON is not set"
           exit 1
         fi
-      - echo "$GOOGLE_SERVICES_JSON" | base64 -d > ./android/app/google-services.json  # base64 디코딩 후 파일로 출력
+      - echo "$CM_KEYSTORE" | base64 -d > ./android/app/google-services.json
       - flutter pub get
       - flutter build apk --release
