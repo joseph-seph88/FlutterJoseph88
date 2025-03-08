@@ -17,7 +17,19 @@ workflows:
       - echo $CM_GOOGLE_SERVICES_JSON | base64 --decode > ./android/app/google-services.json
       - echo $CM_GOOGLE_SERVICES_PLIST | base64 --decode > ./ios/Runner/GoogleService-Info.plist
       - flutter pub get
-      - flutter build apk --release
-      - flutter build ios --release --no-codesign
-      - flutter build web
+      - dart format --set-exit-if-changed .
+      - flutter analyze
+      - flutter test
 
+      - name: Emulator tests setup
+        script: |
+          flutter config --enable-web
+          flutter emulators --launch emulator-5554 &
+          adb wait-for-device
+      - name: Run integration tests on Emulator
+        script: |
+          flutter -d emulator-5554 test integration_test/
+
+#      - flutter build apk --release
+#      - flutter build ios --release --no-codesign
+#      - flutter build web
