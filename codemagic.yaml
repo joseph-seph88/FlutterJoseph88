@@ -17,6 +17,6 @@ workflows:
       xcode: latest
     scripts:
       - echo "$GOOGLE_SERVICES_JSON"
-      - echo "$GOOGLE_SERVICES_JSON" | base64 --decode > ./android/app/google-services.json
+      - echo "$GOOGLE_SERVICES_JSON" | base64 -d > ./android/app/google-services.json  # base64 디코딩 후 파일로 출력
       - flutter pub get
       - flutter build apk --release
