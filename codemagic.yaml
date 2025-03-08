@@ -1,0 +1,74 @@
+workflows:
+  default:
+    name: Flutter CI/CD
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: '*'
+          include: true
+
+jobs:
+  flutter_test:
+    name: 위젯 테스트
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Run format
+        script: dart format --set-exit-if-changed .
+      - name: Run analysis
+        script: flutter analyze
+      - name: Run widget tests
+        script: flutter test test/login/login_widget_test.dart
+
+  build_ios:
+    name: Build Flutter iOS
+    needs: [flutter_test]
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Checkout code
+        script: git clone https://github.com/your/repository.git
+      - name: Decode and write GoogleService-Info.plist
+        script: echo "${GOOGLE_SERVICES_PLIST}" | base64 --decode > ./ios/Runner/GoogleService-Info.plist
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Clean and build iOS
+        script: flutter clean && flutter build ios --no-codesign
+
+  build_android:
+    name: Build Flutter Android
+    needs: [flutter_test]
+    instance_type: ubuntu-latest
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Checkout code
+        script: git clone https://github.com/your/repository.git
+      - name: Decode and write google-services.json
+        script: echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > ./android/app/google-services.json
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Clean and build Android
+        script: flutter clean && flutter build appbundle
+
+  build_web:
+    name: Build Flutter Web
+    needs: [flutter_test]
+    instance_type: ubuntu-latest
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Clean and build Web
+        script: flutter clean && flutter build web
