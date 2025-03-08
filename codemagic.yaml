@@ -14,7 +14,10 @@ workflows:
       flutter: 3.27.1
       xcode: latest
     scripts:
-      - echo $CM_KEYSTORE
-      - echo $CM_KEYSTORE | base64 --decode > ./android/app/google-services.json
+      - echo $CM_GOOGLE_SERVICES_JSON | base64 --decode > ./android/app/google-services.json
+      - echo $CM_GOOGLE_SERVICES_PLIST | base64 --decode > ./ios/Runner/GoogleService-Info.plist
       - flutter pub get
       - flutter build apk --release
+      - flutter build ios --release --no-codesign
+      - flutter build web
+
