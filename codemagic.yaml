@@ -13,6 +13,6 @@ workflows:
         - keystore_credentials
     scripts:
       - echo $CM_KEYSTORE
-      - echo $CM_KEYSTORE | base64 --decode > ./android/app/
+      - echo $CM_KEYSTORE | base64 --decode > ./android/app/google-services.json
       - flutter pub get
       - flutter build apk --release
