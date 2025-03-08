@@ -11,6 +11,13 @@ workflows:
     environment:
       groups:
         - google
+      flutter: stable
+      xcode: latest
+    scripts:
+      - flutter doctor
+      - flutter pub get
+      - flutter test
+      - flutter build apk --release
 
 jobs:
   flutter_test:
