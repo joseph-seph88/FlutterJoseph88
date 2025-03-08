@@ -11,6 +11,8 @@ workflows:
     environment:
       groups:
         - keystore_credentials
+      flutter: 3.27.1
+      xcode: latest
     scripts:
       - echo $CM_KEYSTORE
       - echo $CM_KEYSTORE | base64 --decode > ./android/app/google-services.json
