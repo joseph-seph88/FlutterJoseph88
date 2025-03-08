@@ -12,6 +12,7 @@ workflows:
       groups:
         - keystore_credentials
     scripts:
+      - echo $CM_KEYSTORE
       - echo $CM_KEYSTORE | base64 --decode > ./android/app/
       - flutter pub get
       - flutter build apk --release
