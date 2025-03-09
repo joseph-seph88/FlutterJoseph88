@@ -23,15 +23,12 @@ workflows:
       - name: Widget test or Unit test
         script: flutter test
 
-      - name: Emulator test setup
+      - name: Integration tests
         script: |
-          flutter config --enable-web
-          flutter emulators --launch emulator-5554 &
-          adb wait-for-device
-
-      - name: Run integration test on Emulator
-        script: |
-          flutter -d emulator-5554 test integration_test/
+          mkdir -p test-results 
+          flutter -d emulator-5554 test --machine > test-results/flutter.json integration_test 
+          # for iOS use: -d iPhone
+        test_report: test-results/flutter.json
 
       - flutter build apk --release
       - flutter build ios --release --no-codesign
