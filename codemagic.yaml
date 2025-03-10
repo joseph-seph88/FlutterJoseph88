@@ -26,17 +26,34 @@ workflows:
       - name: Emulator tests
         script: |
           flutter config --enable-web
+          
+          # 사용 가능한 에뮬레이터 목록 출력
           flutter emulators
           
+          # iOS 시뮬레이터 실행
           EMULATOR_ID="apple_ios_simulator"
           echo "Launching iOS simulator: $EMULATOR_ID"
           flutter emulators --launch $EMULATOR_ID &
           
+          # 시뮬레이터가 실행될 시간을 주기 위해 대기
           sleep 10
           
+          # 실행 가능한 디바이스 목록 확인
           flutter devices
           
-          flutter -d $EMULATOR_ID test integration_test
+          # 실제 연결된 iOS 시뮬레이터 ID 가져오기
+          DEVICE_ID=$(flutter devices | grep -i 'iPhone' | awk '{print $1}')
+          echo "Detected iOS Simulator ID: $DEVICE_ID"
+          
+          # ID가 감지되지 않으면 실패 처리
+          if [ -z "$DEVICE_ID" ]; then
+            echo "❌ No iOS simulator detected! Exiting..."
+            exit 1
+          fi
+          
+          # 테스트 실행
+          flutter -d $DEVICE_ID test integration_test
+
 
       - flutter build apk --release
       - flutter build ios --release --no-codesign
