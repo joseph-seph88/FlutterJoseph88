@@ -27,10 +27,16 @@ workflows:
         script: |
           flutter config --enable-web
           flutter emulators
-          flutter emulators --launch emulator &
-          adb wait-for-device
+          
+          EMULATOR_ID="apple_ios_simulator"
+          echo "Launching iOS simulator: $EMULATOR_ID"
+          flutter emulators --launch $EMULATOR_ID &
+          
+          sleep 10
+          
           flutter devices
-          flutter -d emulator-5554 test integration_test 
+          
+          flutter -d $EMULATOR_ID test integration_test
 
       - flutter build apk --release
       - flutter build ios --release --no-codesign
