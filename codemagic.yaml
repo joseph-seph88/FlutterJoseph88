@@ -38,11 +38,6 @@ workflows:
           DEVICE_ID=$(flutter devices | grep -i 'iPhone' | awk '{print $1}')
           echo "Detected iOS Simulator ID: $DEVICE_ID"
           
-          if [ -z "$DEVICE_ID" ]; then
-            echo "❌ No iOS simulator detected! Exiting..."
-            exit 1
-          fi
-          
           flutter -d $DEVICE_ID test integration_test
 
       - flutter build apk --release
