@@ -23,15 +23,22 @@ workflows:
       - name: Widget test or Unit test
         script: flutter test
 
-      - name: Emulator test setup
+      - name: Integration test on iOS Simulator
         script: |
           flutter config --enable-web
-          flutter emulators --launch emulator-5554 &
-          adb wait-for-device
-
-      - name: Run integration test on Emulator
-        script: |
-          flutter -d emulator-5554 test integration_test/
+          flutter emulators
+          
+          EMULATOR_ID="apple_ios_simulator"
+          echo "Launching iOS simulator: $EMULATOR_ID"
+          flutter emulators --launch $EMULATOR_ID &
+          
+          sleep 10
+          flutter devices
+          
+          DEVICE_ID=$(flutter devices | grep -i 'iPhone' | awk '{print $1}')
+          echo "Detected iOS Simulator ID: $DEVICE_ID"
+          
+          flutter -d $DEVICE_ID test integration_test
 
       - flutter build apk --release
       - flutter build ios --release --no-codesign
