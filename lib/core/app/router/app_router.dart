@@ -20,36 +20,28 @@ class AppRouter {
 
   static GoRouter createRouter(RouterBloc routerBloc) {
     return GoRouter(
-      initialLocation: routerBloc.state is RouterAuthenticated ? login : login,
+      initialLocation: routerBloc.state is RouterAuthenticatedState ? home : login,
+      redirect: (context, state) {
+        final isAuthenticated = routerBloc.state is RouterAuthenticatedState;
+        final isUnAuthenticated =
+            routerBloc.state is RouterUnAuthenticatedState;
+        final isLoginRoute = state.matchedLocation == login;
+
+        if (isAuthenticated && isLoginRoute) {
+          return entry;
+        } else if (isUnAuthenticated && isLoginRoute) {
+          return login;
+        }
+        return null;
+      },
       routes: [
-        GoRoute(
-          path: login,
-          builder: (context, state) => LoginScreen(),
-        ),
-        GoRoute(
-          path: register,
-          builder: (context, state) => RegisterScreen(),
-        ),
-        GoRoute(
-          path: entry,
-          builder: (context, state) => EntryScreen(),
-        ),
-        GoRoute(
-          path: home,
-          builder: (context, state) => HomeScreen(),
-        ),
-        GoRoute(
-          path: favorite,
-          builder: (context, state) => FavoriteScreen(),
-        ),
-        GoRoute(
-          path: chat,
-          builder: (context, state) => ChatScreen(),
-        ),
-        GoRoute(
-          path: profile,
-          builder: (context, state) => ProfileScreen(),
-        ),
+        GoRoute(path: login, builder: (context, state) => LoginScreen()),
+        GoRoute(path: register, builder: (context, state) => RegisterScreen()),
+        GoRoute(path: entry, builder: (context, state) => EntryScreen()),
+        GoRoute(path: home, builder: (context, state) => HomeScreen()),
+        GoRoute(path: favorite, builder: (context, state) => FavoriteScreen()),
+        GoRoute(path: chat, builder: (context, state) => ChatScreen()),
+        GoRoute(path: profile, builder: (context, state) => ProfileScreen()),
       ],
     );
   }

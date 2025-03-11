@@ -5,8 +5,8 @@ abstract class RouterState extends Equatable {
   List<Object> get props => [];
 }
 
-class RouterInitial extends RouterState {}
+class RouterInitialState extends RouterState {}
 
-class RouterAuthenticated extends RouterState {}
+class RouterAuthenticatedState extends RouterState {}
 
-class RouterUnAuthenticated extends RouterState {}
+class RouterUnAuthenticatedState extends RouterState {}

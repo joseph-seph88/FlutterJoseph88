@@ -56,3 +56,4 @@ windows/
 google-services.json
 GoogleService-Info.plist
 firebase_options.dart
+firebase.json

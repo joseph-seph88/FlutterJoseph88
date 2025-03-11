@@ -3,13 +3,17 @@ import 'package:personal_select_chat/core/app/router/router_event.dart';
 import 'package:personal_select_chat/core/app/router/router_state.dart';
 
 class RouterBloc extends Bloc<RouterEvent, RouterState> {
-  RouterBloc() : super(RouterInitial()) {
+  RouterBloc() : super(RouterInitialState()) {
     on<RouterLoginEvent>((event, emit) {
-      emit(RouterAuthenticated());
+      emit(RouterAuthenticatedState());
     });
 
     on<RouterLogoutEvent>((event, emit) {
-      emit(RouterUnAuthenticated());
+      emit(RouterUnAuthenticatedState());
+    });
+
+    on<RouterInitialEvent>((event, emit) {
+      emit(RouterInitialState());
     });
   }
 }

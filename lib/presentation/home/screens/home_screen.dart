@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:personal_select_chat/bloc/auth/auth_bloc.dart';
+import 'package:personal_select_chat/bloc/auth/auth_event.dart';
 import 'package:personal_select_chat/bloc/home/home_bloc.dart';
 import 'package:personal_select_chat/bloc/home/home_event.dart';
 import 'package:personal_select_chat/bloc/home/home_state.dart';
@@ -75,9 +77,9 @@ class HomeScreen extends StatelessWidget {
                 'JOSEPH88: ${error.toString()} ${stackTrace.toString()}',
                 style: AppStyle.imageErrorBody())),
         actions: [
-          _buildAppBarIcon(Icons.notifications_outlined),
+          _buildAppBarIcon(Icons.notifications_outlined, context),
           SizedBox(width: 8),
-          _buildAppBarIcon(Icons.settings_outlined),
+          _buildAppBarIcon(Icons.settings_outlined, context),
           SizedBox(width: 8),
         ],
       ),
@@ -119,12 +121,14 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBarIcon(IconData icon) {
+  Widget _buildAppBarIcon(IconData icon, BuildContext context) {
     return Container(
       decoration: WidgetStyle.generalGreyBtnDecoration(),
       child: IconButton(
         icon: Icon(icon, color: Colors.grey.shade800),
-        onPressed: () {},
+        onPressed: () {
+          context.read<AuthLogicBloc>().add(SignOutLogicEvent());
+        },
       ),
     );
   }

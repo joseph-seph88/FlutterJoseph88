@@ -8,3 +8,5 @@ abstract class RouterEvent extends Equatable {
 class RouterLoginEvent extends RouterEvent {}
 
 class RouterLogoutEvent extends RouterEvent {}
+
+class RouterInitialEvent extends RouterEvent {}

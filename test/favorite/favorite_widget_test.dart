@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:personal_select_chat/core/app/provider/app_bloc_provider.dart';
+import 'package:personal_select_chat/core/app/app_bloc/app_bloc_provider.dart';
 import 'package:personal_select_chat/presentation/favorite/favorite_screen.dart';
 
 void main() {
