@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:personal_select_chat/bloc/login/login_bloc.dart';
-import 'package:personal_select_chat/bloc/login/login_event.dart';
-import 'package:personal_select_chat/bloc/login/login_state.dart';
+import 'package:personal_select_chat/bloc/auth/auth_bloc.dart';
+import 'package:personal_select_chat/bloc/auth/auth_event.dart';
+import 'package:personal_select_chat/bloc/auth/auth_state.dart';
 import 'package:personal_select_chat/core/theme/app_style.dart';
 import 'package:personal_select_chat/core/utils/custom_snack_bar.dart';
 import 'package:personal_select_chat/core/utils/validator.dart';
@@ -19,8 +19,8 @@ class RegisterScreen extends StatelessWidget {
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? selectedDate;
-    final state = context.read<LoginBloc>().state;
-    if (state is LoginFormState) {
+    final state = context.read<AuthUIBloc>().state;
+    if (state is SignUIState) {
       selectedDate = state.selectedDateTime;
     }
 
@@ -38,7 +38,7 @@ class RegisterScreen extends StatelessWidget {
       },
     );
     if (picked != null && context.mounted) {
-      context.read<LoginBloc>().add(LoginFormEvent(selectedDateTime: picked));
+      context.read<AuthUIBloc>().add(SignUIEvent(selectedDateTime: picked));
     }
   }
 
@@ -47,7 +47,7 @@ class RegisterScreen extends StatelessWidget {
     _emailController.clear();
     _passwordController.clear();
     _confirmPasswordController.clear();
-    context.read<LoginBloc>().add(ResetLoginFormEvent());
+    context.read<AuthUIBloc>().add(ResetSignUIEvent());
   }
 
   @override
@@ -220,8 +220,8 @@ class RegisterScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            BlocSelector<LoginBloc, LoginState, DateTime?>(selector: (state) {
-              if (state is LoginFormState) {
+            BlocSelector<AuthUIBloc, AuthUIState, DateTime?>(selector: (state) {
+              if (state is SignUIState) {
                 return state.selectedDateTime;
               }
               return null;
@@ -243,8 +243,8 @@ class RegisterScreen extends StatelessWidget {
 
   Widget _buildGenderSelectButton(
       String gender, IconData icon, BuildContext context) {
-    return BlocSelector<LoginBloc, LoginState, String?>(selector: (state) {
-      if (state is LoginFormState) {
+    return BlocSelector<AuthUIBloc, AuthUIState, String?>(selector: (state) {
+      if (state is SignUIState) {
         return state.gender;
       }
       return '';
@@ -253,7 +253,7 @@ class RegisterScreen extends StatelessWidget {
 
       return InkWell(
         onTap: () {
-          context.read<LoginBloc>().add(LoginFormEvent(gender: gender));
+          context.read<AuthUIBloc>().add(SignUIEvent(gender: gender));
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 16),
@@ -283,8 +283,8 @@ class RegisterScreen extends StatelessWidget {
   }
 
   Widget _buildPassword(BuildContext context) {
-    return BlocSelector<LoginBloc, LoginState, bool>(selector: (state) {
-      if (state is LoginFormState) {
+    return BlocSelector<AuthUIBloc, AuthUIState, bool>(selector: (state) {
+      if (state is SignUIState) {
         return state.isRegisterPasswordVisible;
       }
       return false;
@@ -301,8 +301,8 @@ class RegisterScreen extends StatelessWidget {
             icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
               context
-                  .read<LoginBloc>()
-                  .add(LoginFormEvent(isRegisterPasswordVisible: !isVisible));
+                  .read<AuthUIBloc>()
+                  .add(SignUIEvent(isRegisterPasswordVisible: !isVisible));
             },
           ),
         ),
@@ -322,8 +322,8 @@ class RegisterScreen extends StatelessWidget {
   }
 
   Widget _buildConfirmPassword(BuildContext context) {
-    return BlocSelector<LoginBloc, LoginState, bool>(selector: (state) {
-      if (state is LoginFormState) {
+    return BlocSelector<AuthUIBloc, AuthUIState, bool>(selector: (state) {
+      if (state is SignUIState) {
         return state.isConfirmPasswordVisible;
       }
       return false;
@@ -341,8 +341,8 @@ class RegisterScreen extends StatelessWidget {
             icon: Icon(
                 isConfirmVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
-              context.read<LoginBloc>().add(
-                  LoginFormEvent(isConfirmPasswordVisible: !isConfirmVisible));
+              context.read<AuthUIBloc>().add(
+                  SignUIEvent(isConfirmPasswordVisible: !isConfirmVisible));
             },
           ),
         ),
@@ -369,8 +369,8 @@ class RegisterScreen extends StatelessWidget {
     return Row(
       children: [
         SizedBox(height: 24),
-        BlocSelector<LoginBloc, LoginState, bool>(selector: (state) {
-          if (state is LoginFormState) {
+        BlocSelector<AuthUIBloc, AuthUIState, bool>(selector: (state) {
+          if (state is SignUIState) {
             return state.isAgreeTerms;
           }
           return false;
@@ -380,8 +380,8 @@ class RegisterScreen extends StatelessWidget {
             activeColor: Colors.pink,
             onChanged: (bool? value) {
               context
-                  .read<LoginBloc>()
-                  .add(LoginFormEvent(isAgreeTerms: value ?? false));
+                  .read<AuthUIBloc>()
+                  .add(SignUIEvent(isAgreeTerms: value ?? false));
             },
           );
         }),
@@ -419,9 +419,9 @@ class RegisterScreen extends StatelessWidget {
   }
 
   Widget _buildSignUp() {
-    return BlocSelector<LoginBloc, LoginState, LoginFormState?>(
+    return BlocSelector<AuthUIBloc, AuthUIState, SignUIState?>(
         selector: (state) {
-      if (state is LoginFormState) {
+      if (state is SignUIState) {
         return state;
       }
       return null;
@@ -430,33 +430,49 @@ class RegisterScreen extends StatelessWidget {
       bool agreeTerms = formState?.isAgreeTerms ?? false;
       String? gender = formState?.gender;
 
-      return ElevatedButton(
-        key: Key('signUp'),
-        onPressed: () {
-          if (_formKey.currentState!.validate() &&
-              date != null &&
-              gender != null &&
-              agreeTerms) {
-            controllerClear(context);
-            CustomSnackBar().showCustomSnackBar(context, '회원가입 성공');
-            context.pop();
-          } else if (_formKey.currentState!.validate() && date == null) {
-            CustomSnackBar().showCustomSnackBar(context, '생년월일을 선택해주세요');
-          } else if (_formKey.currentState!.validate() && gender == null) {
-            CustomSnackBar().showCustomSnackBar(context, '성별을 선택해주세요');
-          } else if (_formKey.currentState!.validate() && !agreeTerms) {
-            CustomSnackBar().showCustomSnackBar(context, '이용약관에 동의해주세요');
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.pink[200],
-          padding: EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+      return BlocSelector<AuthLogicBloc, AuthLogicState, SignLogicState?>(selector: (state){
+        if(state is SignLogicState){
+          return state;
+        }
+        return null;
+      }, builder: (context, signLogicState) {
+        bool isSignUp = signLogicState?.isSignUp ?? false;
+
+        return ElevatedButton(
+          key: Key('signUp'),
+          onPressed: () {
+            if (_formKey.currentState!.validate() &&
+                date != null &&
+                gender != null &&
+                agreeTerms) {
+              context.read<AuthLogicBloc>().add(SignUpLogicEvent(
+                  email: _emailController.text,
+                  password: _confirmPasswordController.text));
+              if(isSignUp){
+                controllerClear(context);
+                CustomSnackBar().showCustomSnackBar(context, '회원가입 성공');
+                context.pop();
+              }
+            } else if (_formKey.currentState!.validate() && date == null) {
+              CustomSnackBar().showCustomSnackBar(context, '생년월일을 선택해주세요');
+            } else if (_formKey.currentState!.validate() && gender == null) {
+              CustomSnackBar().showCustomSnackBar(context, '성별을 선택해주세요');
+            } else if (_formKey.currentState!.validate() && !agreeTerms) {
+              CustomSnackBar().showCustomSnackBar(context, '이용약관에 동의해주세요');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.pink[200],
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
-        ),
-        child: Text('회원가입', style: AppStyle.generalWhiteMediumBody()),
-      );
+          child: Text('회원가입', style: AppStyle.generalWhiteMediumBody()),
+        );
+      });
+
+
     });
   }
 }

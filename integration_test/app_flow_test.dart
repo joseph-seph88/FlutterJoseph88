@@ -1,7 +1,7 @@
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:personal_select_chat/core/app/provider/app_bloc_provider.dart';
+import 'package:personal_select_chat/core/app/app_bloc/app_bloc_provider.dart';
 import 'package:personal_select_chat/core/utils/app_constant.dart';
 import 'package:personal_select_chat/main.dart';
 

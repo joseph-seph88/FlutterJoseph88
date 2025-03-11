@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:personal_select_chat/core/app/provider/app_bloc_provider.dart';
+import 'package:personal_select_chat/core/app/app_bloc/app_bloc_provider.dart';
 import 'package:personal_select_chat/core/app/router/app_router.dart';
 import 'package:personal_select_chat/presentation/entry/entry_screen.dart';
 import 'package:personal_select_chat/presentation/login/screens/login_screen.dart';

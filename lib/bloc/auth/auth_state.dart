@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 
-abstract class LoginState extends Equatable {
+abstract class AuthUIState extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class LoginFormState extends LoginState {
+class SignUIState extends AuthUIState {
   final bool isLoginPasswordVisible;
   final bool isRegisterPasswordVisible;
   final bool isConfirmPasswordVisible;
@@ -13,7 +13,7 @@ class LoginFormState extends LoginState {
   final DateTime? selectedDateTime;
   final String? gender;
 
-  LoginFormState({
+  SignUIState({
     this.isLoginPasswordVisible = false,
     this.isRegisterPasswordVisible = false,
     this.isConfirmPasswordVisible = false,
@@ -22,7 +22,7 @@ class LoginFormState extends LoginState {
     this.gender,
   });
 
-  LoginFormState copyWith({
+  SignUIState copyWith({
     bool? isLoginPasswordVisible,
     bool? isRegisterPasswordVisible,
     bool? isConfirmPasswordVisible,
@@ -30,7 +30,7 @@ class LoginFormState extends LoginState {
     DateTime? selectedDateTime,
     String? gender,
   }) {
-    return LoginFormState(
+    return SignUIState(
       isLoginPasswordVisible:
           isLoginPasswordVisible ?? this.isLoginPasswordVisible,
       isRegisterPasswordVisible:
@@ -52,4 +52,46 @@ class LoginFormState extends LoginState {
         selectedDateTime?.millisecondsSinceEpoch ?? 0,
         gender ?? '',
       ];
+
+  SignUIState reset() {
+    return SignUIState();
+  }
 }
+
+abstract class AuthLogicState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+class SignLogicState extends AuthLogicState {
+  final bool? isSigned;
+  final bool? isLoading;
+  final bool? isSignUp;
+  final String? errorMessage;
+
+  SignLogicState({
+    this.isSigned = false,
+    this.isLoading = false,
+    this.isSignUp = false,
+    this.errorMessage = "",
+  });
+
+  SignLogicState copyWith({
+    bool? isSigned,
+    bool? isLoading,
+    bool? isSignUp,
+    String? errorMessage,
+  }) {
+    return SignLogicState(
+      isSigned: isSigned ?? this.isSigned,
+      isLoading: isLoading ?? this.isLoading,
+      isSignUp: isSignUp ?? this.isSignUp,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+
+  @override
+  List<Object?> get props => [isSigned, isLoading, isSignUp, errorMessage];
+}
+
+class SignOutLogicState extends AuthLogicState {}

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:personal_select_chat/bloc/login/login_bloc.dart';
-import 'package:personal_select_chat/bloc/login/login_event.dart';
-import 'package:personal_select_chat/bloc/login/login_state.dart';
+import 'package:personal_select_chat/bloc/auth/auth_bloc.dart';
+import 'package:personal_select_chat/bloc/auth/auth_event.dart';
+import 'package:personal_select_chat/bloc/auth/auth_state.dart';
 import 'package:personal_select_chat/core/theme/app_style.dart';
 import 'package:personal_select_chat/core/utils/validator.dart';
 import 'package:personal_select_chat/core/app/router/app_router.dart';
@@ -18,8 +18,16 @@ class LoginScreen extends StatelessWidget {
   void controllerClear(BuildContext context) {
     _emailController.clear();
     _passwordController.clear();
-    context.read<LoginBloc>().add(ResetLoginFormEvent());
+    context.read<AuthUIBloc>().add(ResetSignUIEvent());
   }
+
+  void onTapWithGoogle(BuildContext context) {
+    context.read<AuthLogicBloc>().add(SignInUpWithGoogleLogicEvent());
+  }
+
+  void onTapWithNaver(BuildContext context) {}
+
+  void onTapWithKakao(BuildContext context) {}
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +56,14 @@ class LoginScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildSocialButton(Icons.g_mobiledata, Colors.red),
+                      _buildSocialButton(Icons.g_mobiledata, Colors.red,
+                          () => onTapWithGoogle(context)),
                       SizedBox(width: 24),
-                      _buildSocialButton(Icons.phone_android, Colors.green),
+                      _buildSocialButton(Icons.phone_android, Colors.green,
+                          () => onTapWithNaver(context)),
                       SizedBox(width: 24),
-                      _buildSocialButton(
-                          Icons.chat_bubble, Colors.yellow[700]!),
+                      _buildSocialButton(Icons.chat_bubble, Colors.yellow[700]!,
+                          () => onTapWithKakao(context)),
                     ],
                   ),
                   SizedBox(height: 32),
@@ -107,9 +117,9 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildPassword(BuildContext context) {
-    return BlocSelector<LoginBloc, LoginState, bool>(
+    return BlocSelector<AuthUIBloc, AuthUIState, bool>(
       selector: (state) {
-        if (state is LoginFormState) {
+        if (state is SignUIState) {
           return state.isLoginPasswordVisible;
         }
         return false;
@@ -126,8 +136,9 @@ class LoginScreen extends StatelessWidget {
               suffixIcon: IconButton(
                   icon:
                       Icon(isVisible ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => context.read<LoginBloc>().add(
-                      LoginFormEvent(isLoginPasswordVisible: !isVisible)))),
+                  onPressed: () => context
+                      .read<AuthUIBloc>()
+                      .add(SignUIEvent(isLoginPasswordVisible: !isVisible)))),
           validator: (value) {
             final String? isEmptyResult =
                 Validator.isEmptyValidator(value, "비밀번호를 입력해주세요");
@@ -151,20 +162,31 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildLoginBtn(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          controllerClear(context);
-          context.push(AppRouter.entry);
-        }
-      },
-      style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 48),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          backgroundColor: Colors.pink[100]),
-      child: Text('로그인', style: AppStyle.pinkMediumLabel()),
-    );
+    return BlocBuilder<AuthLogicBloc, AuthLogicState>(
+        builder: (context, state) {
+      if (state is SignLogicState && state.isLoading == true) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+
+      return ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            context.read<AuthLogicBloc>().add(SignInLogicEvent(
+                email: _emailController.text,
+                password: _passwordController.text));
+            controllerClear(context);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 48),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            backgroundColor: Colors.pink[100]),
+        child: Text('로그인', style: AppStyle.pinkMediumLabel()),
+      );
+    });
   }
 
   Widget _buildDiver() {
@@ -179,9 +201,9 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton(IconData icon, Color color) {
+  Widget _buildSocialButton(IconData icon, Color color, Function()? onTap) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         width: 50,
         height: 50,
