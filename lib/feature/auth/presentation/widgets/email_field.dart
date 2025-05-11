@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:project_login/core/app_style/app_theme.dart';
 import 'package:project_login/feature/auth/cubit/login_cubit.dart';
 import 'package:project_login/feature/auth/cubit/login_state.dart';
 
@@ -30,12 +31,12 @@ class EmailField extends StatelessWidget {
                   labelText: '이메일',
                   hintText: 'example@email.com',
                   hintStyle: TextStyle(color: Colors.grey),
-                  labelStyle: const TextStyle(color: Color(0xFF6200EE)),
+                  labelStyle: const TextStyle(color: AppTheme.primaryColor),
                   prefixIcon: const Icon(Icons.email_outlined,
-                      color: Color(0xFF6200EE)),
+                      color: AppTheme.primaryColor),
                   border: InputBorder.none,
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
                 ),
               ),
             ),

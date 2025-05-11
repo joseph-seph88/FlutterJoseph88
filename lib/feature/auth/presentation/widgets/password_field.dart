@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:project_login/core/app_style/app_theme.dart';
 import 'package:project_login/feature/auth/cubit/login_cubit.dart';
 import 'package:project_login/feature/auth/cubit/login_state.dart';
 
@@ -30,22 +31,22 @@ class PasswordField extends StatelessWidget {
                 obscureText: !state.isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: '비밀번호',
-                  labelStyle: const TextStyle(color: Color(0xFF6200EE)),
-                  prefixIcon:
-                      const Icon(Icons.lock_outline, color: Color(0xFF6200EE)),
+                  labelStyle: const TextStyle(color: AppTheme.primaryColor),
+                  prefixIcon: const Icon(Icons.lock_outline,
+                      color: AppTheme.primaryColor),
                   suffixIcon: IconButton(
                     icon: Icon(
                       state.isPasswordVisible
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: const Color(0xFF6200EE),
+                      color: AppTheme.primaryColor,
                     ),
                     onPressed: () =>
                         context.read<LoginCubit>().togglePasswordVisibility(),
                   ),
                   border: InputBorder.none,
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
                 ),
               ),
             ),
