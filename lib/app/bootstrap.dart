@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_login/app.dart';
+import 'package:project_login/app/app.dart';
 import 'package:project_login/feature/auth/cubit/login_cubit.dart';
+import 'package:project_login/feature/auth/cubit/signup_cubit.dart';
 import 'package:project_login/feature/auth/presentation/pages/login_page.dart';
+import 'package:project_login/feature/auth/presentation/pages/sign_up_page.dart';
+import 'package:project_login/feature/entry/cubit/entry_cubit.dart';
+import 'package:project_login/feature/entry/pages/entry_page.dart';
 
 class Bootstrap {
   static Future<void> init() async {
@@ -32,9 +36,14 @@ class Bootstrap {
             create: (_) => LoginCubit(),
             child: LoginPage(),
           ),
-          // BlocProvider<ThemeCubit>(
-          //   create: (_) => ThemeCubit(),
-          // ),
+          BlocProvider<SignupCubit>(
+            create: (_) => SignupCubit(),
+            child: SignUpPage(),
+          ),
+          BlocProvider<EntryCubit>(
+            create: (_) => EntryCubit(),
+            child: EntryPage(),
+          ),
         ],
         child: const MyApp(),
       ),

@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 
 class SocialLoginButton extends StatelessWidget {
   final String buttonImage;
-  final Color color;
   final VoidCallback onPressed;
 
   const SocialLoginButton({
     super.key,
     required this.buttonImage,
-    required this.color,
     required this.onPressed,
   });
 
