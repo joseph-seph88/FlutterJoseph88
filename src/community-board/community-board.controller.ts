@@ -82,4 +82,29 @@ export class CommunityBoardController {
   likeComment(@Param('commentId', ParseIntPipe) commentId: number) {
     return this.commentService.incrementLikeCount(commentId);
   }
+
+  @Get('comments/:commentId/replies')
+  getReplies(@Param('commentId', ParseIntPipe) commentId: number) {
+    return this.commentService.findRepliesByCommentId(commentId);
+  }
+
+  @Post('comments/:commentId/replies')
+  @HttpCode(HttpStatus.CREATED)
+  createReply(
+    @Param('commentId', ParseIntPipe) parentCommentId: number,
+    @Body() createCommentDto: CreateCommentDto
+  ) {
+    createCommentDto.parentCommentId = parentCommentId;
+    return this.commentService.create(createCommentDto);
+  }
+
+  @Get(':id/comments/tree')
+  getCommentTree(@Param('id', ParseIntPipe) postId: number) {
+    return this.commentService.findCommentTree(postId);
+  }
+
+  @Get('comments/:commentId/subtree')
+  getCommentSubtree(@Param('commentId', ParseIntPipe) commentId: number) {
+    return this.commentService.findCommentSubtree(commentId);
+  }
 }

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, IsArray, Length } from "class-validator";
+import { IsOptional, IsString, IsInt, Length } from "class-validator";
 
 export class CreateCommentDto {
     @IsString()
@@ -21,8 +21,8 @@ export class CreateCommentDto {
     writerProfileImage?: string;
 
     @IsOptional()
-    @IsArray()
-    images?: string[];
+    @IsString()
+    image?: string;
 
     @IsOptional()
     @IsInt()

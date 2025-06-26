@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommunityBoardModule } from './community-board/community-board.module';
+import databaseConfig from './config/database.config';
 
 @Module({
   controllers: [AppController],
@@ -12,19 +13,11 @@ import { CommunityBoardModule } from './community-board/community-board.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      load: [databaseConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
-        username: config.get<string>('DB_USER', 'poxi'),
-        password: config.get<string>('DB_PASS', 'ixop'),
-        database: config.get<string>('DB_DATABASE', 'poxi_db'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (config: ConfigService) => config.get('database') || {},
       inject: [ConfigService],
     }),
     CommunityBoardModule,
