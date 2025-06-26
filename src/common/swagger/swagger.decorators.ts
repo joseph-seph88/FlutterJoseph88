@@ -1,0 +1,54 @@
+import { applyDecorators } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ErrorResponseDto } from './common-response.dto';
+
+// 공통 응답 데코레이터
+export const ApiCommonResponses = (summary: string, successStatus = 200) => {
+    return applyDecorators(
+        ApiOperation({ summary }),
+        ApiResponse({ status: successStatus, description: '요청이 성공적으로 처리되었습니다.' }),
+        ApiResponse({ status: 400, description: '잘못된 요청 데이터입니다.', type: ErrorResponseDto }),
+        ApiResponse({ status: 404, description: '리소스를 찾을 수 없습니다.', type: ErrorResponseDto })
+    );
+};
+
+// 생성 응답 데코레이터
+export const ApiCreateResponse = (summary: string) => {
+    return applyDecorators(
+        ApiOperation({ summary }),
+        ApiResponse({ status: 201, description: '리소스가 성공적으로 생성되었습니다.' }),
+        ApiResponse({ status: 400, description: '잘못된 요청 데이터입니다.', type: ErrorResponseDto })
+    );
+};
+
+// 조회 응답 데코레이터
+export const ApiGetResponse = (summary: string) => {
+    return applyDecorators(
+        ApiOperation({ summary }),
+        ApiResponse({ status: 200, description: '데이터를 성공적으로 조회했습니다.' }),
+        ApiResponse({ status: 404, description: '리소스를 찾을 수 없습니다.', type: ErrorResponseDto })
+    );
+};
+
+// 수정 응답 데코레이터
+export const ApiUpdateResponse = (summary: string) => {
+    return applyDecorators(
+        ApiOperation({ summary }),
+        ApiResponse({ status: 200, description: '리소스가 성공적으로 수정되었습니다.' }),
+        ApiResponse({ status: 404, description: '리소스를 찾을 수 없습니다.', type: ErrorResponseDto })
+    );
+};
+
+// 삭제 응답 데코레이터
+export const ApiDeleteResponse = (summary: string) => {
+    return applyDecorators(
+        ApiOperation({ summary }),
+        ApiResponse({ status: 204, description: '리소스가 성공적으로 삭제되었습니다.' }),
+        ApiResponse({ status: 404, description: '리소스를 찾을 수 없습니다.', type: ErrorResponseDto })
+    );
+};
+
+// ID 파라미터 데코레이터
+export const ApiIdParam = (name = 'id', description = '리소스 ID') => {
+    return ApiParam({ name, description, example: 1 });
+};
