@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommunityBoard } from './community-board.entity';
 
 @Entity('comments')
@@ -21,8 +21,8 @@ export class Comment {
     @Column({ nullable: true })
     writerProfileImage: string;
 
-    @Column('simple-array', { nullable: true })
-    images: string[];
+    @Column({ nullable: true })
+    image: string;
 
     @Column({ nullable: true })
     parentCommentId: number;
@@ -39,7 +39,17 @@ export class Comment {
     @UpdateDateColumn()
     updatedAt: Date;
 
+    @UpdateDateColumn()
+    deletedAt: Date;
+
     @ManyToOne(() => CommunityBoard)
     @JoinColumn({ name: 'postId' })
     communityBoard: CommunityBoard;
+
+    @ManyToOne(() => Comment, comment => comment.replies, { nullable: true })
+    @JoinColumn({ name: 'parentCommentId' })
+    parentComment: Comment;
+
+    @OneToMany(() => Comment, comment => comment.parentComment)
+    replies: Comment[];
 }
