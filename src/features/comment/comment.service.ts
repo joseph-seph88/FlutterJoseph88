@@ -31,8 +31,8 @@ export class CommentService {
     }
 
     async findByPostId(postId: number): Promise<Comment[]> {
-        return await this.commentRepository.find({
-            where: { postId, parentCommentId: IsNull() },
+        const comments = await this.commentRepository.find({
+            where: { postId, parentCommentId: IsNull(), deletedAt: IsNull() },
             relations: ['replies', 'replies.replies'],
             order: {
                 createdAt: 'ASC',
@@ -42,22 +42,24 @@ export class CommentService {
                 }
             }
         });
+        return comments;
     }
 
     async findRepliesByCommentId(commentId: number): Promise<Comment[]> {
-        return await this.commentRepository.find({
-            where: { parentCommentId: commentId },
+        const replies = await this.commentRepository.find({
+            where: { parentCommentId: commentId, deletedAt: IsNull() },
             relations: ['replies'],
             order: {
                 createdAt: 'ASC',
                 replies: { createdAt: 'ASC' }
             }
         });
+        return replies;
     }
 
     async findOne(id: number): Promise<Comment> {
         const comment = await this.commentRepository.findOne({
-            where: { id },
+            where: { id, deletedAt: IsNull() },
             relations: ['replies', 'replies.replies', 'parentComment']
         });
 
@@ -75,15 +77,7 @@ export class CommentService {
     }
 
     async remove(id: number): Promise<void> {
-        const comment = await this.findOne(id);
-
-        if (comment.replies && comment.replies.length > 0) {
-            comment.content = '[삭제된 댓글입니다]';
-            comment.deletedBy = 'user';
-            await this.commentRepository.save(comment);
-        } else {
-            await this.commentRepository.remove(comment);
-        }
+        await this.commentRepository.softDelete(id);
     }
 
     async incrementLikeCount(id: number): Promise<void> {
@@ -92,7 +86,7 @@ export class CommentService {
 
     async findCommentTree(postId: number): Promise<Comment[]> {
         const comments = await this.commentRepository.find({
-            where: { postId },
+            where: { postId, deletedAt: IsNull() },
             relations: ['replies', 'replies.replies', 'replies.replies.replies'],
             order: {
                 createdAt: 'ASC',
@@ -111,7 +105,7 @@ export class CommentService {
 
     async findCommentSubtree(commentId: number): Promise<Comment> {
         const comment = await this.commentRepository.findOne({
-            where: { id: commentId },
+            where: { id: commentId, deletedAt: IsNull() },
             relations: ['replies', 'replies.replies', 'replies.replies.replies'],
             order: {
                 replies: {

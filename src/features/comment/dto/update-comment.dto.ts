@@ -1,4 +1,16 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCommentDto } from '../../comment/dto/create-comment.dto';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsOptional, IsString, IsInt, Length } from 'class-validator';
 
-export class UpdateCommentDto extends PartialType(CreateCommentDto) { }
+@InputType()
+export class UpdateCommentDto {
+    @IsOptional()
+    @IsString()
+    @Length(1, 1000, { message: '길이 제한 : 1000' })
+    @Field({ nullable: true })
+    content?: string;
+
+    @IsOptional()
+    @IsString()
+    @Field({ nullable: true })
+    image?: string;
+}
