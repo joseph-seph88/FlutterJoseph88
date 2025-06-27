@@ -2,7 +2,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { CreateCommunityBoardDto } from './dto/create-community-board.dto';
 import { UpdateCommunityBoardDto } from './dto/update-community-board.dto';
 import { CommunityBoard } from './entities/community-board.entity';
@@ -21,6 +21,7 @@ export class CommunityBoardService {
 
   async findAll(): Promise<CommunityBoard[]> {
     return await this.communityBoardRepository.find({
+      where: { deletedAt: IsNull() },
       relations: ['comments'],
       order: { createdAt: 'DESC' }
     });
@@ -28,7 +29,7 @@ export class CommunityBoardService {
 
   async findOne(id: number): Promise<CommunityBoard> {
     const post = await this.communityBoardRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['comments']
     });
 
@@ -46,8 +47,9 @@ export class CommunityBoardService {
   }
 
   async remove(id: number): Promise<void> {
-    const post = await this.findOne(id);
-    await this.communityBoardRepository.remove(post);
+    // const post = await this.findOne(id);
+    // await this.communityBoardRepository.remove(post);
+    await this.communityBoardRepository.softDelete(id);
   }
 
   async incrementViewCount(id: number): Promise<void> {
