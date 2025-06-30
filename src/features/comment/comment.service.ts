@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment } from '../comment/entities/comment.entity';
+import { BasicResponse } from 'src/common/response.dto.ts/basic-response.dto';
+import { ResponseCommentDto } from './dto/response-comment.dto';
+import { plainToInstance } from 'class-transformer';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentService {
@@ -11,7 +15,7 @@ export class CommentService {
         private commentRepository: Repository<Comment>,
     ) { }
 
-    async create(createCommentDto: CreateCommentDto): Promise<Comment> {
+    async create(createCommentDto: CreateCommentDto): Promise<BasicResponse> {
         if (createCommentDto.parentCommentId) {
             const parentComment = await this.commentRepository.findOne({
                 where: { id: createCommentDto.parentCommentId }
@@ -27,10 +31,14 @@ export class CommentService {
         }
 
         const comment = this.commentRepository.create(createCommentDto);
-        return await this.commentRepository.save(comment);
+        await this.commentRepository.save(comment);
+        return {
+            statusCode: 201,
+            message: '리소스가 성공적으로 생성되었습니다.'
+        };
     }
 
-    async findByPostId(postId: number): Promise<Comment[]> {
+    async findByPostId(postId: number): Promise<ResponseCommentDto[]> {
         const comments = await this.commentRepository.find({
             where: { postId, parentCommentId: IsNull(), deletedAt: IsNull() },
             relations: ['replies', 'replies.replies'],
@@ -45,7 +53,7 @@ export class CommentService {
         return comments;
     }
 
-    async findRepliesByCommentId(commentId: number): Promise<Comment[]> {
+    async findRepliesByCommentId(commentId: number): Promise<ResponseCommentDto[]> {
         const replies = await this.commentRepository.find({
             where: { parentCommentId: commentId, deletedAt: IsNull() },
             relations: ['replies'],
@@ -57,7 +65,7 @@ export class CommentService {
         return replies;
     }
 
-    async findOne(id: number): Promise<Comment> {
+    async findOne(id: number): Promise<ResponseCommentDto> {
         const comment = await this.commentRepository.findOne({
             where: { id, deletedAt: IsNull() },
             relations: ['replies', 'replies.replies', 'parentComment']
@@ -70,14 +78,20 @@ export class CommentService {
         return comment;
     }
 
-    async update(id: number, updateCommentDto: Partial<CreateCommentDto>): Promise<Comment> {
+    async update(id: number, updateCommentDto: UpdateCommentDto): Promise<ResponseCommentDto> {
         const comment = await this.findOne(id);
         Object.assign(comment, updateCommentDto);
-        return await this.commentRepository.save(comment);
+        await this.commentRepository.save(comment);
+
+        return plainToInstance(ResponseCommentDto, comment, { excludeExtraneousValues: true });
     }
 
-    async remove(id: number): Promise<void> {
+    async remove(id: number): Promise<BasicResponse> {
         await this.commentRepository.softDelete(id);
+        return {
+            statusCode: 204,
+            message: '리소스가 성공적으로 삭제되었습니다.'
+        };
     }
 
     async incrementLikeCount(id: number): Promise<void> {

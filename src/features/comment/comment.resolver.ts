@@ -3,35 +3,33 @@ import { Comment } from './entities/comment.entity';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { BasicResponse } from 'src/common/response.dto.ts/basic-response.dto';
+import { ResponseCommentDto } from './dto/response-comment.dto';
 
 @Resolver(() => Comment)
 export class CommentResolver {
     constructor(private readonly commentService: CommentService) { }
 
-    @Query(() => [Comment])
-    async getCommentsByPostId(@Args('postId', { type: () => Int }) postId: number): Promise<Comment[]> {
-        return this.commentService.findByPostId(postId);
+    @Query(() => [ResponseCommentDto])
+    async getCommentsByPostId(@Args('postId', { type: () => Int }) postId: number) {
+        return await this.commentService.findByPostId(postId);
     }
 
-    @Mutation(() => Comment)
+    @Mutation(() => BasicResponse)
     async createComment(
-        @Args('createCommentInput') createCommentDto: CreateCommentDto,
-    ): Promise<Comment> {
-        return this.commentService.create(createCommentDto);
+        @Args('createCommentInput') createCommentDto: CreateCommentDto) {
+        return await this.commentService.create(createCommentDto);
     }
 
-    @Mutation(() => Comment)
+    @Mutation(() => ResponseCommentDto)
     async updateComment(
         @Args('id', { type: () => Int }) id: number,
-        @Args('updateCommentInput') updateCommentDto: UpdateCommentDto,
-    ): Promise<Comment> {
-        return this.commentService.update(id, updateCommentDto);
+        @Args('updateCommentInput') updateCommentDto: UpdateCommentDto) {
+        return await this.commentService.update(id, updateCommentDto);
     }
 
-    @Mutation(() => Comment)
-    async removeComment(@Args('id', { type: () => Int }) id: number): Promise<Comment> {
-        const comment = await this.commentService.findOne(id);
-        await this.commentService.remove(id);
-        return comment;
+    @Mutation(() => BasicResponse)
+    async removeComment(@Args('id', { type: () => Int }) id: number) {
+        return await this.commentService.remove(id);
     }
 }
