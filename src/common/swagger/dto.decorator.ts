@@ -34,3 +34,7 @@ export const ApiOptionalArray = (example: any[], type?: any) => {
 export const ApiEnum = (example: string, enumValues: string[], required = true) => {
     return ApiProperty({ example, enum: enumValues, required });
 };
+
+export const ApiObject = (example: object, required = true, description?: string) => {
+    return ApiProperty({ example, required, description });
+};

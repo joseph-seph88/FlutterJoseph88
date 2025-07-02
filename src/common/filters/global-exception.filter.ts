@@ -32,5 +32,30 @@ export class GlobalExceptionFilter implements ExceptionFilter {
                 path: request.url,
             });
         }
+
+        if (exception instanceof Error) {
+            this.logger.error(
+                `Error: ${exception.message} - ${request.url}`,
+                exception.stack,
+            );
+
+            return response.status(HttpStatus.BAD_REQUEST).json({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: exception.message,
+                timestamp: new Date().toISOString(),
+                path: request.url,
+            });
+        }
+
+        this.logger.error(
+            `Unknown Exception: ${exception} - ${request.url}`,
+        );
+
+        return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: 'Internal server error',
+            timestamp: new Date().toISOString(),
+            path: request.url,
+        });
     }
 }

@@ -15,8 +15,7 @@ import {
 @Controller('community-board')
 export class CommunityBoardController {
   constructor(
-    private readonly communityBoardService: CommunityBoardService,
-  ) { }
+    private readonly communityBoardService: CommunityBoardService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
