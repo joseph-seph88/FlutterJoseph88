@@ -27,6 +27,7 @@ export class ImageResponseDto {
         targetType: string;
         sortedNumber: number;
         fileName: string;
+        originalFileName: string;
         fileUrl: string[];
         createdAt: string;
     };

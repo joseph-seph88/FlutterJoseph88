@@ -13,25 +13,28 @@ export class ImageController {
     @HttpCode(HttpStatus.CREATED)
     @ApiCreateResponse('이미지 업로드')
     @UseInterceptors(FileInterceptor('file', createMemoryUploadConfig()))
-    async uploadImage(
+    async uploadImages(
         @UploadedFile() file: Express.Multer.File,
         @Body() imageDto: ImageDto
     ) {
         return await this.imageService.uploadImage(file, imageDto);
     }
 
+    @Get('getUrl')
+    @HttpCode(HttpStatus.OK)
+    @ApiGetResponse('이미지 URL 조회')
+    async getUrlImage(
+        @Query('userId') userId: number,
+        @Query('targetType') targetType: string,
+        @Query('targetId') targetId: number) {
+        return await this.imageService.getImage(userId, targetType, targetId);
+    }
+
+
 }
 
 
-//     @Get('getUrl')
-//     @HttpCode(HttpStatus.OK)
-//     @ApiGetResponse('이미지 URL 조회')
-//     async getUrlImage(
-//         @Query('userId') userId: number,
-//         @Query('targetType') targetType: string,
-//         @Query('targetId') targetId: number) {
-//         return await this.imageService.getImage(userId, targetType, targetId);
-//     }
+
 
 //     @Post('upload-memory')
 //     @HttpCode(HttpStatus.CREATED)

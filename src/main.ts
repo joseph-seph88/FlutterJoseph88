@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { setupMiddlewares } from './config/middleware.config';
 import { SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from './config/swagger.config';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,6 +14,8 @@ async function bootstrap() {
       credentials: true,
     }
   });
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  app.useGlobalPipes(new (await import('@nestjs/common')).ValidationPipe({ transform: true }));
   setupMiddlewares(app.getHttpAdapter().getInstance());
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

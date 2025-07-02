@@ -35,12 +35,13 @@ export class ImageService {
             .toFormat(format, { quality: 80 })
             .toFile(outputPath);
 
-        const fileUrl = `http://${process.env.HOST || 'localhost'}:${process.env.PORT || 3000}/${outputPath}`;
+        const fileUrl = `http://${process.env.HOST || 'localhost'}:${process.env.PORT || 3000}/uploads/images/${fileName}`;
 
         const imageData = this.imageRepository.create({
             ...imageDto,
             fileName: fileName,
             fileUrl: fileUrl,
+            originalFileName: file.originalname,
         });
 
         const savedImage = await this.imageRepository.save(imageData);
@@ -48,18 +49,30 @@ export class ImageService {
         return {
             statusCode: 201,
             message: '이미지 업로드 완료',
-            data: {
-                id: savedImage.id,
-                fileName: savedImage.fileName,
-                fileUrl: savedImage.fileUrl,
-                originalName: file.originalname,
-                mimeType: file.mimetype,
-                size: file.size,
-                createdAt: savedImage.createdAt
-            }
+            // data: {
+            //     id: savedImage.id,
+            //     fileName: savedImage.fileName,
+            //     fileUrl: savedImage.fileUrl,
+            //     originalName: file.originalname,
+            //     mimeType: file.mimetype,
+            //     size: file.size,
+            //     createdAt: savedImage.createdAt
+            // }
         };
     }
+
+    async getImage(userId: number, targetType: string, targetId: number) {
+        const image = await this.imageRepository.findOne({
+            where: { userId, targetType, targetId },
+        });
+
+        if (!image) throw new NotFoundException('이미지를 찾을 수 없습니다.');
+
+
+        return { url: image.fileUrl };
+    }
 }
+
 // generateUniqueFilename = (originalname: string): string => {
 //     const uuid = uuidv4();
 //     const extension = path.extname(originalname);

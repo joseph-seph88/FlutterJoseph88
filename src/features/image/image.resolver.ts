@@ -3,6 +3,7 @@ import { ImageEntity } from './entities/image.entity';
 import { ImageDto } from './dto/image.dto';
 import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ImageService } from './image.service';
+import { ImageResponseDto } from './dto/image-response.dto';
 
 interface FileUpload {
     filename: string;
@@ -16,7 +17,7 @@ export class ImageResolver {
     constructor(private readonly imageService: ImageService) { }
 
     @Mutation(() => BasicResponse)
-    async uploadImage(
+    async uploadImages(
         @Args('file', { type: () => 'Upload' }) file: Promise<FileUpload>,
         @Args('imageDto') imageDto: ImageDto
     ) {
@@ -41,4 +42,10 @@ export class ImageResolver {
         } as unknown as Express.Multer.File;
         return await this.imageService.uploadImage(multerFile, imageDto);
     }
+
+    // @Query(() => ImageResponseDto)
+    // async GetImages(){
+
+    // }
+
 }

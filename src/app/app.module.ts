@@ -42,7 +42,7 @@ import { ImageModule } from 'src/features/image/image.module';
       // debug: true,
       introspection: true,
       context: ({ req }) => ({ req }),
-      csrfPrevention: false, // CSRF 보호 비활성화 (개발 환경용)
+      csrfPrevention: false,
     }),
     ConfigModule.forRoot({
       isGlobal: true,
