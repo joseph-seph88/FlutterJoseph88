@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment } from '../comment/entities/comment.entity';
-import { BasicResponse } from 'src/common/response.dto.ts/basic-response.dto';
+import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommentDto } from './dto/response-comment.dto';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCommentDto } from './dto/update-comment.dto';

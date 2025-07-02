@@ -3,7 +3,7 @@ import { Comment } from './entities/comment.entity';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { BasicResponse } from 'src/common/response.dto.ts/basic-response.dto';
+import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommentDto } from './dto/response-comment.dto';
 
 @Resolver(() => Comment)

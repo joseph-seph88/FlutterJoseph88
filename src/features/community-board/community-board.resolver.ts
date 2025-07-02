@@ -3,7 +3,7 @@ import { CommunityBoard } from './entities/community-board.entity';
 import { CommunityBoardService } from './community-board.service';
 import { CreateCommunityBoardDto } from './dto/create-community-board.dto';
 import { UpdateCommunityBoardDto } from './dto/update-community-board.dto';
-import { BasicResponse } from 'src/common/response.dto.ts/basic-response.dto';
+import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommunityBoardDto } from './dto/response-community-board.dto';
 
 @Resolver(() => CommunityBoard)
