@@ -1,7 +1,5 @@
 import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { AppController } from './app.controller';
-// import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommunityBoardModule } from '../features/community-board/community-board.module';
 import { CommentModule } from '../features/comment/comment.module';
@@ -9,16 +7,14 @@ import databaseConfig from '../config/database.config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ValidationPipe } from '@nestjs/common';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_PIPE, APP_FILTER } from '@nestjs/core';
 import { ImageModule } from 'src/features/image/image.module';
+import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
 // import { UploadScalar } from 'src/common/scalars/upload.scalar';
 
 @Module({
-  controllers: [
-    // AppController
-  ],
+  controllers: [],
   providers: [
-    // AppService
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
@@ -26,6 +22,10 @@ import { ImageModule } from 'src/features/image/image.module';
         forbidNonWhitelisted: true,
         transform: true,
       }),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
     // UploadScalar,
   ],

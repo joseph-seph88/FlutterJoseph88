@@ -12,12 +12,11 @@ async function bootstrap() {
     cors: {
       origin: true,
       credentials: true,
-    }
+    },
   });
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-  app.useGlobalPipes(new (await import('@nestjs/common')).ValidationPipe({ transform: true }));
-  setupMiddlewares(app.getHttpAdapter().getInstance());
 
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  setupMiddlewares(app.getHttpAdapter().getInstance());
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 

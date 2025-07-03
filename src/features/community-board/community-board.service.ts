@@ -5,8 +5,8 @@ import { CreateCommunityBoardDto } from './dto/create-community-board.dto';
 import { UpdateCommunityBoardDto } from './dto/update-community-board.dto';
 import { ResponseCommunityBoardDto } from './dto/response-community-board.dto';
 import { CommunityBoard } from './entities/community-board.entity';
-import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
 @Injectable()
 export class CommunityBoardService {
@@ -15,7 +15,7 @@ export class CommunityBoardService {
     private communityBoardRepository: Repository<CommunityBoard>,
   ) { }
 
-  async create(createCommunityBoardDto: CreateCommunityBoardDto): Promise<BasicResponse> {
+  async create(createCommunityBoardDto: CreateCommunityBoardDto): Promise<CommonResponse> {
     const post = this.communityBoardRepository.create(createCommunityBoardDto);
     await this.communityBoardRepository.save(post);
     return {
@@ -61,7 +61,7 @@ export class CommunityBoardService {
     return plainToInstance(ResponseCommunityBoardDto, post, { excludeExtraneousValues: true });
   }
 
-  async remove(id: number): Promise<BasicResponse> {
+  async remove(id: number): Promise<CommonResponse> {
     // const post = await this.findOne(id);
     // await this.communityBoardRepository.remove(post);
     await this.communityBoardRepository.softDelete(id);
