@@ -19,10 +19,9 @@ export class ImageResponseDto {
         "userId": 1,
         "targetId": 1,
         "targetType": "게시판",
-        "sortedNumber": 1,
         "fileName": "hashsaltfish.jpg",
         "originalName": "fish.jpg",
-        "fileUrl": "http://localhost:3000/u/i/hashsaltfish.jpg",
+        "fileUrl": ["http://localhost:3000/u/i/hashsaltfish.jpg"],
         "createdAt": "2025-07-02",
     })
     @IsObject()

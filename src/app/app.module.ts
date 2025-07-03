@@ -10,7 +10,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { APP_PIPE, APP_FILTER } from '@nestjs/core';
 import { ImageModule } from 'src/features/image/image.module';
 import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
-// import { UploadScalar } from 'src/common/scalars/upload.scalar';
+import { UploadScalar } from 'src/features/image/upload.scalar';
 
 @Module({
   controllers: [],
@@ -27,7 +27,7 @@ import { GlobalExceptionFilter } from '../common/filters/global-exception.filter
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
     },
-    // UploadScalar,
+    UploadScalar,
   ],
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({

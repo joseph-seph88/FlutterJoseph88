@@ -7,6 +7,8 @@ import * as path from 'path';
 import { ImageDto } from './dto/image.dto';
 import { ImageResponseDto } from './dto/image-response.dto';
 import { ImageUtils } from './image.utils';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
+import * as fs from 'fs';
 
 
 @Injectable()
@@ -16,8 +18,9 @@ export class ImageService {
         private readonly imageRepository: Repository<ImageEntity>
     ) { }
 
-    async uploadImages(files: Express.Multer.File[], imageDto: ImageDto) {
+    async uploadImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ImageResponseDto> {
         const results: ImageEntity[] = [];
+        const imageUrls: string[] = [];
         const saveDir = ImageUtils.createImageDir();
 
         for (const file of files) {
@@ -41,11 +44,23 @@ export class ImageService {
             });
             const savedImage = await this.imageRepository.save(imageData);
             results.push(savedImage);
+            imageUrls.push(fileUrl);
         }
+        const firstImage = results[0];
         return {
             statusCode: 201,
             message: '리소스가 성공적으로 생성되었습니다.',
-        }
+            data: {
+                id: firstImage.id,
+                userId: firstImage.userId,
+                targetId: firstImage.targetId,
+                targetType: firstImage.targetType,
+                fileName: firstImage.fileName,
+                originalFileName: firstImage.originalFileName,
+                fileUrl: imageUrls,
+                createdAt: firstImage.createdAt.toISOString(),
+            }
+        };
     }
 
     async getImages(userId: number, targetType: string, targetId: number): Promise<ImageResponseDto> {
@@ -56,20 +71,100 @@ export class ImageService {
 
         if (!images || images.length === 0) throw new NotFoundException('이미지를 찾을 수 없습니다.');
         const fileUrls = images.map(img => img.fileUrl);
+        const firstImage = images[0];
 
         return {
             statusCode: 200,
             message: "요청이 성공적으로 처리되었습니다.",
             data: {
-                id: images[0].id,
-                userId: images[0].userId,
-                targetId: images[0].targetId,
-                targetType: images[0].targetType,
-                fileName: images[0].fileName,
-                originalFileName: images[0].originalFileName,
+                id: firstImage.id,
+                userId: firstImage.userId,
+                targetId: firstImage.targetId,
+                targetType: firstImage.targetType,
+                fileName: firstImage.fileName,
+                originalFileName: firstImage.originalFileName,
                 fileUrl: fileUrls,
-                createdAt: images[0].createdAt.toISOString(),
+                createdAt: firstImage.createdAt.toISOString(),
             }
+        }
+    }
+
+    async updateImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ImageResponseDto> {
+        const results: ImageEntity[] = [];
+        const imageUrls: string[] = [];
+        const saveDir = ImageUtils.createImageDir();
+        const userId = imageDto.userId;
+        const targetId = imageDto.targetId;
+        const targetType = imageDto.targetType;
+        const imageIds = imageDto.imageIds ?? [];
+
+        console.log(`이미지(id: ${imageIds});.`);
+
+        for (const file of files) {
+            const extension = path.extname(file.originalname).toLowerCase();
+            const fileName = ImageUtils.generateUniqueFilename(file.originalname, extension);
+            const outputPath = path.join(saveDir, fileName);
+            const format = ImageUtils.getSharpFormat(extension);
+            const fileUrl = ImageUtils.generateFileUrl(fileName);
+
+            await sharp(file.buffer)
+                .rotate()
+                .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+                .toFormat(format, { quality: 80 })
+                .toFile(outputPath);
+
+            const imageData = this.imageRepository.create({
+                userId,
+                targetType,
+                targetId,
+                fileName: fileName,
+                fileUrl: fileUrl,
+                originalFileName: file.originalname,
+            });
+            const savedImage = await this.imageRepository.save(imageData);
+            results.push(savedImage);
+            imageUrls.push(fileUrl);
+        }
+
+        for (const imageId of imageIds) {
+            const image = await this.imageRepository.findOne({ where: { id: imageId } });
+            if (!image) {
+                throw new NotFoundException(`이미지(id: ${imageIds})를 찾을 수 없습니다.`);
+            }
+            ImageUtils.deleteImageDir(image.fileName);
+            await this.imageRepository.delete(imageId);
+        }
+
+        const firstImage = results[0];
+
+        return {
+            statusCode: 201,
+            message: '리소스가 성공적으로 수정되었습니다.',
+            data: {
+                id: firstImage.id,
+                userId: firstImage.userId,
+                targetId: firstImage.targetId,
+                targetType: firstImage.targetType,
+                fileName: firstImage.fileName,
+                originalFileName: firstImage.originalFileName,
+                fileUrl: imageUrls,
+                createdAt: firstImage.createdAt.toISOString(),
+            }
+        };
+    }
+
+    async deleteImages(imageIds: number[]): Promise<CommonResponse> {
+        for (const id of imageIds) {
+            const image = await this.imageRepository.findOne({ where: { id } });
+            if (!image) {
+                throw new NotFoundException(`이미지(id: ${id})를 찾을 수 없습니다.`);
+            }
+            ImageUtils.deleteImageDir(image.fileName);
+            await this.imageRepository.delete(id);
+        }
+        return {
+            statusCode: 204,
+            message: '리소스가 성공적으로 삭제되었습니다.',
         }
     }
 }

@@ -5,20 +5,13 @@ import { ImageService } from './image.service';
 import { ImageResponseDto } from './dto/image-response.dto';
 import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
-interface FileUpload {
-    filename: string;
-    mimetype: string;
-    encoding: string;
-    createReadStream: () => NodeJS.ReadableStream;
-}
-
 @Resolver(() => ImageEntity)
 export class ImageResolver {
     constructor(private readonly imageService: ImageService) { }
 
     @Mutation(() => CommonResponse)
-    async uploadImages(
-        @Args('file', { type: () => 'Upload' }) file: Promise<FileUpload>,
+    async uploadImage(
+        @Args('file', { type: () => 'Upload' }) file: any,
         @Args('imageDto') imageDto: ImageDto
     ) {
         const { createReadStream, filename, mimetype } = await file;
@@ -45,10 +38,4 @@ export class ImageResolver {
         const files: Express.Multer.File[] = [multerFile];
         return await this.imageService.uploadImages(files, imageDto);
     }
-
-    // @Query(() => ImageResponseDto)
-    // async GetImages(){
-
-    // }
-
 }

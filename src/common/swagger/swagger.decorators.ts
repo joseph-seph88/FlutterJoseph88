@@ -18,10 +18,14 @@ export const ApiCommonResponses = (summary: string, successStatus = 200, respons
 
 
 // 생성 응답 데코레이터
-export const ApiCreateResponse = (summary: string) => {
+export const ApiCreateResponse = (summary: string, responseType?: any) => {
     return applyDecorators(
         ApiOperation({ summary }),
-        ApiResponse({ status: 201, description: '리소스가 성공적으로 생성되었습니다.' }),
+        ApiResponse({
+            status: 201,
+            description: '리소스가 성공적으로 생성되었습니다.',
+            type: responseType,
+        }),
         ApiResponse({ status: 400, description: '잘못된 요청 데이터입니다.' }),
         ApiResponse({ status: 404, description: '리소스를 찾을 수 없습니다.' }),
         ApiResponse({ status: 500, description: '서버 내부 오류가 발생했습니다.' })
@@ -72,4 +76,13 @@ export const ApiDeleteResponse = (summary: string) => {
 // ID 파라미터 데코레이터
 export const ApiIdParam = (name = 'id', description = '리소스 ID') => {
     return ApiParam({ name, description, example: 1 });
+};
+
+// 3개 파라미터 데코레이터
+export const ApiThreeParam = (name1st, name2st, name3st, desc1st, desc2st, desc3st) => {
+    return applyDecorators(
+        ApiParam({ name: name1st, description: desc1st, example: 1 }),
+        ApiParam({ name: name2st, description: desc2st, example: 1 }),
+        ApiParam({ name: name3st, description: desc3st, example: "게시판" }),
+    );
 };
