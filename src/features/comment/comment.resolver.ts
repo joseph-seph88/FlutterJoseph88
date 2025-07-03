@@ -3,8 +3,8 @@ import { Comment } from './entities/comment.entity';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommentDto } from './dto/response-comment.dto';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
 @Resolver(() => Comment)
 export class CommentResolver {
@@ -15,7 +15,7 @@ export class CommentResolver {
         return await this.commentService.findByPostId(postId);
     }
 
-    @Mutation(() => BasicResponse)
+    @Mutation(() => CommonResponse)
     async createComment(
         @Args('createCommentInput') createCommentDto: CreateCommentDto) {
         return await this.commentService.create(createCommentDto);
@@ -28,7 +28,7 @@ export class CommentResolver {
         return await this.commentService.update(id, updateCommentDto);
     }
 
-    @Mutation(() => BasicResponse)
+    @Mutation(() => CommonResponse)
     async removeComment(@Args('id', { type: () => Int }) id: number) {
         return await this.commentService.remove(id);
     }

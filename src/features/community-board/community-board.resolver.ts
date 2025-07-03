@@ -3,8 +3,8 @@ import { CommunityBoard } from './entities/community-board.entity';
 import { CommunityBoardService } from './community-board.service';
 import { CreateCommunityBoardDto } from './dto/create-community-board.dto';
 import { UpdateCommunityBoardDto } from './dto/update-community-board.dto';
-import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommunityBoardDto } from './dto/response-community-board.dto';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
 @Resolver(() => CommunityBoard)
 export class CommunityBoardResolver {
@@ -20,7 +20,7 @@ export class CommunityBoardResolver {
         return this.communityBoardService.findOne(id);
     }
 
-    @Mutation(() => BasicResponse)
+    @Mutation(() => CommonResponse)
     async createCommunityBoard(
         @Args('createCommunityBoardInput') createCommunityBoardDto: CreateCommunityBoardDto) {
         return await this.communityBoardService.create(createCommunityBoardDto);
@@ -33,7 +33,7 @@ export class CommunityBoardResolver {
         return await this.communityBoardService.update(id, updateCommunityBoardDto);
     }
 
-    @Mutation(() => BasicResponse)
+    @Mutation(() => CommonResponse)
     async removeCommunity(@Args('id', { type: () => Int }) id: number) {
         return await this.communityBoardService.remove(id);
     }

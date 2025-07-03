@@ -21,10 +21,6 @@ export class ImageEntity {
     targetType: string;
 
     @Column()
-    @Field(() => Int)
-    sortedNumber: number;
-
-    @Column()
     @Field()
     fileUrl: string;
 

@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment } from '../comment/entities/comment.entity';
-import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ResponseCommentDto } from './dto/response-comment.dto';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
 @Injectable()
 export class CommentService {
@@ -15,7 +15,7 @@ export class CommentService {
         private commentRepository: Repository<Comment>,
     ) { }
 
-    async create(createCommentDto: CreateCommentDto): Promise<BasicResponse> {
+    async create(createCommentDto: CreateCommentDto): Promise<CommonResponse> {
         if (createCommentDto.parentCommentId) {
             const parentComment = await this.commentRepository.findOne({
                 where: { id: createCommentDto.parentCommentId }
@@ -86,7 +86,7 @@ export class CommentService {
         return plainToInstance(ResponseCommentDto, comment, { excludeExtraneousValues: true });
     }
 
-    async remove(id: number): Promise<BasicResponse> {
+    async remove(id: number): Promise<CommonResponse> {
         await this.commentRepository.softDelete(id);
         return {
             statusCode: 204,

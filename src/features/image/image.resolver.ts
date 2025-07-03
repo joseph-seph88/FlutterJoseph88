@@ -1,9 +1,9 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ImageEntity } from './entities/image.entity';
 import { ImageDto } from './dto/image.dto';
-import { BasicResponse } from 'src/common/response-dto/basic-response.dto';
 import { ImageService } from './image.service';
 import { ImageResponseDto } from './dto/image-response.dto';
+import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 
 interface FileUpload {
     filename: string;
@@ -16,7 +16,7 @@ interface FileUpload {
 export class ImageResolver {
     constructor(private readonly imageService: ImageService) { }
 
-    @Mutation(() => BasicResponse)
+    @Mutation(() => CommonResponse)
     async uploadImages(
         @Args('file', { type: () => 'Upload' }) file: Promise<FileUpload>,
         @Args('imageDto') imageDto: ImageDto
@@ -40,7 +40,10 @@ export class ImageResolver {
             path: '',
             stream,
         } as unknown as Express.Multer.File;
-        return await this.imageService.uploadImage(multerFile, imageDto);
+
+        // 서비스 메서드가 배열을 기대하므로 단일 파일을 배열로 변환
+        const files: Express.Multer.File[] = [multerFile];
+        return await this.imageService.uploadImages(files, imageDto);
     }
 
     // @Query(() => ImageResponseDto)
