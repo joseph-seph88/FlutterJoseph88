@@ -1,7 +1,7 @@
 import { Field, InputType, Int } from "@nestjs/graphql";
-import { Type } from "class-transformer";
-import { IsNumber, IsString } from "class-validator";
-import { ApiNumber, ApiString } from "src/common/swagger/dto.decorator";
+import { Type, Transform } from "class-transformer";
+import { IsNumber, IsOptional, IsString } from "class-validator";
+import { ApiArray, ApiNumber, ApiString } from "src/common/swagger/dto.decorator";
 
 @InputType()
 export class ImageDto {
@@ -21,4 +21,9 @@ export class ImageDto {
     @IsString()
     @Field()
     targetType: string;
+
+    @ApiArray([1, 2])
+    @IsOptional()
+    @Field(() => [Int], { nullable: true })
+    imageIds?: number[];
 }

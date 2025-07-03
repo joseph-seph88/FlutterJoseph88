@@ -11,6 +11,16 @@ export class ImageUtils {
         return saveDir;
     }
 
+    static deleteImageDir(imageName: string) {
+        if (imageName) {
+            const filePath = path.join(__dirname, '../../../uploads/images', imageName);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+
+    }
+
     static generateUniqueFilename(originalFileName: string, extension: string): string {
         const uuid = uuidv4();
         return `${uuid}-${extension}`;
