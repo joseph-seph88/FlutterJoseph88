@@ -5,10 +5,10 @@ import { Repository } from 'typeorm';
 import * as sharp from 'sharp';
 import * as path from 'path';
 import { ImageDto } from './dto/image.dto';
-import { ImageResponseDto } from './dto/image-response.dto';
-import { ImageUtils } from './image.utils';
 import { CommonResponse } from 'src/common/response-dto/common-response.dto';
 import * as fs from 'fs';
+import { ResponseImageDto } from './dto/response_image.dto';
+import { ImageUtils } from './\binternal/image.utils';
 
 
 @Injectable()
@@ -18,7 +18,7 @@ export class ImageService {
         private readonly imageRepository: Repository<ImageEntity>
     ) { }
 
-    async uploadImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ImageResponseDto> {
+    async uploadImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ResponseImageDto> {
         const results: ImageEntity[] = [];
         const imageUrls: string[] = [];
         const saveDir = ImageUtils.createImageDir();
@@ -50,20 +50,20 @@ export class ImageService {
         return {
             statusCode: 201,
             message: '리소스가 성공적으로 생성되었습니다.',
-            data: {
-                id: firstImage.id,
-                userId: firstImage.userId,
-                targetId: firstImage.targetId,
-                targetType: firstImage.targetType,
-                fileName: firstImage.fileName,
-                originalFileName: firstImage.originalFileName,
-                fileUrl: imageUrls,
-                createdAt: firstImage.createdAt.toISOString(),
-            }
+            // data: {
+            id: firstImage.id,
+            userId: firstImage.userId,
+            targetId: firstImage.targetId,
+            targetType: firstImage.targetType,
+            fileName: firstImage.fileName,
+            originalFileName: firstImage.originalFileName,
+            fileUrl: imageUrls,
+            createdAt: firstImage.createdAt.toISOString(),
+            // }
         };
     }
 
-    async getImages(userId: number, targetType: string, targetId: number): Promise<ImageResponseDto> {
+    async getImages(userId: number, targetType: string, targetId: number): Promise<ResponseImageDto> {
         const images = await this.imageRepository.find({
             where: { userId, targetType, targetId },
             order: { createdAt: 'ASC' }
@@ -76,20 +76,20 @@ export class ImageService {
         return {
             statusCode: 200,
             message: "요청이 성공적으로 처리되었습니다.",
-            data: {
-                id: firstImage.id,
-                userId: firstImage.userId,
-                targetId: firstImage.targetId,
-                targetType: firstImage.targetType,
-                fileName: firstImage.fileName,
-                originalFileName: firstImage.originalFileName,
-                fileUrl: fileUrls,
-                createdAt: firstImage.createdAt.toISOString(),
-            }
+            // data: {
+            id: firstImage.id,
+            userId: firstImage.userId,
+            targetId: firstImage.targetId,
+            targetType: firstImage.targetType,
+            fileName: firstImage.fileName,
+            originalFileName: firstImage.originalFileName,
+            fileUrl: fileUrls,
+            createdAt: firstImage.createdAt.toISOString(),
+            // }
         }
     }
 
-    async updateImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ImageResponseDto> {
+    async updateImages(files: Express.Multer.File[], imageDto: ImageDto): Promise<ResponseImageDto> {
         const results: ImageEntity[] = [];
         const imageUrls: string[] = [];
         const saveDir = ImageUtils.createImageDir();
@@ -140,16 +140,16 @@ export class ImageService {
         return {
             statusCode: 201,
             message: '리소스가 성공적으로 수정되었습니다.',
-            data: {
-                id: firstImage.id,
-                userId: firstImage.userId,
-                targetId: firstImage.targetId,
-                targetType: firstImage.targetType,
-                fileName: firstImage.fileName,
-                originalFileName: firstImage.originalFileName,
-                fileUrl: imageUrls,
-                createdAt: firstImage.createdAt.toISOString(),
-            }
+            // data: {
+            id: firstImage.id,
+            userId: firstImage.userId,
+            targetId: firstImage.targetId,
+            targetType: firstImage.targetType,
+            fileName: firstImage.fileName,
+            originalFileName: firstImage.originalFileName,
+            fileUrl: imageUrls,
+            createdAt: firstImage.createdAt.toISOString(),
+            // }
         };
     }
 
