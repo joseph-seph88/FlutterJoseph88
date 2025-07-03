@@ -3,9 +3,9 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiCreateResponse, ApiDeleteResponse, ApiGetResponse, ApiIdParam, ApiThreeParam, ApiUpdateResponse } from '../../common/swagger/swagger.decorators';
 import { ImageService } from './image.service';
 import { ImageDto } from './dto/image.dto';
-import { ImageResponseDto } from './dto/image-response.dto';
-import { createMemoryUploadConfig } from './image-upload.config';
 import { CommonResponse } from 'src/common/response-dto/common-response.dto';
+import { ResponseImageDto } from './dto/response_image.dto';
+import { createMemoryUploadConfig } from './\binternal/image-upload.config';
 
 @Controller('image')
 export class ImageController {
@@ -19,30 +19,30 @@ export class ImageController {
     async uploadImages(
         @UploadedFiles() files: Express.Multer.File[],
         @Body() imageDto: ImageDto,
-    ): Promise<ImageResponseDto> {
+    ): Promise<ResponseImageDto> {
         return await this.imageService.uploadImages(files, imageDto);
     }
 
     @Get('getImages')
     @HttpCode(HttpStatus.OK)
-    @ApiGetResponse('이미지 조회', ImageResponseDto)
+    @ApiGetResponse('이미지 조회', ResponseImageDto)
     async getUrlImages(
         @Query('userId') userId: number,
         @Query('targetType') targetType: string,
         @Query('targetId') targetId: number,
-    ): Promise<ImageResponseDto> {
+    ): Promise<ResponseImageDto> {
         return await this.imageService.getImages(userId, targetType, targetId);
     }
 
     @Patch('updateImages')
     @HttpCode(HttpStatus.OK)
-    @ApiUpdateResponse('이미지 수정', ImageResponseDto)
+    @ApiUpdateResponse('이미지 수정', ResponseImageDto)
     @ApiThreeParam('userId', 'targetId', 'targetType', '유저 ID', '게시글/댓글 등의 ID', '게시글/댓글/피드 등')
     @UseInterceptors(FilesInterceptor('file', 10, createMemoryUploadConfig()))
     async updateImages(
         @UploadedFiles() files: Express.Multer.File[],
         @Body() imageDto: ImageDto,
-    ): Promise<ImageResponseDto> {
+    ): Promise<ResponseImageDto> {
         return await this.imageService.updateImages(files, imageDto);
     }
 
