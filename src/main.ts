@@ -8,12 +8,7 @@ import { join } from 'path';
 import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: true,
-      credentials: true,
-    },
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   setupMiddlewares(app.getHttpAdapter().getInstance());
@@ -26,6 +21,5 @@ async function bootstrap() {
   await app.listen(port, ip);
   console.log(`Server Running (ip/port/env) :`, ip, port, process.env.NODE_ENV);
   console.log(`Swagger UI available at: http://${ip}:${port}/api`);
-  console.log(`Playground UI available at: http://${ip}:${port}/graphql`);
 }
 bootstrap();

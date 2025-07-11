@@ -35,7 +35,7 @@ export const createMemoryUploadConfig = () => ({
     storage: createMemoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024,
-        files: 10,
+        files: 5,
     },
     fileFilter: imageFileFilter,
 });

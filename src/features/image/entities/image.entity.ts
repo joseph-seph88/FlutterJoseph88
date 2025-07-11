@@ -1,42 +1,31 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+// import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Entity()
-@ObjectType()
-export class ImageEntity {
-    @PrimaryGeneratedColumn()
-    @Field(() => Int)
-    id: number;
+// @Entity()
+// export class ImageEntity {
+//     @PrimaryGeneratedColumn()
+//     id: number;
 
-    @Column()
-    @Field(() => Int)
-    userId: number;
+//     @Column()
+//     userId: number;
 
-    @Column()
-    @Field(() => Int)
-    targetId: number;
+//     @Column()
+//     targetId: number;
 
-    @Column()
-    @Field()
-    targetType: string;
+//     @Column()
+//     targetType: string;
 
-    @Column()
-    @Field()
-    fileUrl: string;
+//     @Column()
+//     fileUrl: string;
 
-    @Column()
-    @Field()
-    fileName: string;
+//     @Column()
+//     fileName: string;
 
-    @Column()
-    @Field()
-    originalFileName: string;
+//     @Column()
+//     originalFileName: string;
 
-    @CreateDateColumn()
-    @Field()
-    createdAt: Date;
+//     @CreateDateColumn()
+//     createdAt: Date;
 
-    @UpdateDateColumn()
-    @Field()
-    updatedAt: Date;
-}
+//     @UpdateDateColumn()
+//     updatedAt: Date;
+// }
